@@ -1380,16 +1380,80 @@ import {
       serviceId: "service_xg1cj6m",
       templateId: "template_ew3tqbg"
     };
+// User credentials resolution order:
+// 1) window.__AIS_USERS__ (preferred for hosted deployments)
+// 2) localStorage.ais_users_config (JSON object)
+// 3) built-in fallback for local/demo usage
+const DEFAULT_USERS = {
+  AISteam: { pass: 'AIS@005', role: 'viewer' },
+  channeladmin: { pass: 'Shivji$01', role: 'admin' }
+};
 
-    // User credentials should be injected at runtime by the hosting environment.
-    // Example:
-    // window.__AIS_USERS__ = {
-    //   AISteam: { pass: "viewer-password", role: "viewer" },
-    //   channeladmin: { pass: "admin-password", role: "admin" }
-    // };
-    const USERS = (window.__AIS_USERS__ && typeof window.__AIS_USERS__ === 'object')
-      ? window.__AIS_USERS__
-      : {};
+function readUsersFromLocalStorage() {
+  try {
+    const raw = localStorage.getItem('ais_users_config');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return (parsed && typeof parsed === 'object') ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+const USERS = (
+  (window.__AIS_USERS__ && typeof window.__AIS_USERS__ === 'object' && Object.keys(window.__AIS_USERS__).length > 0 && window.__AIS_USERS__)
+  || readUsersFromLocalStorage()
+  || DEFAULT_USERS
+);
+
+const AUTH_STORAGE_KEY = 'ais_auth_session';
+const SESSION_SECRET = Array.from(crypto.getRandomValues(new Uint8Array(16)))
+  .map(b => b.toString(16).padStart(2, '0'))
+  .join('');
+
+function encodeAuthToken(role) {
+  return btoa(`${role}:${SESSION_SECRET}`);
+}
+
+function saveAuthSession(role) {
+  sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({
+    role,
+    token: encodeAuthToken(role),
+    issuedAt: Date.now()
+  }));
+}
+
+function clearAuthSession() {
+  sessionStorage.removeItem(AUTH_STORAGE_KEY);
+}
+
+function getCurrentRole() {
+  const raw = sessionStorage.getItem(AUTH_STORAGE_KEY);
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw);
+    if (!parsed?.role || !parsed?.token) return null;
+    return parsed.token === encodeAuthToken(parsed.role) ? parsed.role : null;
+  } catch {
+    return null;
+  }
+}
+    function readUsersFromLocalStorage() {
+      try {
+        const raw = localStorage.getItem('ais_users_config');
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        return (parsed && typeof parsed === 'object') ? parsed : null;
+      } catch {
+        return null;
+      }
+    }
+
+    const USERS = (
+      (window.__AIS_USERS__ && typeof window.__AIS_USERS__ === 'object' && Object.keys(window.__AIS_USERS__).length > 0 && window.__AIS_USERS__)
+      || readUsersFromLocalStorage()
+      || DEFAULT_USERS
+    );
     const AUTH_STORAGE_KEY = 'ais_auth_session';
     const SESSION_SECRET = Array.from(crypto.getRandomValues(new Uint8Array(16)))
       .map(b => b.toString(16).padStart(2, '0'))
@@ -1906,7 +1970,7 @@ import {
       const loginBtn = document.querySelector('#login-screen .btn-add');
 
       if (Object.keys(USERS).length === 0) {
-        loginError.textContent = 'Login is not configured. Please set window.__AIS_USERS__ on the host page.';
+loginError.textContent = 'Login is not configured. Please set window.__AIS_USERS__ or localStorage.ais_users_config.';
         loginError.style.display = 'block';
         showToast('Login is not configured for this environment', 'error');
         return;
