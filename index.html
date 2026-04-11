@@ -1400,91 +1400,34 @@ function readUsersFromLocalStorage() {
   }
 }
 
-const USERS = (
-  (window.__AIS_USERS__ && typeof window.__AIS_USERS__ === 'object' && Object.keys(window.__AIS_USERS__).length > 0 && window.__AIS_USERS__)
-  || readUsersFromLocalStorage()
-  || DEFAULT_USERS
-);
-
-const AUTH_STORAGE_KEY = 'ais_auth_session';
-const SESSION_SECRET = Array.from(crypto.getRandomValues(new Uint8Array(16)))
-  .map(b => b.toString(16).padStart(2, '0'))
-  .join('');
-
-function encodeAuthToken(role) {
-  return btoa(`${role}:${SESSION_SECRET}`);
-}
+// User credentials (kept in code for now; can be moved later)
+const USERS = {
+  AISteam: { pass: 'AIS@005', role: 'viewer' },
+  channeladmin: { pass: 'Shivji$01', role: 'admin' }
+};
 
 function saveAuthSession(role) {
-  sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({
-    role,
-    token: encodeAuthToken(role),
-    issuedAt: Date.now()
-  }));
+  sessionStorage.setItem("ais_user_role", role);
 }
 
 function clearAuthSession() {
-  sessionStorage.removeItem(AUTH_STORAGE_KEY);
+  sessionStorage.removeItem("ais_user_role");
 }
 
 function getCurrentRole() {
-  const raw = sessionStorage.getItem(AUTH_STORAGE_KEY);
-  if (!raw) return null;
-  try {
-    const parsed = JSON.parse(raw);
-    if (!parsed?.role || !parsed?.token) return null;
-    return parsed.token === encodeAuthToken(parsed.role) ? parsed.role : null;
-  } catch {
-    return null;
-  }
+  return sessionStorage.getItem("ais_user_role");
 }
-    function readUsersFromLocalStorage() {
-      try {
-        const raw = localStorage.getItem('ais_users_config');
-        if (!raw) return null;
-        const parsed = JSON.parse(raw);
-        return (parsed && typeof parsed === 'object') ? parsed : null;
-      } catch {
-        return null;
-      }
-    }
-
-    const USERS = (
-      (window.__AIS_USERS__ && typeof window.__AIS_USERS__ === 'object' && Object.keys(window.__AIS_USERS__).length > 0 && window.__AIS_USERS__)
-      || readUsersFromLocalStorage()
-      || DEFAULT_USERS
-    );
-    const AUTH_STORAGE_KEY = 'ais_auth_session';
-    const SESSION_SECRET = Array.from(crypto.getRandomValues(new Uint8Array(16)))
-      .map(b => b.toString(16).padStart(2, '0'))
-      .join('');
-
-    function encodeAuthToken(role) {
-      return btoa(`${role}:${SESSION_SECRET}`);
-    }
 
     function saveAuthSession(role) {
-      sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({
-        role,
-        token: encodeAuthToken(role),
-        issuedAt: Date.now()
-      }));
+      sessionStorage.setItem("ais_user_role", role);
     }
 
     function clearAuthSession() {
-      sessionStorage.removeItem(AUTH_STORAGE_KEY);
+      sessionStorage.removeItem("ais_user_role");
     }
 
     function getCurrentRole() {
-      const raw = sessionStorage.getItem(AUTH_STORAGE_KEY);
-      if (!raw) return null;
-      try {
-        const parsed = JSON.parse(raw);
-        if (!parsed?.role || !parsed?.token) return null;
-        return parsed.token === encodeAuthToken(parsed.role) ? parsed.role : null;
-      } catch {
-        return null;
-      }
+      return sessionStorage.getItem("ais_user_role");
     }
 
     // Phase Configuration
@@ -2006,6 +1949,7 @@ loginError.textContent = 'Login is not configured. Please set window.__AIS_USERS
           loginBtn.textContent = 'Login';
         }
       } else {
+        loginError.textContent = 'Invalid username or password';
         showToast('Invalid username or password', 'error');
         loginError.style.display = 'block';
       }
