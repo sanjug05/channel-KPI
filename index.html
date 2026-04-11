@@ -1286,49 +1286,51 @@ body.dark-mode {
       </div>
 
       <!-- Showroom Detail -->
-      <div class="stats-grid">
-        <div class="card"><h3>Completion</h3><div class="value" id="stat-completion">0%</div></div>
-        <div class="card"><h3>Planned Finish</h3><div class="value" id="stat-planned-date">--</div><div class="sub-text" id="stat-variance-summary">Calculating...</div></div>
-        <div class="card"><h3>Forecasted Finish</h3><div class="value" id="stat-projected-date">--</div><div class="sub-text" id="stat-pace-text">Based on current pace</div></div>
-        <div class="card"><h3>Velocity</h3><div class="value" id="stat-velocity">0%</div><div class="sub-text" id="velocity-label">On-time Efficiency</div></div>
-        <div class="card active-phase-card"><h3>Current Active</h3><div class="value" id="stat-active">--</div></div>
-      </div>
-
-      <div class="project-settings" style="margin-bottom: 25px; background: white; padding: 20px; border-radius:12px; box-shadow: var(--shadow); display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
-        <div style="flex: 1;">
-          <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">PROJECT HANDOVER DATE</label>
-          <input type="date" id="current-start-date" class="admin-editable" style="width: auto; display: block; margin-top: 5px;" onchange="updateStartDate(this.value)">
+      <div id="showroom-detail-view" style="display: none;">
+        <div class="stats-grid">
+          <div class="card"><h3>Completion</h3><div class="value" id="stat-completion">0%</div></div>
+          <div class="card"><h3>Planned Finish</h3><div class="value" id="stat-planned-date">--</div><div class="sub-text" id="stat-variance-summary">Calculating...</div></div>
+          <div class="card"><h3>Forecasted Finish</h3><div class="value" id="stat-projected-date">--</div><div class="sub-text" id="stat-pace-text">Based on current pace</div></div>
+          <div class="card"><h3>Velocity</h3><div class="value" id="stat-velocity">0%</div><div class="sub-text" id="velocity-label">On-time Efficiency</div></div>
+          <div class="card active-phase-card"><h3>Current Active</h3><div class="value" id="stat-active">--</div></div>
         </div>
-        <div class="admin-only" style="display: flex; gap: 10px;">
-          <button class="btn btn-reset" onclick="resetCurrentShowroom()">Reset Progress</button>
-          <button class="btn btn-delete" onclick="deleteCurrentShowroom()">Delete</button>
-        </div>
-      </div>
 
-      <div class="table-section">
-        <div class="table-responsive">
-           <table>
-            <thead>
-               <tr>
-                <th width="15%">Phase</th>
-                <th width="5%">Plan</th>
-                <th width="10%">Target Date</th>
-                <th width="12%">Actual Completion</th>
-                <th width="10%">Status</th>
-                <th width="8%">Var. (Days)</th>
-                <th width="10%">Planned Comp</th>
-                <th width="10%">Projected Comp</th>
-                <th>Delay Notes</th>
-               </tr>
-            </thead>
-            <tbody id="tracker-body"></tbody>
-           <tr>
+        <div class="project-settings" style="margin-bottom: 25px; background: white; padding: 20px; border-radius:12px; box-shadow: var(--shadow); display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+          <div style="flex: 1;">
+            <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">PROJECT HANDOVER DATE</label>
+            <input type="date" id="current-start-date" class="admin-editable" style="width: auto; display: block; margin-top: 5px;" onchange="updateStartDate(this.value)">
+          </div>
+          <div class="admin-only" style="display: flex; gap: 10px;">
+            <button class="btn btn-reset" onclick="resetCurrentShowroom()">Reset Progress</button>
+            <button class="btn btn-delete" onclick="deleteCurrentShowroom()">Delete</button>
+          </div>
         </div>
-      </div>
 
-      <div class="progress-section">
-        <div class="progress-info"><span>Execution Milestone Completion</span><span id="progress-val-text">0%</span></div>
-        <div class="progress-bar-container"><div class="progress-bar-fill" id="progress-bar"></div></div>
+        <div class="table-section">
+          <div class="table-responsive">
+             <table>
+              <thead>
+                 <tr>
+                  <th width="15%">Phase</th>
+                  <th width="5%">Plan</th>
+                  <th width="10%">Target Date</th>
+                  <th width="12%">Actual Completion</th>
+                  <th width="10%">Status</th>
+                  <th width="8%">Var. (Days)</th>
+                  <th width="10%">Planned Comp</th>
+                  <th width="10%">Projected Comp</th>
+                  <th>Delay Notes</th>
+                 </tr>
+              </thead>
+              <tbody id="tracker-body"></tbody>
+             <tr>
+          </div>
+        </div>
+
+        <div class="progress-section">
+          <div class="progress-info"><span>Execution Milestone Completion</span><span id="progress-val-text">0%</span></div>
+          <div class="progress-bar-container"><div class="progress-bar-fill" id="progress-bar"></div></div>
+        </div>
       </div>
     </div>
   </div>
@@ -1379,11 +1381,47 @@ import {
       templateId: "template_ew3tqbg"
     };
 
-    // User credentials - MOVE TO ENVIRONMENT VARIABLES IN PRODUCTION
-    const USERS = {
-      'AISteam': { pass: 'AIS@005', role: 'viewer' },
-      'channeladmin': { pass: 'Shivji$01', role: 'admin' }
-    };
+    // User credentials should be injected at runtime by the hosting environment.
+    // Example:
+    // window.__AIS_USERS__ = {
+    //   AISteam: { pass: "viewer-password", role: "viewer" },
+    //   channeladmin: { pass: "admin-password", role: "admin" }
+    // };
+    const USERS = (window.__AIS_USERS__ && typeof window.__AIS_USERS__ === 'object')
+      ? window.__AIS_USERS__
+      : {};
+    const AUTH_STORAGE_KEY = 'ais_auth_session';
+    const SESSION_SECRET = Array.from(crypto.getRandomValues(new Uint8Array(16)))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+
+    function encodeAuthToken(role) {
+      return btoa(`${role}:${SESSION_SECRET}`);
+    }
+
+    function saveAuthSession(role) {
+      sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({
+        role,
+        token: encodeAuthToken(role),
+        issuedAt: Date.now()
+      }));
+    }
+
+    function clearAuthSession() {
+      sessionStorage.removeItem(AUTH_STORAGE_KEY);
+    }
+
+    function getCurrentRole() {
+      const raw = sessionStorage.getItem(AUTH_STORAGE_KEY);
+      if (!raw) return null;
+      try {
+        const parsed = JSON.parse(raw);
+        if (!parsed?.role || !parsed?.token) return null;
+        return parsed.token === encodeAuthToken(parsed.role) ? parsed.role : null;
+      } catch {
+        return null;
+      }
+    }
 
     // Phase Configuration
     const PHASES_CONFIG = [
@@ -1431,7 +1469,7 @@ import {
     function resetInactivityTimer() {
       clearTimeout(inactivityTimer);
       inactivityTimer = setTimeout(() => {
-        if (sessionStorage.getItem("ais_user_role")) {
+        if (getCurrentRole()) {
           showToast('Session expired due to inactivity. Please login again.', 'warning');
           logout();
         }
@@ -1529,7 +1567,14 @@ import {
       const toast = document.createElement('div');
       toast.className = `toast`;
       const bgColor = type === 'success' ? '#27ae60' : type === 'error' ? '#e74c3c' : type === 'warning' ? '#f39c12' : '#3498db';
-      toast.innerHTML = `<div style="background:${bgColor}; color:white; padding:12px 20px; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.1);">${message}</div>`;
+      const toastBody = document.createElement('div');
+      toastBody.style.background = bgColor;
+      toastBody.style.color = 'white';
+      toastBody.style.padding = '12px 20px';
+      toastBody.style.borderRadius = '8px';
+      toastBody.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+      toastBody.textContent = String(message ?? '');
+      toast.appendChild(toastBody);
       container.appendChild(toast);
       setTimeout(() => {
         toast.style.animation = 'slideOut 0.3s ease';
@@ -1743,7 +1788,7 @@ import {
     async function logAction(action, details) {
       try {
         await addDoc(collection(db, "auditLog"), {
-          user: sessionStorage.getItem("ais_user_role") || 'unknown',
+          user: getCurrentRole() || 'unknown',
           action,
           details,
           timestamp: new Date(),
@@ -1860,6 +1905,13 @@ import {
       const loginError = document.getElementById('login-error');
       const loginBtn = document.querySelector('#login-screen .btn-add');
 
+      if (Object.keys(USERS).length === 0) {
+        loginError.textContent = 'Login is not configured. Please set window.__AIS_USERS__ on the host page.';
+        loginError.style.display = 'block';
+        showToast('Login is not configured for this environment', 'error');
+        return;
+      }
+
       if (USERS[u] && USERS[u].pass === p) {
         try {
           loginBtn.disabled = true;
@@ -1870,7 +1922,7 @@ import {
           const ip = await getUserIP();
           await storeLoginRecord(u, USERS[u].role, ip);
           
-          sessionStorage.setItem("ais_user_role", USERS[u].role);
+          saveAuthSession(USERS[u].role);
           
           const auth = getAuth();
           await signInAnonymously(auth);
@@ -1881,7 +1933,7 @@ import {
           
         } catch (e) {
           console.error('Anonymous sign-in failed:', e);
-          sessionStorage.setItem("ais_user_role", USERS[u].role);
+          saveAuthSession(USERS[u].role);
           setTimeout(() => {
             checkAuth();
           }, 100);
@@ -1895,16 +1947,16 @@ import {
       }
     };
     
-    window.logout = () => { 
+    window.logout = () => {
       logAction('LOGOUT', 'User logged out');
-      sessionStorage.removeItem("ais_user_role"); 
+      clearAuthSession();
       if (state.unsubscribeDealers) state.unsubscribeDealers();
       if (state.unsubscribeShowrooms) state.unsubscribeShowrooms();
-      window.location.reload(); 
+      window.location.reload();
     };
 
     function checkAuth() {
-      const role = sessionStorage.getItem("ais_user_role");
+      const role = getCurrentRole();
       const loginScreen = document.getElementById('login-screen');
       const mainContainer = document.getElementById('main-container');
       
@@ -2018,7 +2070,7 @@ import {
         document.getElementById('back-to-dash-btn').style.display = 'none';
         document.getElementById('nav-dealer-btn').style.display = 'inline-flex';
         document.getElementById('nav-showroom-btn').style.display = 'none';
-        document.getElementById('add-main-btn').style.display = sessionStorage.getItem("ais_user_role") === 'admin' ? 'inline-flex' : 'none';
+        document.getElementById('add-main-btn').style.display = getCurrentRole() === 'admin' ? 'inline-flex' : 'none';
         document.getElementById('header-title').innerHTML = 'AIS <span>Command Center</span>';
         renderMasterGrid();
       };
@@ -2317,8 +2369,13 @@ import {
         setTimeout(() => closeEmailModal(), 2000);
       } catch (error) {
         console.error('Email send failed:', error);
-        statusDiv.innerHTML = `<span style="color: var(--delay-red);">❌ Failed to send email: ${error.text || error.message || 'Unknown error'}</span>`;
-        showToast(`Failed to send email: ${error.text || error.message || 'Please check EmailJS setup'}`, 'error');
+        const errMsg = String(error?.text || error?.message || 'Unknown error');
+        statusDiv.innerHTML = '';
+        const errSpan = document.createElement('span');
+        errSpan.style.color = 'var(--delay-red)';
+        errSpan.textContent = `❌ Failed to send email: ${errMsg}`;
+        statusDiv.appendChild(errSpan);
+        showToast(`Failed to send email: ${errMsg}`, 'error');
       } finally {
         hideLoading(sendBtn);
       }
@@ -2424,7 +2481,7 @@ import {
       const addMainBtn = document.getElementById('add-main-btn');
       addMainBtn.innerText = '+ Add Showroom';
       addMainBtn.onclick = () => openModal();
-      addMainBtn.style.display = sessionStorage.getItem("ais_user_role") === 'admin' ? 'inline-flex' : 'none';
+      addMainBtn.style.display = getCurrentRole() === 'admin' ? 'inline-flex' : 'none';
       
       document.getElementById('dealer-dashboard-view').style.display = 'none';
       document.getElementById('dealer-detail-view').style.display = 'none';
@@ -2445,36 +2502,26 @@ import {
     window.initDealerModule = () => {
       state.view = 'dealer';
       state.currentDealerId = null;
+      state.currentIndex = -1;
       filterState = { status: 'all', stage: 'all', rm: 'all' };
       
       const addMainBtn = document.getElementById('add-main-btn');
       addMainBtn.innerText = '+ Add Dealer';
       addMainBtn.onclick = () => openDealerModal();
-      addMainBtn.style.display = sessionStorage.getItem("ais_user_role") === 'admin' ? 'inline-flex' : 'none';
+      addMainBtn.style.display = getCurrentRole() === 'admin' ? 'inline-flex' : 'none';
       
       document.getElementById('master-dashboard-view').style.display = 'none';
       document.getElementById('analytics-dashboard-view').style.display = 'none';
       document.getElementById('dashboard-content').style.display = 'block';
       document.getElementById('dealer-dashboard-view').style.display = 'block';
       document.getElementById('dealer-detail-view').style.display = 'none';
+      document.getElementById('showroom-detail-view').style.display = 'none';
       
       document.getElementById('nav-dealer-btn').style.display = 'none';
       document.getElementById('nav-showroom-btn').style.display = 'inline-flex';
       
       document.getElementById('back-to-dash-btn').style.display = 'none';
       document.getElementById('showroom-selector').style.display = 'none';
-      
-      const showroomStatsGrid = document.querySelector('#dashboard-content .stats-grid:first-of-type');
-      if (showroomStatsGrid) showroomStatsGrid.style.display = 'none';
-      
-      const projectSettings = document.querySelector('.project-settings');
-      if (projectSettings) projectSettings.style.display = 'none';
-      
-      const tableSection = document.querySelector('.table-section');
-      if (tableSection) tableSection.style.display = 'none';
-      
-      const progressSection = document.querySelector('#dashboard-content .progress-section:last-of-type');
-      if (progressSection) progressSection.style.display = 'none';
       
       document.getElementById('header-title').innerHTML = 'AIS <span>Dealer Onboarding</span>';
       
@@ -2491,22 +2538,13 @@ import {
       document.getElementById('master-dashboard-view').style.display = 'none';
       document.getElementById('analytics-dashboard-view').style.display = 'none';
       document.getElementById('dashboard-content').style.display = 'block';
+      document.getElementById('showroom-detail-view').style.display = 'block';
+      document.getElementById('dealer-dashboard-view').style.display = 'none';
+      document.getElementById('dealer-detail-view').style.display = 'none';
       document.getElementById('back-to-dash-btn').style.display = 'inline-flex';
       document.getElementById('showroom-selector').style.display = 'inline-block';
       document.getElementById('showroom-selector').value = idx;
       document.getElementById('header-title').innerHTML = `AIS <span>${state.showrooms[idx].name}</span>`;
-      
-      const showroomStatsGrid = document.querySelector('#dashboard-content .stats-grid:first-of-type');
-      if (showroomStatsGrid) showroomStatsGrid.style.display = 'grid';
-      
-      const projectSettings = document.querySelector('.project-settings');
-      if (projectSettings) projectSettings.style.display = 'flex';
-      
-      const tableSection = document.querySelector('.table-section');
-      if (tableSection) tableSection.style.display = 'block';
-      
-      const progressSection = document.querySelector('#dashboard-content .progress-section:last-of-type');
-      if (progressSection) progressSection.style.display = 'block';
       
       renderDashboard();
     };
@@ -2613,7 +2651,7 @@ import {
       if (!showroom) return;
       
       document.getElementById('current-start-date').value = showroom.startDate || "";
-      const isAdmin = sessionStorage.getItem("ais_user_role") === 'admin';
+      const isAdmin = getCurrentRole() === 'admin';
 
       const tbody = document.getElementById('tracker-body');
       const planFinish = calculatePlannedDate(showroom.startDate);
@@ -2995,7 +3033,7 @@ import {
         </div>`).join('');
       document.getElementById('rm-analytics-body').innerHTML = rmHtml || '<div>No data available</div>';
       
-      const isAdmin = sessionStorage.getItem("ais_user_role") === 'admin';
+      const isAdmin = getCurrentRole() === 'admin';
       grid.innerHTML = dealers.map(d => {
         const status = d.status || 'Active';
         const badgeClass = isDropped(d) ? 'status-delayed' :
@@ -3197,7 +3235,7 @@ import {
         
         document.getElementById('nav-dealer-btn').style.display = 'none';
         document.getElementById('nav-showroom-btn').style.display = 'inline-flex';
-        document.getElementById('add-main-btn').style.display = sessionStorage.getItem("ais_user_role") === 'admin' ? 'inline-flex' : 'none';
+        document.getElementById('add-main-btn').style.display = getCurrentRole() === 'admin' ? 'inline-flex' : 'none';
         document.getElementById('header-title').innerHTML = 'AIS <span>Dealer Onboarding</span>';
         renderDealerDashboard();
       };
@@ -3311,7 +3349,7 @@ import {
       document.getElementById('back-to-dash-btn').style.display = 'none';
       document.getElementById('nav-dealer-btn').style.display = 'none';
       document.getElementById('nav-showroom-btn').style.display = 'inline-flex';
-      document.getElementById('add-main-btn').style.display = sessionStorage.getItem("ais_user_role") === 'admin' ? 'inline-flex' : 'none';
+      document.getElementById('add-main-btn').style.display = getCurrentRole() === 'admin' ? 'inline-flex' : 'none';
       document.getElementById('header-title').innerHTML = 'AIS <span>Dealer Onboarding</span>';
       renderDealerDashboard();
     };
