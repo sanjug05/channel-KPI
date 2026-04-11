@@ -1286,49 +1286,51 @@ body.dark-mode {
       </div>
 
       <!-- Showroom Detail -->
-      <div class="stats-grid">
-        <div class="card"><h3>Completion</h3><div class="value" id="stat-completion">0%</div></div>
-        <div class="card"><h3>Planned Finish</h3><div class="value" id="stat-planned-date">--</div><div class="sub-text" id="stat-variance-summary">Calculating...</div></div>
-        <div class="card"><h3>Forecasted Finish</h3><div class="value" id="stat-projected-date">--</div><div class="sub-text" id="stat-pace-text">Based on current pace</div></div>
-        <div class="card"><h3>Velocity</h3><div class="value" id="stat-velocity">0%</div><div class="sub-text" id="velocity-label">On-time Efficiency</div></div>
-        <div class="card active-phase-card"><h3>Current Active</h3><div class="value" id="stat-active">--</div></div>
-      </div>
-
-      <div class="project-settings" style="margin-bottom: 25px; background: white; padding: 20px; border-radius:12px; box-shadow: var(--shadow); display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
-        <div style="flex: 1;">
-          <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">PROJECT HANDOVER DATE</label>
-          <input type="date" id="current-start-date" class="admin-editable" style="width: auto; display: block; margin-top: 5px;" onchange="updateStartDate(this.value)">
+      <div id="showroom-detail-view" style="display: none;">
+        <div class="stats-grid">
+          <div class="card"><h3>Completion</h3><div class="value" id="stat-completion">0%</div></div>
+          <div class="card"><h3>Planned Finish</h3><div class="value" id="stat-planned-date">--</div><div class="sub-text" id="stat-variance-summary">Calculating...</div></div>
+          <div class="card"><h3>Forecasted Finish</h3><div class="value" id="stat-projected-date">--</div><div class="sub-text" id="stat-pace-text">Based on current pace</div></div>
+          <div class="card"><h3>Velocity</h3><div class="value" id="stat-velocity">0%</div><div class="sub-text" id="velocity-label">On-time Efficiency</div></div>
+          <div class="card active-phase-card"><h3>Current Active</h3><div class="value" id="stat-active">--</div></div>
         </div>
-        <div class="admin-only" style="display: flex; gap: 10px;">
-          <button class="btn btn-reset" onclick="resetCurrentShowroom()">Reset Progress</button>
-          <button class="btn btn-delete" onclick="deleteCurrentShowroom()">Delete</button>
-        </div>
-      </div>
 
-      <div class="table-section">
-        <div class="table-responsive">
-           <table>
-            <thead>
-               <tr>
-                <th width="15%">Phase</th>
-                <th width="5%">Plan</th>
-                <th width="10%">Target Date</th>
-                <th width="12%">Actual Completion</th>
-                <th width="10%">Status</th>
-                <th width="8%">Var. (Days)</th>
-                <th width="10%">Planned Comp</th>
-                <th width="10%">Projected Comp</th>
-                <th>Delay Notes</th>
-               </tr>
-            </thead>
-            <tbody id="tracker-body"></tbody>
-           <tr>
+        <div class="project-settings" style="margin-bottom: 25px; background: white; padding: 20px; border-radius:12px; box-shadow: var(--shadow); display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+          <div style="flex: 1;">
+            <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">PROJECT HANDOVER DATE</label>
+            <input type="date" id="current-start-date" class="admin-editable" style="width: auto; display: block; margin-top: 5px;" onchange="updateStartDate(this.value)">
+          </div>
+          <div class="admin-only" style="display: flex; gap: 10px;">
+            <button class="btn btn-reset" onclick="resetCurrentShowroom()">Reset Progress</button>
+            <button class="btn btn-delete" onclick="deleteCurrentShowroom()">Delete</button>
+          </div>
         </div>
-      </div>
 
-      <div class="progress-section">
-        <div class="progress-info"><span>Execution Milestone Completion</span><span id="progress-val-text">0%</span></div>
-        <div class="progress-bar-container"><div class="progress-bar-fill" id="progress-bar"></div></div>
+        <div class="table-section">
+          <div class="table-responsive">
+             <table>
+              <thead>
+                 <tr>
+                  <th width="15%">Phase</th>
+                  <th width="5%">Plan</th>
+                  <th width="10%">Target Date</th>
+                  <th width="12%">Actual Completion</th>
+                  <th width="10%">Status</th>
+                  <th width="8%">Var. (Days)</th>
+                  <th width="10%">Planned Comp</th>
+                  <th width="10%">Projected Comp</th>
+                  <th>Delay Notes</th>
+                 </tr>
+              </thead>
+              <tbody id="tracker-body"></tbody>
+             <tr>
+          </div>
+        </div>
+
+        <div class="progress-section">
+          <div class="progress-info"><span>Execution Milestone Completion</span><span id="progress-val-text">0%</span></div>
+          <div class="progress-bar-container"><div class="progress-bar-fill" id="progress-bar"></div></div>
+        </div>
       </div>
     </div>
   </div>
@@ -2500,6 +2502,7 @@ import {
     window.initDealerModule = () => {
       state.view = 'dealer';
       state.currentDealerId = null;
+      state.currentIndex = -1;
       filterState = { status: 'all', stage: 'all', rm: 'all' };
       
       const addMainBtn = document.getElementById('add-main-btn');
@@ -2512,24 +2515,13 @@ import {
       document.getElementById('dashboard-content').style.display = 'block';
       document.getElementById('dealer-dashboard-view').style.display = 'block';
       document.getElementById('dealer-detail-view').style.display = 'none';
+      document.getElementById('showroom-detail-view').style.display = 'none';
       
       document.getElementById('nav-dealer-btn').style.display = 'none';
       document.getElementById('nav-showroom-btn').style.display = 'inline-flex';
       
       document.getElementById('back-to-dash-btn').style.display = 'none';
       document.getElementById('showroom-selector').style.display = 'none';
-      
-      const showroomStatsGrid = document.querySelector('#dashboard-content .stats-grid:first-of-type');
-      if (showroomStatsGrid) showroomStatsGrid.style.display = 'none';
-      
-      const projectSettings = document.querySelector('.project-settings');
-      if (projectSettings) projectSettings.style.display = 'none';
-      
-      const tableSection = document.querySelector('.table-section');
-      if (tableSection) tableSection.style.display = 'none';
-      
-      const progressSection = document.querySelector('#dashboard-content .progress-section:last-of-type');
-      if (progressSection) progressSection.style.display = 'none';
       
       document.getElementById('header-title').innerHTML = 'AIS <span>Dealer Onboarding</span>';
       
@@ -2546,22 +2538,13 @@ import {
       document.getElementById('master-dashboard-view').style.display = 'none';
       document.getElementById('analytics-dashboard-view').style.display = 'none';
       document.getElementById('dashboard-content').style.display = 'block';
+      document.getElementById('showroom-detail-view').style.display = 'block';
+      document.getElementById('dealer-dashboard-view').style.display = 'none';
+      document.getElementById('dealer-detail-view').style.display = 'none';
       document.getElementById('back-to-dash-btn').style.display = 'inline-flex';
       document.getElementById('showroom-selector').style.display = 'inline-block';
       document.getElementById('showroom-selector').value = idx;
       document.getElementById('header-title').innerHTML = `AIS <span>${state.showrooms[idx].name}</span>`;
-      
-      const showroomStatsGrid = document.querySelector('#dashboard-content .stats-grid:first-of-type');
-      if (showroomStatsGrid) showroomStatsGrid.style.display = 'grid';
-      
-      const projectSettings = document.querySelector('.project-settings');
-      if (projectSettings) projectSettings.style.display = 'flex';
-      
-      const tableSection = document.querySelector('.table-section');
-      if (tableSection) tableSection.style.display = 'block';
-      
-      const progressSection = document.querySelector('#dashboard-content .progress-section:last-of-type');
-      if (progressSection) progressSection.style.display = 'block';
       
       renderDashboard();
     };
