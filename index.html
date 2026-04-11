@@ -992,7 +992,8 @@
       updateDoc,
       query,
       orderBy,
-      getDocs
+      getDocs,
+      limit
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     // =============== CONFIGURATION ===============
@@ -1039,7 +1040,10 @@
       const toast = document.createElement('div');
       toast.className = `toast`;
       const bgColor = type === 'success' ? '#27ae60' : type === 'error' ? '#e74c3c' : type === 'warning' ? '#f39c12' : '#3498db';
-      toast.innerHTML = `<div style="background:${bgColor}; color:white; padding:12px 20px; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.1);">${message}</div>`;
+      const toastBody = document.createElement('div');
+      toastBody.style.cssText = `background:${bgColor}; color:white; padding:12px 20px; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.1);`;
+      toastBody.textContent = String(message);
+      toast.appendChild(toastBody);
       container.appendChild(toast);
       setTimeout(() => { toast.style.animation = 'slideOut 0.3s ease'; setTimeout(() => toast.remove(), 300); }, 3000);
     }
