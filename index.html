@@ -1380,12 +1380,43 @@ import {
       serviceId: "service_xg1cj6m",
       templateId: "template_ew3tqbg"
     };
+// User credentials resolution order:
+// 1) window.__AIS_USERS__ (preferred for hosted deployments)
+// 2) localStorage.ais_users_config (JSON object)
+// 3) built-in fallback for local/demo usage
+const DEFAULT_USERS = {
+  AISteam: { pass: 'AIS@005', role: 'viewer' },
+  channeladmin: { pass: 'Shivji$01', role: 'admin' }
+};
 
-    // User credentials (kept in code for now; can be moved later)
-    const USERS = {
-      AISteam: { pass: 'AIS@005', role: 'viewer' },
-      channeladmin: { pass: 'Shivji$01', role: 'admin' }
-    };
+function readUsersFromLocalStorage() {
+  try {
+    const raw = localStorage.getItem('ais_users_config');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return (parsed && typeof parsed === 'object') ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+// User credentials (kept in code for now; can be moved later)
+const USERS = {
+  AISteam: { pass: 'AIS@005', role: 'viewer' },
+  channeladmin: { pass: 'Shivji$01', role: 'admin' }
+};
+
+function saveAuthSession(role) {
+  sessionStorage.setItem("ais_user_role", role);
+}
+
+function clearAuthSession() {
+  sessionStorage.removeItem("ais_user_role");
+}
+
+function getCurrentRole() {
+  return sessionStorage.getItem("ais_user_role");
+}
 
     function saveAuthSession(role) {
       sessionStorage.setItem("ais_user_role", role);
@@ -1880,6 +1911,13 @@ import {
       const p = document.getElementById('password').value;
       const loginError = document.getElementById('login-error');
       const loginBtn = document.querySelector('#login-screen .btn-add');
+
+      if (Object.keys(USERS).length === 0) {
+loginError.textContent = 'Login is not configured. Please set window.__AIS_USERS__ or localStorage.ais_users_config.';
+        loginError.style.display = 'block';
+        showToast('Login is not configured for this environment', 'error');
+        return;
+      }
 
       if (USERS[u] && USERS[u].pass === p) {
         try {
