@@ -20,9 +20,6 @@
       --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
       --text-muted: #7f8c8d;
       --hover-bg: #f5f5f5;
-      --dark-bg: #1a1a2e;
-      --dark-card: #16213e;
-      --dark-text: #e0e0e0;
       --info-blue: #3498db;
       --purple: #9b59b6;
     }
@@ -67,7 +64,6 @@
     .app-footer .heart { color: var(--delay-red); }
     .app-footer .name { color: var(--primary-blue); font-weight: 600; }
 
-    /* Keyboard Shortcuts */
     .shortcuts-help {
       position: fixed;
       bottom: 20px;
@@ -166,7 +162,6 @@
       to { transform: translateX(100%); opacity: 0; }
     }
 
-    /* Login Screen */
     #login-screen {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -215,7 +210,6 @@
 
     .container { max-width: 1400px; margin: 0 auto; padding: 20px; display: none; flex: 1; }
 
-    /* Header */
     header {
       display: flex;
       justify-content: space-between;
@@ -235,7 +229,6 @@
 
     .controls { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 
-    /* Enhanced Stats Grid */
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -260,10 +253,7 @@
     .card h3 { font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; letter-spacing: 0.5px; }
     .card .value { font-size: 1.6rem; font-weight: 700; color: var(--primary-blue); display: block; }
     .card .sub-text { font-size: 0.65rem; color: #95a5a6; margin-top: 5px; font-weight: bold; }
-    .card .trend-up { color: var(--success-green); }
-    .card .trend-down { color: var(--delay-red); }
 
-    /* Filter Bar */
     .filter-bar {
       display: flex;
       gap: 10px;
@@ -442,7 +432,6 @@
     .progress-bar-container { height: 10px; background: #e9ecef; border-radius: 10px; overflow: hidden; }
     .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary-blue), #3498db); width: 0%; transition: width 0.8s ease; border-radius: 10px; }
 
-    /* Buttons */
     .btn {
       padding: 8px 16px;
       border: none;
@@ -541,7 +530,8 @@
     input:checked + .stage-slider:before { transform: translateX(20px); }
     .stage-item-wrapper { display: flex; flex-direction: column; align-items: center; gap: 5px; }
 
-    #modal-overlay, #modal-dealer-overlay, #bulk-import-modal, #pdf-export-modal {
+    #modal-overlay, #modal-dealer-overlay, #pdf-export-modal,
+    #edit-showroom-modal, #edit-dealer-modal {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0,0,0,0.5);
@@ -640,7 +630,6 @@
       .chart-grid { grid-template-columns: 1fr; }
     }
 
-    /* Loading Spinner */
     .spinner {
       display: inline-block;
       width: 20px;
@@ -655,7 +644,6 @@
 </head>
 <body>
 
-  <!-- Login Screen -->
   <div id="login-screen">
     <div class="login-card">
       <img src="https://www.aiswindows.com/assets/images/ais-windows-logo.svg" alt="AIS Logo" style="height: 40px; margin-bottom: 20px;">
@@ -674,7 +662,6 @@
     </div>
   </div>
 
-  <!-- Notes Modal -->
   <div id="notes-modal" class="notes-modal">
     <div class="modal">
       <h2 id="notes-modal-title">Add Notes</h2>
@@ -686,7 +673,6 @@
     </div>
   </div>
 
-  <!-- Keyboard Shortcuts -->
   <div class="shortcuts-help" onclick="toggleShortcuts()" data-tooltip="Keyboard Shortcuts">⌨️ Shortcuts</div>
   <div class="shortcuts-panel" id="shortcutsPanel">
     <strong>⌨️ Keyboard Shortcuts</strong><br>
@@ -700,7 +686,9 @@
   <div id="modal-overlay">
     <div class="modal">
       <h2>Add New Showroom</h2>
-      <div class="field"><label>Name</label><input type="text" id="new-showroom-name" placeholder="Enter showroom name"></div>
+      <div class="field"><label>Showroom Name</label><input type="text" id="new-showroom-name" placeholder="Enter showroom name"></div>
+      <div class="field"><label>City</label><input type="text" id="new-showroom-city" placeholder="Enter city"></div>
+      <div class="field"><label>RM Name</label><input type="text" id="new-showroom-rm" placeholder="Enter RM name"></div>
       <div class="field"><label>Start Date</label><input type="date" id="new-showroom-start"></div>
       <div class="modal-btns">
         <button class="btn btn-add" onclick="confirmAddShowroom()">Create</button>
@@ -709,21 +697,38 @@
     </div>
   </div>
 
-  <!-- Bulk Import Modal -->
-  <div id="bulk-import-modal">
+  <!-- Edit Showroom Modal -->
+  <div id="edit-showroom-modal">
     <div class="modal">
-      <h2>Bulk Import Dealers</h2>
-      <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">Upload Excel/CSV with columns: Name, City, RM, Start Date</p>
-      <div class="field"><label>Select File</label><input type="file" id="bulk-import-file" accept=".xlsx,.xls,.csv"></div>
+      <h2>✏️ Edit Showroom</h2>
+      <div class="field"><label>Showroom Name</label><input type="text" id="edit-showroom-name" placeholder="Enter showroom name"></div>
+      <div class="field"><label>City</label><input type="text" id="edit-showroom-city" placeholder="Enter city"></div>
+      <div class="field"><label>RM Name</label><input type="text" id="edit-showroom-rm" placeholder="Enter RM name"></div>
+      <div class="field"><label>Start Date</label><input type="date" id="edit-showroom-start"></div>
       <div class="modal-btns">
-        <button class="btn btn-add" onclick="bulkImportDealers()">Import</button>
-        <button class="btn btn-print" onclick="closeBulkImportModal()">Cancel</button>
+        <button class="btn btn-add" onclick="saveEditShowroom()">Save Changes</button>
+        <button class="btn btn-print" onclick="closeEditShowroomModal()">Cancel</button>
       </div>
-      <div id="bulk-import-status" style="margin-top: 10px; font-size: 0.85rem;"></div>
+      <div id="edit-showroom-error" style="margin-top:10px; color:#e74c3c; font-size:0.85rem; display:none;"></div>
     </div>
   </div>
 
-  <!-- PDF Export Modal -->
+  <!-- Edit Dealer Modal -->
+  <div id="edit-dealer-modal">
+    <div class="modal">
+      <h2>✏️ Edit Dealer</h2>
+      <div class="field"><label>Dealer Name</label><input type="text" id="edit-dealer-name" placeholder="Enter dealer name"></div>
+      <div class="field"><label>City</label><input type="text" id="edit-dealer-city" placeholder="Enter city"></div>
+      <div class="field"><label>RM Name</label><input type="text" id="edit-dealer-rm" placeholder="Enter RM name"></div>
+      <div class="field"><label>Start Date</label><input type="date" id="edit-dealer-start"></div>
+      <div class="modal-btns">
+        <button class="btn btn-add" onclick="saveEditDealer()">Save Changes</button>
+        <button class="btn btn-print" onclick="closeEditDealerModal()">Cancel</button>
+      </div>
+      <div id="edit-dealer-error" style="margin-top:10px; color:#e74c3c; font-size:0.85rem; display:none;"></div>
+    </div>
+  </div>
+
   <div id="pdf-export-modal">
     <div class="modal">
       <h2>📄 Export Dashboard as PDF</h2>
@@ -749,7 +754,6 @@
     </div>
   </div>
 
-  <!-- Main Container -->
   <div class="container" id="main-container">
     <header>
       <div class="brand"><h1 id="header-title">AIS <span>Command Center</span></h1></div>
@@ -770,7 +774,6 @@
       </div>
     </header>
 
-    <!-- Master Showroom Dashboard -->
     <div id="master-dashboard-view">
       <div class="stats-grid">
         <div class="card"><h3>Total Showrooms</h3><div class="value" id="global-total-showrooms">0</div></div>
@@ -780,12 +783,22 @@
         <div class="card"><h3>Active Dealers</h3><div class="value" id="global-active-dealers">0</div><div class="sub-text">Currently onboarding</div></div>
         <div class="card"><h3>Avg Dealer Delay</h3><div class="value" id="global-avg-dealer-delay">0</div><div class="sub-text">days delayed</div></div>
       </div>
-      
+
+      <!-- RM Performance Analytics for Showroom Dashboard -->
+      <div class="card" id="showroom-rm-analytics" style="margin: 10px 0; text-align:left; padding: 0; overflow: hidden;">
+        <div class="collapsible-header" onclick="toggleShowroomRMAnalytics()" style="padding: 20px; background: var(--white);">
+          <h3>📊 Showroom RM Performance Analytics</h3>
+          <span class="collapse-icon" id="showroom-rm-collapse-icon">▶</span>
+        </div>
+        <div id="showroom-rm-analytics-content" class="collapsible-content" style="padding: 0 20px 20px 20px;">
+          <div id="showroom-rm-analytics-body" style="margin-top:10px; font-size:.9rem; color:#444;"></div>
+        </div>
+      </div>      
+
       <div class="search-bar"><input type="text" id="showroom-search" placeholder="🔍 Search showrooms by name..." onkeyup="filterShowrooms()"></div>
       <div id="master-grid"></div>
     </div>
 
-    <!-- Analytics Dashboard View -->
     <div id="analytics-dashboard-view" style="display: none;">
       <div class="analytics-section">
         <h2>📊 Performance Analytics</h2>
@@ -822,11 +835,8 @@
       </div>
     </div>
 
-    <!-- Shared Wrapper -->
     <div id="dashboard-content" style="display: none;">
-      <!-- Dealer Dashboard -->
       <div id="dealer-dashboard-view" style="display: none;">
-        <!-- Enhanced KPI Row -->
         <div class="stats-grid">
           <div class="card"><h3>Total Dealers</h3><div class="value" id="dealer-stat-total">0</div></div>
           <div class="card"><h3>Active Dealers</h3><div class="value" id="dealer-stat-active" style="color: var(--primary-blue);">0</div><div class="sub-text">Currently onboarding</div></div>
@@ -838,7 +848,6 @@
           <div class="card"><h3>Forecast Completion</h3><div class="value" id="dealer-stat-forecast">0%</div><div class="sub-text">by target date</div></div>
         </div>
         
-        <!-- Stage Stats Cards -->
         <div class="stage-stats-grid">
           <div class="stage-stat-card"><div class="stage-name">Interested</div><div class="stage-count" id="stage-count-interested">0</div></div>
           <div class="stage-stat-card"><div class="stage-name">Shortlisted</div><div class="stage-count" id="stage-count-shortlisted">0</div></div>
@@ -869,7 +878,6 @@
         
         <div class="controls" style="margin-bottom: 20px; flex-wrap: wrap;">
           <button class="btn btn-add admin-only" id="add-dealer-btn">+ Add New Dealer</button>
-          <button class="btn btn-add admin-only" onclick="openBulkImportModal()">📁 Bulk Import</button>
         </div>
 
         <div class="stats-grid" style="margin-top: -10px;">
@@ -878,11 +886,10 @@
           <div class="card"><h3>Pending Docs</h3><div class="value" id="stat-docs-pending">0</div><div class="sub-text">dealers in Documentation</div></div>
         </div>
 
-        <!-- RM Analytics Collapsible -->
         <div class="card" id="rm-analytics" style="margin: 10px 0; text-align:left; padding: 0; overflow: hidden;">
           <div class="collapsible-header" onclick="toggleRMAnalytics()" style="padding: 20px; background: var(--white);">
             <h3>📊 RM Performance Analytics</h3>
-            <span class="collapse-icon" id="rm-collapse-icon">▼</span>
+            <span class="collapse-icon" id="rm-collapse-icon">▶</span>
           </div>
           <div id="rm-analytics-content" class="collapsible-content" style="padding: 0 20px 20px 20px;">
             <div id="rm-analytics-body" style="margin-top:10px; font-size:.9rem; color:#444;"></div>
@@ -892,7 +899,6 @@
         <div id="dealer-grid" class="stats-grid" style="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));"></div>
       </div>
 
-      <!-- Dealer Detail View -->
       <div id="dealer-detail-view" style="display: none;">
         <div class="card" style="text-align: left; padding: 30px; margin-bottom: 25px;">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px;">
@@ -911,6 +917,7 @@
             <div class="progress-section" style="box-shadow: none; padding: 15px 0;"><div class="progress-info"><span>Documentation Progress</span><span id="doc-progress-pct">0%</span></div>
             <div class="progress-bar-container"><div class="progress-bar-fill" id="doc-progress-bar"></div></div></div>
             <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;" class="admin-only">
+              <button class="btn btn-add" onclick="editDealerFromDetail()">✏️ Edit Dealer Details</button>
               <button class="btn btn-delete" onclick="showNotesModal('backout')">Mark as Backout</button>
               <button class="btn btn-delete" onclick="showNotesModal('cftRejected')">CFT Rejected</button>
               <button class="btn btn-delete" onclick="showNotesModal('shortlistedRejected')">Shortlisted Rejected</button>
@@ -920,7 +927,6 @@
         </div>
       </div>
 
-      <!-- Dealer Modal -->
       <div id="modal-dealer-overlay" style="position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000;">
         <div class="modal">
           <h2>Add New Dealer</h2>
@@ -936,8 +942,7 @@
         </div>
       </div>
 
-      <!-- Showroom Detail -->
-      <div id="showroom-detail-view">
+      <div id="showroom-detail-view" style="display: none;">
         <div class="stats-grid">
           <div class="card"><h3>Completion</h3><div class="value" id="stat-completion">0%</div></div>
           <div class="card"><h3>Planned Finish</h3><div class="value" id="stat-planned-date">--</div><div class="sub-text" id="stat-variance-summary">Calculating...</div></div>
@@ -950,8 +955,11 @@
         <div class="project-settings" style="margin-bottom: 25px; background: white; padding: 20px; border-radius:12px; box-shadow: var(--shadow); display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
           <div style="flex: 1;"><label style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">PROJECT START DATE</label>
           <input type="date" id="current-start-date" class="admin-editable" style="width: auto; display: block; margin-top: 5px;" onchange="updateStartDate(this.value)"></div>
-          <div class="admin-only" style="display: flex; gap: 10px;"><button class="btn btn-reset" onclick="resetCurrentShowroom()">Reset Progress</button><button class="btn btn-delete" onclick="deleteCurrentShowroom()">Delete</button></div>
-        </div>
+          <div class="admin-only" style="display: flex; gap: 10px;">
+  <button class="btn btn-add" onclick="editCurrentShowroom()">✏️ Edit Showroom Details</button>
+  <button class="btn btn-reset" onclick="resetCurrentShowroom()">Reset Progress</button>
+  <button class="btn btn-delete" onclick="deleteCurrentShowroom()">Delete</button>
+</div>
 
         <div class="table-section">
           <div class="table-responsive">
@@ -978,7 +986,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script type="module">
-    // =============== IMPORTS ===============
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import {
@@ -996,7 +1003,6 @@
       limit
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // =============== CONFIGURATION ===============
     const firebaseConfig = {
       apiKey: "AIzaSyDav3rI7fTr8KrXYxvnz5LB82CgjRq4v20",
       authDomain: "ais-showroom-dashboard.firebaseapp.com",
@@ -1030,8 +1036,9 @@
     let inactivityTimer;
     const INACTIVITY_TIMEOUT = 30 * 60 * 1000;
     let showroomSearchTerm = '';
+    let currentEditShowroomId = null;
+    let currentEditDealerId = null;
 
-    // =============== HELPER FUNCTIONS ===============
     function escapeHtml(text) { if (!text) return ''; const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
     function formatDate(date) { if (!date || isNaN(new Date(date).getTime())) return "--"; const d = new Date(date); return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }); }
     
@@ -1062,10 +1069,8 @@
     function logStageChange(prevDealer, newStage) { const log = { ...(prevDealer.stageLog || {}) }; if (!log[newStage]) log[newStage] = new Date().toISOString(); return log; }
     async function logAction(action, details) { try { await addDoc(collection(db, "auditLog"), { user: sessionStorage.getItem("ais_user_role") || 'unknown', action, details, timestamp: new Date(), userAgent: navigator.userAgent }); } catch (error) { console.error('Audit log failed:', error); } }
 
-    // =============== STATE ===============
     const state = { showrooms: [], dealers: [], currentIndex: -1, currentDealerId: null, view: 'showroom', searchTerm: '', unsubscribeDealers: null, unsubscribeShowrooms: null };
 
-    // =============== CALCULATION FUNCTIONS ===============
     function calculateShowroomStats(s) {
       if (!s || !s.startDate) return { pct: 0, avgDelay: 0 };
       const start = new Date(s.startDate + "T00:00:00");
@@ -1104,7 +1109,6 @@
       const totalOnboarded = state.dealers.filter(d => d.status === 'Completed' || autoDetectStage(d) === 'Onboarded').length;
       const totalActive = activeDealers.length;
       
-      // Forecast completion based on current pace
       const dealersWithStart = activeDealers.filter(d => d.startDate);
       let forecastPct = 0;
       if (dealersWithStart.length > 0) {
@@ -1124,12 +1128,11 @@
       return { activeCount: totalActive, avgDelay, avgCompletion, totalOnboarded, forecastCompletion: forecastPct };
     }
 
-    // =============== AUTHENTICATION ===============
     async function getUserIP() { try { const response = await fetch('https://api.ipify.org?format=json'); const data = await response.json(); return data.ip; } catch (error) { return 'Unable to fetch'; } }
     function getDeviceInfo() { const ua = navigator.userAgent; let device = 'Desktop'; if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) device = 'Tablet'; if (/Mobile|iP(hone|od)|Android|BlackBerry|IEMobile|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(ua)) device = 'Mobile'; let os = 'Unknown'; if (ua.includes('Windows')) os = 'Windows'; else if (ua.includes('Mac')) os = 'MacOS'; else if (ua.includes('Linux')) os = 'Linux'; else if (ua.includes('Android')) os = 'Android'; else if (ua.includes('iOS') || ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS'; let browser = 'Unknown'; if (ua.includes('Chrome')) browser = 'Chrome'; else if (ua.includes('Firefox')) browser = 'Firefox'; else if (ua.includes('Safari')) browser = 'Safari'; else if (ua.includes('Edge')) browser = 'Edge'; return { device, os, browser, userAgent: ua }; }
     async function storeLoginRecord(username, role, ip) { const deviceInfo = getDeviceInfo(); const loginRecord = { username, role, ipAddress: ip, device: deviceInfo.device, os: deviceInfo.os, browser: deviceInfo.browser, userAgent: deviceInfo.userAgent, timestamp: new Date(), date: new Date().toISOString().split('T')[0] }; try { await addDoc(collection(db, "loginHistory"), loginRecord); } catch (error) { console.error('Failed to store login record:', error); } }
     
-    window.showLoginHistory = async () => { try { const q = query(collection(db, "loginHistory"), orderBy("timestamp", "desc"), limit(50)); const snapshot = await getDocs(q); if (snapshot.empty) { showToast('No login records found', 'info'); return; } let historyHtml = '<div style="max-height: 400px; overflow-y: auto;"><table style="width:100%; border-collapse: collapse;"><tr style="background: var(--primary-blue); color: white;"><th style="padding: 8px;">User</th><th style="padding: 8px;">IP</th><th style="padding: 8px;">Device</th><th style="padding: 8px;">Time</th></tr>'; snapshot.forEach(doc => { const data = doc.data(); const time = data.timestamp?.toDate?.() || new Date(data.timestamp); historyHtml += `<tr style="border-bottom: 1px solid #ddd;"><td style="padding: 8px;">${escapeHtml(data.username || '?')}</td><td style="padding: 8px;">${escapeHtml(data.ipAddress || '?')}</td><td style="padding: 8px;">${escapeHtml(data.device || '?')} | ${escapeHtml(data.browser || '?')}</td><td style="padding: 8px;">${time.toLocaleString()}</td></tr>`; }); historyHtml += '</table></div>'; const modal = document.createElement('div'); modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center; z-index:2000;'; modal.innerHTML = `<div style="background:white; border-radius:12px; padding:25px; max-width:800px; width:90%; max-height:80vh; overflow:auto;"><h2 style="color:var(--primary-blue); margin-bottom:15px;">📋 Login History (Last 50)</h2>${historyHtml}<div style="margin-top:20px; text-align:center;"><button class="btn btn-print" onclick="this.closest(\'div\').parentElement.remove()">Close</button></div></div>`; document.body.appendChild(modal); } catch (error) { showToast('Failed to load login history', 'error'); } };
+    window.showLoginHistory = async () => { try { const q = query(collection(db, "loginHistory"), orderBy("timestamp", "desc"), limit(50)); const snapshot = await getDocs(q); if (snapshot.empty) { showToast('No login records found', 'info'); return; } let historyHtml = '<div style="max-height: 400px; overflow-y: auto;"><table style="width:100%; border-collapse: collapse;"><tr style="background: var(--primary-blue); color: white;"><th style="padding: 8px;">User</th><th style="padding: 8px;">IP</th><th style="padding: 8px;">Device</th><th style="padding: 8px;">Time</th></td>'; snapshot.forEach(doc => { const data = doc.data(); const time = data.timestamp?.toDate?.() || new Date(data.timestamp); historyHtml += `<tr style="border-bottom: 1px solid #ddd;"><td style="padding: 8px;">${escapeHtml(data.username || '?')}</td><td style="padding: 8px;">${escapeHtml(data.ipAddress || '?')}</td><td style="padding: 8px;">${escapeHtml(data.device || '?')} | ${escapeHtml(data.browser || '?')}</td><td style="padding: 8px;">${time.toLocaleString()}</td></tr>`; }); historyHtml += '</table></div>'; const modal = document.createElement('div'); modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center; z-index:2000;'; modal.innerHTML = `<div style="background:white; border-radius:12px; padding:25px; max-width:800px; width:90%; max-height:80vh; overflow:auto;"><h2 style="color:var(--primary-blue); margin-bottom:15px;">📋 Login History (Last 50)</h2>${historyHtml}<div style="margin-top:20px; text-align:center;"><button class="btn btn-print" onclick="this.closest('div').parentElement.remove()">Close</button></div></div>`; document.body.appendChild(modal); } catch (error) { showToast('Failed to load login history', 'error'); } };
     
     window.handleLogin = async () => { const u = document.getElementById('username').value.trim(); const p = document.getElementById('password').value; const loginError = document.getElementById('login-error'); const loginBtn = document.querySelector('#login-screen .btn-add'); if (USERS[u] && USERS[u].pass === p) { try { loginBtn.disabled = true; loginBtn.textContent = 'Logging in...'; loginError.style.display = 'none'; const ip = await getUserIP(); await storeLoginRecord(u, USERS[u].role, ip); sessionStorage.setItem("ais_user_role", USERS[u].role); const auth = getAuth(); await signInAnonymously(auth); setTimeout(() => { checkAuth(); }, 100); } catch (e) { sessionStorage.setItem("ais_user_role", USERS[u].role); setTimeout(() => { checkAuth(); }, 100); } finally { loginBtn.disabled = false; loginBtn.textContent = 'Login'; } } else { showToast('Invalid username or password', 'error'); loginError.style.display = 'block'; } };
     
@@ -1139,72 +1142,93 @@
     
     function applyPermissions(role) { const isAdmin = (role === 'admin'); document.querySelectorAll('.admin-only').forEach(el => { if (el.style) el.style.display = isAdmin ? '' : 'none'; }); document.querySelectorAll('.admin-editable').forEach(el => { if (el.disabled !== undefined) el.disabled = !isAdmin; }); const badgeCont = document.getElementById('role-badge-container'); if (badgeCont) { badgeCont.innerHTML = isAdmin ? `<span class="role-badge badge-admin">Admin Mode</span>` : `<span class="role-badge badge-viewer">Viewer Mode</span>`; } }
 
-    // =============== DATA INITIALIZATION ===============
     function init() { 
-  state.unsubscribeShowrooms = onSnapshot(collection(db, "showrooms"), (snapshot) => { 
-    state.showrooms = snapshot.docs.map(d => ({ id: d.data().id || d.id, ...d.data() })); 
-    renderShowroomList(); 
-    const masterVisible = document.getElementById('master-dashboard-view')?.style.display !== 'none'; 
-    if (masterVisible) renderMasterGrid(); 
-    else if (state.currentIndex !== -1) renderDashboard(); 
-  }, (error) => { 
-    showToast('Failed to load showrooms', 'error'); 
-  }); 
-  
-  // Load dealers immediately on page load so data is ready when user clicks Dealers button
-  loadDealersRealtime();
-}
+      state.unsubscribeShowrooms = onSnapshot(collection(db, "showrooms"), (snapshot) => { 
+        state.showrooms = snapshot.docs.map(d => ({ id: d.data().id || d.id, ...d.data() })); 
+        renderShowroomList(); 
+        const masterVisible = document.getElementById('master-dashboard-view')?.style.display !== 'none'; 
+        if (masterVisible) renderMasterGrid(); 
+        else if (state.currentIndex !== -1) renderDashboard(); 
+      }, (error) => { showToast('Failed to load showrooms', 'error'); }); 
+      
+      loadDealersRealtime();
+    }
     
-function loadDealersRealtime() { 
-  if (state.unsubscribeDealers) state.unsubscribeDealers(); 
-  state.unsubscribeDealers = onSnapshot(collection(db, "dealerOnboarding"), (snapshot) => { 
-    state.dealers = snapshot.docs.map(d => ({ id: d.id, ...d.data() })); 
-    const rmSelect = document.getElementById('filter-rm'); 
-    if (rmSelect) { 
-      const rms = [...new Set(state.dealers.map(d => d.rm || 'Unassigned'))]; 
-      const currentValue = rmSelect.value; 
-      rmSelect.innerHTML = '<option value="all">All RMs</option>' + rms.map(rm => `<option value="${rm}">${rm}</option>`).join(''); 
-      if (currentValue !== 'all' && rms.includes(currentValue)) rmSelect.value = currentValue; 
-      else rmSelect.value = 'all'; 
-    } 
-    // Always render if in dealer view
-    if (state.view === 'dealer') { 
-      renderDealerDashboard(); 
-      updateGlobalDealerKPIs(); 
-    } 
-    if (document.getElementById('analytics-dashboard-view')?.style.display !== 'none') { 
-      renderAnalyticsCharts(); 
-    } 
-  }, (error) => { 
-    showToast('Failed to load dealers', 'error'); 
-  }); 
-}
+    function loadDealersRealtime() { 
+      if (state.unsubscribeDealers) state.unsubscribeDealers(); 
+      state.unsubscribeDealers = onSnapshot(collection(db, "dealerOnboarding"), (snapshot) => { 
+        state.dealers = snapshot.docs.map(d => ({ id: d.id, ...d.data() })); 
+        const rmSelect = document.getElementById('filter-rm'); 
+        if (rmSelect) { 
+          const rms = [...new Set(state.dealers.map(d => d.rm || 'Unassigned'))]; 
+          const currentValue = rmSelect.value; 
+          rmSelect.innerHTML = '<option value="all">All RMs</option>' + rms.map(rm => `<option value="${rm}">${rm}</option>`).join(''); 
+          if (currentValue !== 'all' && rms.includes(currentValue)) rmSelect.value = currentValue; 
+          else rmSelect.value = 'all'; 
+        } 
+        if (state.view === 'dealer') { 
+          renderDealerDashboard(); 
+          updateGlobalDealerKPIs(); 
+        } 
+        if (document.getElementById('analytics-dashboard-view')?.style.display !== 'none') { 
+          renderAnalyticsCharts(); 
+        } 
+      }, (error) => { showToast('Failed to load dealers', 'error'); }); 
+    }
     
     async function saveShowroom(showroom) { try { const docId = showroom.id || showroom.name.replace(/\s+/g, "_"); await setDoc(doc(db, "showrooms", docId), showroom); await logAction('SAVE_SHOWROOM', `Showroom ${showroom.name} saved`); } catch (error) { throw new Error('Failed to save showroom. Please try again.'); } }
     
     function updateGlobalDealerKPIs() { const kpis = calculateDealerKPIs(); document.getElementById('global-active-dealers').innerText = kpis.activeCount; document.getElementById('global-avg-dealer-delay').innerText = kpis.avgDelay; }
 
-    // =============== SHORTCUTS & UTILITIES ===============
     window.toggleShortcuts = () => { const panel = document.getElementById('shortcutsPanel'); panel.classList.toggle('show'); };
-    document.addEventListener('keydown', (e) => { if (e.ctrlKey && e.key === 'd') { e.preventDefault(); showMasterDashboard(); showToast('Switched to Dashboard', 'info'); } if (e.ctrlKey && e.key === 'a') { e.preventDefault(); showAnalyticsDashboard(); showToast('Switched to Analytics', 'info'); } if (e.ctrlKey && e.key === 'p') { e.preventDefault(); openPDFModal(); } if (e.key === 'Escape') { closeModal(); closeNotesModal(); } });
+    document.addEventListener('keydown', (e) => { 
+      const isInput = e.target.matches('input, textarea, select');
+      if (!isInput) {
+        if (e.ctrlKey && e.key === 'd') { e.preventDefault(); showMasterDashboard(); showToast('Switched to Dashboard', 'info'); } 
+        if (e.ctrlKey && e.key === 'a') { e.preventDefault(); showAnalyticsDashboard(); showToast('Switched to Analytics', 'info'); } 
+        if (e.ctrlKey && e.key === 'p') { e.preventDefault(); openPDFModal(); } 
+      }
+      if (e.key === 'Escape') { closeModal(); closeNotesModal(); closeEditShowroomModal(); closeEditDealerModal(); } 
+    });
     
     window.filterShowrooms = () => { showroomSearchTerm = document.getElementById('showroom-search')?.value?.toLowerCase() || ''; renderMasterGrid(); };
     window.toggleRMAnalytics = () => { const content = document.getElementById('rm-analytics-content'); const icon = document.getElementById('rm-collapse-icon'); if (content.classList.contains('show')) { content.classList.remove('show'); icon.innerHTML = '▶'; } else { content.classList.add('show'); icon.innerHTML = '▼'; } };
     window.exportChartAsImage = (chartId) => { const canvas = document.getElementById(chartId); if (canvas) { const link = document.createElement('a'); link.download = `${chartId}.png`; link.href = canvas.toDataURL(); link.click(); showToast(`Chart exported as ${chartId}.png`, 'success'); } };
     window.applyDateRange = () => { const startDate = document.getElementById('analytics-start-date').value; const endDate = document.getElementById('analytics-end-date').value; if (startDate && endDate) { showToast(`Filtering data from ${startDate} to ${endDate}`, 'info'); renderAnalyticsCharts(); } };
     
-    // =============== PDF GENERATION ===============
     window.openPDFModal = () => { document.getElementById('pdf-export-modal').style.display = 'flex'; };
     window.closePDFModal = () => { document.getElementById('pdf-export-modal').style.display = 'none'; document.getElementById('pdf-status').innerHTML = ''; };
     
-    window.generatePDF = async () => { const { jsPDF } = window.jspdf; const title = document.getElementById('pdf-title').value || 'AIS Dashboard Report'; const statusDiv = document.getElementById('pdf-status'); statusDiv.innerHTML = '<div class="spinner"></div> Generating PDF...'; try { const element = document.getElementById('main-container'); const canvas = await html2canvas(element, { scale: 2, logging: false, useCORS: true }); const imgData = canvas.toDataURL('image/png'); const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' }); const imgProps = pdf.getImageProperties(imgData); const pdfWidth = pdf.internal.pageSize.getWidth(); const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width; pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight); pdf.save(`${title}_${new Date().toISOString().slice(0,10)}.pdf`); statusDiv.innerHTML = '<span style="color: var(--success-green);">✅ PDF generated successfully!</span>'; showToast('PDF exported successfully', 'success'); logAction('EXPORT_PDF', `PDF report generated: ${title}`); setTimeout(() => closePDFModal(), 1500); } catch (error) { console.error('PDF generation failed:', error); statusDiv.innerHTML = '<span style="color: var(--delay-red);">❌ Failed to generate PDF. Please try again.</span>'; showToast('PDF generation failed', 'error'); } };
+    window.generatePDF = async () => { 
+      const { jsPDF } = window.jspdf; 
+      const title = document.getElementById('pdf-title').value || 'AIS Dashboard Report'; 
+      const statusDiv = document.getElementById('pdf-status'); 
+      statusDiv.innerHTML = '<div class="spinner"></div> Generating PDF...'; 
+      try { 
+        const element = document.getElementById('main-container'); 
+        const canvas = await html2canvas(element, { scale: 2, logging: false, useCORS: true }); 
+        const imgData = canvas.toDataURL('image/png'); 
+        const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' }); 
+        const imgProps = pdf.getImageProperties(imgData); 
+        const pdfWidth = pdf.internal.pageSize.getWidth(); 
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width; 
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight); 
+        pdf.save(`${title}_${new Date().toISOString().slice(0,10)}.pdf`); 
+        statusDiv.innerHTML = '<span style="color: var(--success-green);">✅ PDF generated successfully!</span>'; 
+        showToast('PDF exported successfully', 'success'); 
+        logAction('EXPORT_PDF', `PDF report generated: ${title}`); 
+        setTimeout(() => closePDFModal(), 1500); 
+      } catch (error) { 
+        console.error('PDF generation failed:', error); 
+        statusDiv.innerHTML = '<span style="color: var(--delay-red);">❌ Failed to generate PDF. Please try again.</span>'; 
+        showToast('PDF generation failed', 'error'); 
+      } 
+    };
     
-    // =============== NOTES MODAL ===============
     window.showNotesModal = (action) => { pendingAction = action; const modal = document.getElementById('notes-modal'); const title = document.getElementById('notes-modal-title'); if (action === 'backout') title.innerHTML = 'Mark as Backout - Add Reason'; else if (action === 'cftRejected') title.innerHTML = 'CFT Rejected - Add Reason'; else if (action === 'shortlistedRejected') title.innerHTML = 'Shortlisted Rejected - Add Reason'; else if (action === 'deletePermanent') title.innerHTML = 'Delete Permanently - Add Reason'; document.getElementById('notes-textarea').value = ''; modal.style.display = 'flex'; };
     window.closeNotesModal = () => { document.getElementById('notes-modal').style.display = 'none'; pendingAction = null; };
     document.getElementById('notes-confirm-btn').onclick = async () => { const notes = document.getElementById('notes-textarea').value.trim(); if (!notes) { showToast('Please enter a reason before proceeding', 'warning'); return; } closeNotesModal(); if (pendingAction === 'backout') await dropDealerWithNotes('backout', notes); else if (pendingAction === 'cftRejected') await dropDealerWithNotes('cftRejected', notes); else if (pendingAction === 'shortlistedRejected') await dropDealerWithNotes('shortlistedRejected', notes); else if (pendingAction === 'deletePermanent') await deleteDealerWithNotes(notes); pendingAction = null; };
 
-    // =============== ANALYTICS ===============
     window.showAnalyticsDashboard = () => {
       document.getElementById('master-dashboard-view').style.display = 'none';
       document.getElementById('analytics-dashboard-view').style.display = 'block';
@@ -1263,88 +1287,70 @@ function loadDealersRealtime() {
       stageDistChart = new Chart(document.getElementById('stage-dist-chart').getContext('2d'), { type: 'pie', data: { labels: DEALER_STAGES, datasets: [{ data: stageCounts, backgroundColor: ['#3498db', '#2ecc71', '#f39c12', '#e74c3c', '#9b59b6'] }] }, options: { responsive: true, plugins: { legend: { position: 'bottom' } } } });
     }
     
-    // =============== BACKUP & IMPORT ===============
     window.backupData = async () => { const backup = { showrooms: state.showrooms, dealers: state.dealers, exportedAt: new Date().toISOString() }; const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `ais_backup_${new Date().toISOString().slice(0,19)}.json`; a.click(); URL.revokeObjectURL(url); await logAction('BACKUP_DATA', 'Data backup downloaded'); showToast('Backup downloaded successfully', 'success'); };
+
+    window.showMasterDashboard = () => {
+      state.view = 'showroom';
+      state.currentIndex = -1;
+      
+      const addMainBtn = document.getElementById('add-main-btn');
+      addMainBtn.innerText = '+ Add Showroom';
+      addMainBtn.onclick = () => openModal();
+      addMainBtn.style.display = sessionStorage.getItem("ais_user_role") === 'admin' ? 'inline-flex' : 'none';
+      
+      document.getElementById('dealer-dashboard-view').style.display = 'none';
+      document.getElementById('dealer-detail-view').style.display = 'none';
+      document.getElementById('master-dashboard-view').style.display = 'block';
+      document.getElementById('dashboard-content').style.display = 'none';
+      document.getElementById('analytics-dashboard-view').style.display = 'none';
+      
+      const showroomDetailView = document.getElementById('showroom-detail-view');
+      if (showroomDetailView) showroomDetailView.style.display = 'none';
+      
+      document.getElementById('nav-dealer-btn').style.display = 'inline-flex';
+      document.getElementById('nav-showroom-btn').style.display = 'none';
+      document.getElementById('back-to-dash-btn').style.display = 'none';
+      document.getElementById('showroom-selector').style.display = 'none';
+      document.getElementById('header-title').innerHTML = 'AIS <span>Command Center</span>';
+      
+      renderMasterGrid();
+      updateGlobalDealerKPIs();
+    };
     
-    window.openBulkImportModal = () => { document.getElementById('bulk-import-modal').style.display = 'flex'; };
-    window.closeBulkImportModal = () => { document.getElementById('bulk-import-modal').style.display = 'none'; document.getElementById('bulk-import-status').innerHTML = ''; document.getElementById('bulk-import-file').value = ''; };
-    window.bulkImportDealers = async () => { const fileInput = document.getElementById('bulk-import-file'); const statusDiv = document.getElementById('bulk-import-status'); if (!fileInput.files.length) { statusDiv.innerHTML = '<span style="color: var(--warning-orange);">Please select a file</span>'; return; } const file = fileInput.files[0]; const reader = new FileReader(); reader.onload = async (e) => { try { const data = new Uint8Array(e.target.result); const workbook = XLSX.read(data, { type: 'array' }); const sheet = workbook.Sheets[workbook.SheetNames[0]]; const rows = XLSX.utils.sheet_to_json(sheet); let success = 0, failed = 0; statusDiv.innerHTML = '<span>Importing... please wait</span>'; for (const row of rows) { try { const dealer = { name: row.Name || row.name || '', city: row.City || row.city || '', rm: row.RM || row.rm || '', startDate: row['Start Date'] || row.startDate || '', currentStage: 'Interested', status: 'Active', documents: {}, selectedStages: {}, createdAt: new Date().toISOString() }; if (dealer.name && dealer.city && dealer.rm && dealer.startDate) { await addDoc(collection(db, "dealerOnboarding"), dealer); success++; } else { failed++; } } catch (err) { failed++; } } await logAction('BULK_IMPORT', `Imported ${success} dealers, ${failed} failed`); statusDiv.innerHTML = `<span style="color: var(--success-green);">✅ Imported ${success} dealers, ${failed} failed</span>`; showToast(`Imported ${success} dealers`, 'success'); setTimeout(() => closeBulkImportModal(), 2000); renderDealerDashboard(); } catch (err) { statusDiv.innerHTML = '<span style="color: var(--delay-red);">Failed to parse file.</span>'; } }; reader.readAsArrayBuffer(file); };
+    window.initDealerModule = () => {
+      state.view = 'dealer';
+      state.currentIndex = -1;
+      state.currentDealerId = null;
+      filterState = { status: 'all', stage: 'all', rm: 'all' };
+      
+      const addMainBtn = document.getElementById('add-main-btn');
+      addMainBtn.innerText = '+ Add Dealer';
+      addMainBtn.onclick = () => openDealerModal();
+      addMainBtn.style.display = sessionStorage.getItem("ais_user_role") === 'admin' ? 'inline-flex' : 'none';
+      
+      const showroomDetailView = document.getElementById('showroom-detail-view');
+      if (showroomDetailView) showroomDetailView.style.display = 'none';
+      
+      document.getElementById('master-dashboard-view').style.display = 'none';
+      document.getElementById('analytics-dashboard-view').style.display = 'none';
+      document.getElementById('dashboard-content').style.display = 'block';
+      document.getElementById('dealer-dashboard-view').style.display = 'block';
+      document.getElementById('dealer-detail-view').style.display = 'none';
+      
+      document.getElementById('nav-dealer-btn').style.display = 'none';
+      document.getElementById('nav-showroom-btn').style.display = 'inline-flex';
+      document.getElementById('back-to-dash-btn').style.display = 'none';
+      document.getElementById('showroom-selector').style.display = 'none';
+      document.getElementById('header-title').innerHTML = 'AIS <span>Dealer Onboarding</span>';
+      
+      loadDealersRealtime();
+      renderDealerDashboard();
+      updateGlobalDealerKPIs();
+    };
     
-    // =============== VIEW SWITCHERS ===============
-   window.showMasterDashboard = () => {
-  state.view = 'showroom';
-  state.currentIndex = -1;
-  
-  const addMainBtn = document.getElementById('add-main-btn');
-  addMainBtn.innerText = '+ Add Showroom';
-  addMainBtn.onclick = () => openModal();
-  addMainBtn.style.display = sessionStorage.getItem("ais_user_role") === 'admin' ? 'inline-flex' : 'none';
-  
-  // Hide dealer views
-  document.getElementById('dealer-dashboard-view').style.display = 'none';
-  document.getElementById('dealer-detail-view').style.display = 'none';
-  
-  // Show showroom views
-  document.getElementById('master-dashboard-view').style.display = 'block';
-  document.getElementById('dashboard-content').style.display = 'none';
-  document.getElementById('analytics-dashboard-view').style.display = 'none';
-  
-  // Navigation
-  document.getElementById('nav-dealer-btn').style.display = 'inline-flex';
-  document.getElementById('nav-showroom-btn').style.display = 'none';
-  document.getElementById('back-to-dash-btn').style.display = 'none';
-  document.getElementById('showroom-selector').style.display = 'none';
-  document.getElementById('header-title').innerHTML = 'AIS <span>Command Center</span>';
-  
-  renderMasterGrid();
-  updateGlobalDealerKPIs();
-};
-    
-window.initDealerModule = () => {
-  state.view = 'dealer';
-  state.currentIndex = -1;
-  state.currentDealerId = null;
-  filterState = { status: 'all', stage: 'all', rm: 'all' };
-  
-  const addMainBtn = document.getElementById('add-main-btn');
-  addMainBtn.innerText = '+ Add Dealer';
-  addMainBtn.onclick = () => openDealerModal();
-  addMainBtn.style.display = sessionStorage.getItem("ais_user_role") === 'admin' ? 'inline-flex' : 'none';
-  
-  // Hide ALL showroom-related elements
-  document.getElementById('master-dashboard-view').style.display = 'none';
-  document.getElementById('analytics-dashboard-view').style.display = 'none';
-  document.getElementById('dashboard-content').style.display = 'block';
-  document.getElementById('dealer-dashboard-view').style.display = 'block';
-  document.getElementById('dealer-detail-view').style.display = 'none';
-  
-  // Keep showroom tracker fully hidden in dealer mode.
-  const showroomDetailView = document.getElementById('showroom-detail-view');
-  if (showroomDetailView) showroomDetailView.style.display = 'none';
-  
-  // Make sure dealer-specific cards are visible
-  const dealerCards = document.querySelectorAll('#dealer-dashboard-view .card');
-  dealerCards.forEach(card => {
-    card.style.display = 'block';
-  });
-  
-  // Navigation buttons
-  document.getElementById('nav-dealer-btn').style.display = 'none';
-  document.getElementById('nav-showroom-btn').style.display = 'inline-flex';
-  document.getElementById('back-to-dash-btn').style.display = 'none';
-  document.getElementById('showroom-selector').style.display = 'none';
-  
-  // Update header title
-  document.getElementById('header-title').innerHTML = 'AIS <span>Dealer Onboarding</span>';
-  
-  // Load dealer data and render immediately
-  loadDealersRealtime();
-  
-  // Render immediately so KPI cards are populated (or reset to 0) without requiring extra navigation.
-  renderDealerDashboard();
-  updateGlobalDealerKPIs();
-};    
-    window.openShowroom = (idx) => { if (!state.showrooms[idx]) { showToast('Showroom not found', 'error'); return; } state.currentIndex = idx; document.getElementById('master-dashboard-view').style.display = 'none'; document.getElementById('analytics-dashboard-view').style.display = 'none'; document.getElementById('dashboard-content').style.display = 'block'; document.getElementById('dealer-dashboard-view').style.display = 'none'; document.getElementById('dealer-detail-view').style.display = 'none'; const showroomDetailView = document.getElementById('showroom-detail-view'); if (showroomDetailView) showroomDetailView.style.display = 'block'; document.getElementById('back-to-dash-btn').style.display = 'inline-flex'; document.getElementById('showroom-selector').style.display = 'inline-block'; document.getElementById('showroom-selector').value = idx; document.getElementById('header-title').innerHTML = `AIS <span>${state.showrooms[idx].name}</span>`; renderDashboard(); };
+    window.openShowroom = (idx) => { if (!state.showrooms[idx]) { showToast('Showroom not found', 'error'); return; } state.currentIndex = idx; document.getElementById('master-dashboard-view').style.display = 'none'; document.getElementById('analytics-dashboard-view').style.display = 'none'; document.getElementById('dashboard-content').style.display = 'block'; document.getElementById('dealer-dashboard-view').style.display = 'none'; document.getElementById('dealer-detail-view').style.display = 'none'; const showroomDetailView = document.getElementById('showroom-detail-view'); if (showroomDetailView) showroomDetailView.style.display = 'block'; document.getElementById('back-to-dash-btn').style.display = 'inline-flex'; document.getElementById('showroom-selector').style.display = 'inline-block'; document.getElementById('showroom-selector').value = idx; const showroom = state.showrooms[idx];
+const subHeader = showroom.city || showroom.rm ? ` - ${showroom.city || ''} ${showroom.rm ? `(RM: ${showroom.rm})` : ''}` : '';
+document.getElementById('header-title').innerHTML = `AIS <span>${showroom.name}${subHeader}</span>`; renderDashboard(); };
     window.switchShowroom = (i) => openShowroom(parseInt(i));
     
     function renderShowroomList() { const selector = document.getElementById('showroom-selector'); if (!selector) return; selector.innerHTML = state.showrooms.map((s, i) => `<option value="${i}" ${state.currentIndex === i ? 'selected' : ''}>${escapeHtml(s.name)}</option>`).join(''); }
@@ -1352,15 +1358,212 @@ window.initDealerModule = () => {
     function renderMasterGrid() {
       const grid = document.getElementById('master-grid');
       let totalPct = 0, totalAvgDelay = 0, completedShowrooms = 0, activeDelayCount = 0;
-      let filteredShowrooms = state.showrooms; if (showroomSearchTerm) filteredShowrooms = state.showrooms.filter(s => s.name?.toLowerCase().includes(showroomSearchTerm));
-      if (!filteredShowrooms.length) { grid.innerHTML = '<div class="card" style="grid-column: 1/-1;">No showrooms found. Click "+ Add Showroom" to get started.</div>'; document.getElementById('global-total-showrooms').innerText = state.showrooms.length; document.getElementById('global-avg-completion').innerText = '0%'; document.getElementById('global-total-delay').innerText = '0'; document.getElementById('global-completed-count').innerText = '0'; return; }
-      grid.innerHTML = filteredShowrooms.map((s, idx) => { const stats = calculateShowroomStats(s); totalPct += stats.pct; if (stats.avgDelay > 0) { totalAvgDelay += stats.avgDelay; activeDelayCount++; } if (stats.pct === 100) completedShowrooms++; const originalIdx = state.showrooms.findIndex(orig => orig.id === s.id); return `<div class="showroom-card"><h4>${escapeHtml(s.name)}</h4><div class="showroom-meta"><span><strong>Progress:</strong> ${stats.pct}%</span><span style="color:${stats.avgDelay > 0 ? 'var(--delay-red)' : 'var(--success-green)'}"><strong>Avg Delay:</strong> ${stats.avgDelay}d</span></div><div class="progress-bar-container" style="height:6px"><div class="progress-bar-fill" style="width:${stats.pct}%"></div></div><button class="btn btn-add" onclick="openShowroom(${originalIdx})" style="margin-top:12px; width:100%;">Open Tracker</button></div>`; }).join('');
+      let filteredShowrooms = state.showrooms; 
+      if (showroomSearchTerm) filteredShowrooms = state.showrooms.filter(s => s.name?.toLowerCase().includes(showroomSearchTerm));
+      
+      if (!filteredShowrooms.length) { 
+        grid.innerHTML = '<div class="card" style="grid-column: 1/-1;">No showrooms found. Click "+ Add Showroom" to get started.</div>'; 
+        document.getElementById('global-total-showrooms').innerText = state.showrooms.length; 
+        document.getElementById('global-avg-completion').innerText = '0%'; 
+        document.getElementById('global-total-delay').innerText = '0'; 
+        document.getElementById('global-completed-count').innerText = '0'; 
+        return; 
+      }
+      
+      grid.innerHTML = filteredShowrooms.map((s, idx) => { 
+        const stats = calculateShowroomStats(s); 
+        totalPct += stats.pct; 
+        if (stats.avgDelay > 0) { 
+          totalAvgDelay += stats.avgDelay; 
+          activeDelayCount++; 
+        } 
+        if (stats.pct === 100) completedShowrooms++; 
+        const originalIdx = state.showrooms.findIndex(orig => orig.id === s.id); 
+        const cityDisplay = s.city ? `<span>📍 ${escapeHtml(s.city)}</span>` : '';
+        const rmDisplay = s.rm ? `<span>👤 RM: ${escapeHtml(s.rm)}</span>` : '';
+        
+        return `<div class="showroom-card"><h4>${escapeHtml(s.name)}</h4><div class="showroom-meta" style="flex-direction:column; gap:5px;"><div style="display:flex; justify-content:space-between; width:100%;"><span><strong>Progress:</strong> ${stats.pct}%</span><span style="color:${stats.avgDelay > 0 ? 'var(--delay-red)' : 'var(--success-green)'}"><strong>Delay:</strong> ${stats.avgDelay}d</span></div><div style="display:flex; justify-content:space-between; font-size:0.7rem; color:var(--text-muted);">${cityDisplay} ${rmDisplay}</div></div><div class="progress-bar-container" style="height:6px"><div class="progress-bar-fill" style="width:${stats.pct}%"></div></div><button class="btn btn-add" onclick="openShowroom(${originalIdx})" style="margin-top:12px; width:100%;">Open Tracker</button></div>`;
+      }).join('');
+      
       const globalAvgDelay = activeDelayCount > 0 ? Math.round(totalAvgDelay / activeDelayCount) : 0;
       document.getElementById('global-total-showrooms').innerText = state.showrooms.length;
       document.getElementById('global-avg-completion').innerText = state.showrooms.length ? Math.round(totalPct / state.showrooms.length) + '%' : '0%';
       document.getElementById('global-total-delay').innerText = globalAvgDelay;
       document.getElementById('global-completed-count').innerText = completedShowrooms;
+      
+      renderShowroomRMAnalytics();
     }
+    
+    // =============== SHOWROOM RM ANALYTICS ===============
+    window.toggleShowroomRMAnalytics = () => { 
+      const content = document.getElementById('showroom-rm-analytics-content'); 
+      const icon = document.getElementById('showroom-rm-collapse-icon'); 
+      if (content.classList.contains('show')) { 
+        content.classList.remove('show'); 
+        icon.innerHTML = '▶'; 
+      } else { 
+        content.classList.add('show'); 
+        icon.innerHTML = '▼'; 
+      } 
+    };
+    
+    function renderShowroomRMAnalytics() {
+      const rmMap = new Map();
+      state.showrooms.forEach(s => {
+        const rm = s.rm || 'Not assigned';
+        if (!rmMap.has(rm)) rmMap.set(rm, { total: 0, totalDelay: 0, totalProgress: 0 });
+        const stats = rmMap.get(rm);
+        const showroomStats = calculateShowroomStats(s);
+        stats.total++;
+        stats.totalDelay += showroomStats.avgDelay;
+        stats.totalProgress += showroomStats.pct;
+      });
+      
+      const rmHtml = Array.from(rmMap.entries()).map(([rm, stats]) => {
+        const avgDelay = stats.total > 0 ? Math.round(stats.totalDelay / stats.total) : 0;
+        const avgProgress = stats.total > 0 ? Math.round(stats.totalProgress / stats.total) : 0;
+        return `<div style="margin-bottom:10px; padding:8px; background:#f8f9fa; border-radius:6px;">
+          <strong>${escapeHtml(rm)}</strong><br>
+          Showrooms: ${stats.total} | Avg Progress: ${avgProgress}% | Avg Delay: ${avgDelay} days
+        </div>`;
+      }).join('');
+      document.getElementById('showroom-rm-analytics-body').innerHTML = rmHtml || '<div>No data available</div>';
+    }
+    
+    // =============== EDIT SHOWROOM FUNCTIONS ===============
+    window.editShowroom = (idx) => {
+      const showroom = state.showrooms[idx];
+      if (!showroom) return;
+      currentEditShowroomId = idx;
+      document.getElementById('edit-showroom-name').value = showroom.name || '';
+      document.getElementById('edit-showroom-city').value = showroom.city || '';
+      document.getElementById('edit-showroom-rm').value = showroom.rm || '';
+      document.getElementById('edit-showroom-start').value = showroom.startDate || '';
+      document.getElementById('edit-showroom-modal').style.display = 'flex';
+    };
+    
+    window.closeEditShowroomModal = () => {
+      document.getElementById('edit-showroom-modal').style.display = 'none';
+      currentEditShowroomId = null;
+      document.getElementById('edit-showroom-error').style.display = 'none';
+    };
+    
+    window.saveEditShowroom = async () => {
+      const name = document.getElementById('edit-showroom-name').value.trim();
+      const city = document.getElementById('edit-showroom-city').value.trim();
+      const rm = document.getElementById('edit-showroom-rm').value.trim();
+      const startDate = document.getElementById('edit-showroom-start').value;
+      const errorDiv = document.getElementById('edit-showroom-error');
+      const saveBtn = document.querySelector('#edit-showroom-modal .btn-add');
+      
+      if (!name || !startDate) {
+        errorDiv.innerHTML = 'Showroom Name and Start Date are required';
+        errorDiv.style.display = 'block';
+        return;
+      }
+      
+      const duplicate = state.showrooms.some((s, i) => s.name?.toLowerCase() === name.toLowerCase() && i !== currentEditShowroomId);
+      if (duplicate) {
+        errorDiv.innerHTML = 'A showroom with this name already exists';
+        errorDiv.style.display = 'block';
+        return;
+      }
+      
+      showLoading(saveBtn);
+      try {
+        const showroom = state.showrooms[currentEditShowroomId];
+        const updatedShowroom = {
+          ...showroom,
+          name: name,
+          city: city || 'Not specified',
+          rm: rm || 'Not assigned',
+          startDate: startDate,
+          updatedAt: new Date().toISOString()
+        };
+        await saveShowroom(updatedShowroom);
+        state.showrooms[currentEditShowroomId] = updatedShowroom;
+        await logAction('EDIT_SHOWROOM', `Showroom ${showroom.name} edited`);
+        closeEditShowroomModal();
+        renderMasterGrid();
+        renderShowroomList();
+        if (state.currentIndex === currentEditShowroomId) {
+          const subHeader = city || rm ? ` - ${city || ''} ${rm ? `(RM: ${rm})` : ''}` : '';
+          document.getElementById('header-title').innerHTML = `AIS <span>${name}${subHeader}</span>`;
+          document.getElementById('current-start-date').value = startDate;
+        }
+        showToast(`Showroom "${name}" updated successfully`, 'success');
+      } catch (error) {
+        errorDiv.innerHTML = 'Failed to update showroom. Please try again.';
+        errorDiv.style.display = 'block';
+        showToast('Failed to update showroom', 'error');
+      } finally {
+        hideLoading(saveBtn);
+      }
+    };
+    
+    // =============== EDIT DEALER FUNCTIONS ===============
+    window.editDealer = (id) => {
+      const dealer = state.dealers.find(d => d.id === id);
+      if (!dealer) return;
+      currentEditDealerId = id;
+      document.getElementById('edit-dealer-name').value = dealer.name || '';
+      document.getElementById('edit-dealer-city').value = dealer.city || '';
+      document.getElementById('edit-dealer-rm').value = dealer.rm || '';
+      document.getElementById('edit-dealer-start').value = dealer.startDate || '';
+      document.getElementById('edit-dealer-modal').style.display = 'flex';
+    };
+    
+    window.editDealerFromDetail = () => {
+      if (state.currentDealerId) {
+        editDealer(state.currentDealerId);
+      }
+    };
+    
+    window.closeEditDealerModal = () => {
+      document.getElementById('edit-dealer-modal').style.display = 'none';
+      currentEditDealerId = null;
+      document.getElementById('edit-dealer-error').style.display = 'none';
+    };
+    
+    window.saveEditDealer = async () => {
+      const name = document.getElementById('edit-dealer-name').value.trim();
+      const city = document.getElementById('edit-dealer-city').value.trim();
+      const rm = document.getElementById('edit-dealer-rm').value.trim();
+      const startDate = document.getElementById('edit-dealer-start').value;
+      const errorDiv = document.getElementById('edit-dealer-error');
+      const saveBtn = document.querySelector('#edit-dealer-modal .btn-add');
+      
+      if (!name || !city || !rm || !startDate) {
+        errorDiv.innerHTML = 'Please fill all fields (Name, City, RM, Start Date)';
+        errorDiv.style.display = 'block';
+        return;
+      }
+      
+      showLoading(saveBtn);
+      try {
+        const dRef = doc(db, "dealerOnboarding", currentEditDealerId);
+        await updateDoc(dRef, {
+          name: name,
+          city: city,
+          rm: rm,
+          startDate: startDate,
+          updatedAt: new Date().toISOString()
+        });
+        await logAction('EDIT_DEALER', `Dealer ${name} edited`);
+        closeEditDealerModal();
+        renderDealerDashboard();
+        if (state.currentDealerId === currentEditDealerId) {
+          openDealer(currentEditDealerId);
+        }
+        showToast(`Dealer "${name}" updated successfully`, 'success');
+      } catch (error) {
+        errorDiv.innerHTML = 'Failed to update dealer. Please try again.';
+        errorDiv.style.display = 'block';
+        showToast('Failed to update dealer', 'error');
+      } finally {
+        hideLoading(saveBtn);
+      }
+    };
     
     function renderDashboard() {
       const showroom = state.showrooms[state.currentIndex]; if (!showroom) return;
@@ -1395,112 +1598,145 @@ window.initDealerModule = () => {
     window.updateStartDate = async (d) => { if (state.currentIndex === -1) return; state.showrooms[state.currentIndex].startDate = d; try { await saveShowroom(state.showrooms[state.currentIndex]); calculateDashboard(); renderMasterGrid(); await logAction('UPDATE_START_DATE', `Start date updated for ${state.showrooms[state.currentIndex].name}`); showToast('Start date updated successfully', 'success'); } catch (error) { showToast(error.message, 'error'); } };
     window.resetCurrentShowroom = async () => { if (!confirm("Are you sure you want to reset all progress for this showroom?")) return; if (state.currentIndex !== -1) { state.showrooms[state.currentIndex].data = {}; try { await saveShowroom(state.showrooms[state.currentIndex]); renderDashboard(); renderMasterGrid(); await logAction('RESET_SHOWROOM', `Progress reset for ${state.showrooms[state.currentIndex].name}`); showToast('Showroom progress reset', 'success'); } catch (error) { showToast(error.message, 'error'); } } };
     window.deleteCurrentShowroom = async () => { if (state.currentIndex === -1) return; const showroom = state.showrooms[state.currentIndex]; if (!confirm(`Are you sure you want to permanently delete "${showroom.name}"?`)) return; try { const docId = showroom.id || showroom.name.replace(/\s+/g, "_"); await deleteDoc(doc(db, "showrooms", docId)); await logAction('DELETE_SHOWROOM', `Showroom ${showroom.name} deleted`); state.showrooms.splice(state.currentIndex, 1); state.currentIndex = -1; showMasterDashboard(); showToast(`Deleted "${showroom.name}"`, 'success'); } catch (error) { showToast('Failed to delete showroom', 'error'); } };
-    window.confirmAddShowroom = async () => { const name = document.getElementById('new-showroom-name')?.value?.trim(); const start = document.getElementById('new-showroom-start')?.value; const addBtn = document.querySelector('#modal-overlay .btn.btn-add'); if (!name || !start) { showToast('Please fill in both fields', 'warning'); return; } if (state.showrooms.some(sh => sh.name?.toLowerCase() === name.toLowerCase())) { showToast('A showroom with this name already exists', 'warning'); return; } showLoading(addBtn); try { const showroom = { id: Date.now().toString(), name: name, startDate: start, data: {}, createdAt: new Date().toISOString() }; await saveShowroom(showroom); state.showrooms.push(showroom); await logAction('ADD_SHOWROOM', `Showroom ${name} created`); document.getElementById('modal-overlay').style.display = 'none'; document.getElementById('new-showroom-name').value = ''; document.getElementById('new-showroom-start').value = ''; renderMasterGrid(); renderShowroomList(); showToast(`Showroom "${name}" created`, 'success'); } catch (error) { showToast('Failed to create showroom', 'error'); } finally { hideLoading(addBtn); } };
+window.editCurrentShowroom = () => {
+  if (state.currentIndex === -1) return;
+  const showroom = state.showrooms[state.currentIndex];
+  if (!showroom) return;
+  
+  currentEditShowroomId = state.currentIndex;
+  document.getElementById('edit-showroom-name').value = showroom.name || '';
+  document.getElementById('edit-showroom-city').value = showroom.city || '';
+  document.getElementById('edit-showroom-rm').value = showroom.rm || '';
+  document.getElementById('edit-showroom-start').value = showroom.startDate || '';
+  document.getElementById('edit-showroom-modal').style.display = 'flex';
+};
+    window.confirmAddShowroom = async () => { 
+  const name = document.getElementById('new-showroom-name')?.value?.trim(); 
+  const city = document.getElementById('new-showroom-city')?.value?.trim();
+  const rm = document.getElementById('new-showroom-rm')?.value?.trim();
+  const start = document.getElementById('new-showroom-start')?.value; 
+  const addBtn = document.querySelector('#modal-overlay .btn.btn-add'); 
+  if (!name || !start) { 
+    showToast('Please fill in Showroom Name and Start Date', 'warning'); 
+    return; 
+  } 
+  if (state.showrooms.some(sh => sh.name?.toLowerCase() === name.toLowerCase())) { 
+    showToast('A showroom with this name already exists', 'warning'); 
+    return; 
+  } 
+  showLoading(addBtn); 
+  try { 
+    const showroom = { 
+      id: Date.now().toString(), 
+      name: name, 
+      city: city || 'Not specified',
+      rm: rm || 'Not assigned',
+      startDate: start, 
+      data: {}, 
+      createdAt: new Date().toISOString() 
+    }; 
+    await saveShowroom(showroom); 
+    state.showrooms.push(showroom); 
+    await logAction('ADD_SHOWROOM', `Showroom ${name} created`); 
+    document.getElementById('modal-overlay').style.display = 'none'; 
+    document.getElementById('new-showroom-name').value = ''; 
+    document.getElementById('new-showroom-city').value = ''; 
+    document.getElementById('new-showroom-rm').value = ''; 
+    document.getElementById('new-showroom-start').value = ''; 
+    renderMasterGrid(); 
+    renderShowroomList(); 
+    showToast(`Showroom "${name}" created`, 'success'); 
+  } catch (error) { 
+    showToast('Failed to create showroom', 'error'); 
+  } finally { 
+    hideLoading(addBtn); 
+  } 
+};
     
     function showLoading(button) { if (button) { button.classList.add('is-loading'); button.disabled = true; } }
     function hideLoading(button) { if (button) { button.classList.remove('is-loading'); button.disabled = false; } }
     
-// =============== DEALER FUNCTIONS ===============
-window.filterDealers = () => { 
-  filterState.status = document.getElementById('filter-status')?.value || 'all'; 
-  filterState.stage = document.getElementById('filter-stage')?.value || 'all'; 
-  filterState.rm = document.getElementById('filter-rm')?.value || 'all'; 
-  state.searchTerm = document.getElementById('dealer-search')?.value?.toLowerCase() || ''; 
-  renderDealerDashboard(); 
-};
+    window.filterDealers = () => { 
+      filterState.status = document.getElementById('filter-status')?.value || 'all'; 
+      filterState.stage = document.getElementById('filter-stage')?.value || 'all'; 
+      filterState.rm = document.getElementById('filter-rm')?.value || 'all'; 
+      state.searchTerm = document.getElementById('dealer-search')?.value?.toLowerCase() || ''; 
+      renderDealerDashboard(); 
+    };
 
-function renderDealerDashboard() {
-  if (state.view !== 'dealer') return;
-  
-  // Double-check that showroom elements are hidden
-  const showroomDetailView = document.getElementById('showroom-detail-view');
-  if (showroomDetailView) showroomDetailView.style.display = 'none';
-  
-  const grid = document.getElementById('dealer-grid');
-  let dealers = state.dealers || [];
-  if (state.searchTerm) dealers = dealers.filter(d => (d.name?.toLowerCase() || '').includes(state.searchTerm) || (d.city?.toLowerCase() || '').includes(state.searchTerm));
-  if (filterState.status !== 'all') { 
-    dealers = dealers.filter(d => { 
-      if (filterState.status === 'delayed') { 
-        const timeline = calculateDealerTimeline(d); 
-        return timeline.isDelayed && !isDropped(d) && d.status !== 'Completed'; 
-      } 
-      if (filterState.status === 'dropped') return isDropped(d); 
-      if (filterState.status === 'completed') return d.status === 'Completed'; 
-      if (filterState.status === 'active') return d.status === 'Active' && !isDropped(d); 
-      return true; 
-    }); 
-  }
-  if (filterState.stage !== 'all') dealers = dealers.filter(d => (d.currentStage || autoDetectStage(d)) === filterState.stage);
-  if (filterState.rm !== 'all') dealers = dealers.filter(d => (d.rm || 'Unassigned') === filterState.rm);
-  
-  const total = dealers.length; 
-  const active = dealers.filter(d => d.status === 'Active' && !isDropped(d)).length; 
-  const completed = dealers.filter(d => d.status === 'Completed').length; 
-  const dropped = dealers.filter(d => isDropped(d)).length;
-  const delayedDealers = dealers.filter(d => { 
-    if (isDropped(d) || d.status === 'Completed') return false; 
-    const timeline = calculateDealerTimeline(d); 
-    return timeline.isDelayed; 
-  }); 
-  const delayed = delayedDealers.length;
-  const totalDelayDays = dealers.reduce((sum, d) => { 
-    const timeline = calculateDealerTimeline(d); 
-    return sum + (timeline.delayDays || 0); 
-  }, 0); 
-  const avgDelay = dealers.length > 0 ? Math.round(totalDelayDays / dealers.length) : 0;
-  const avgCompletion = active > 0 ? Math.round(dealers.filter(d => d.status === 'Active' && !isDropped(d)).reduce((sum, d) => sum + docProgress(d.documents).pct, 0) / active) : 0;
-  const kpis = calculateDealerKPIs();
-  
-  document.getElementById('dealer-stat-total').innerText = total; 
-  document.getElementById('dealer-stat-active').innerText = active; 
-  document.getElementById('dealer-stat-completed').innerText = completed; 
-  document.getElementById('dealer-stat-dropped').innerText = dropped; 
-  document.getElementById('dealer-stat-delayed').innerText = delayed; 
-  document.getElementById('dealer-stat-avg-delay').innerText = avgDelay; 
-  document.getElementById('dealer-stat-avg-completion').innerText = avgCompletion + '%'; 
-  document.getElementById('dealer-stat-forecast').innerText = kpis.forecastCompletion + '%';
-  
-  const interestedCount = state.dealers.filter(d => (d.currentStage || autoDetectStage(d)) === 'Interested' && !isDropped(d)).length;
-  const shortlistedCount = state.dealers.filter(d => (d.currentStage || autoDetectStage(d)) === 'Shortlisted' && !isDropped(d)).length;
-  const cftCount = state.dealers.filter(d => (d.currentStage || autoDetectStage(d)) === 'CFT Selected' && !isDropped(d)).length;
-  const docsCount = state.dealers.filter(d => (d.currentStage || autoDetectStage(d)) === 'Documentation' && !isDropped(d)).length;
-  const onboardedCount = state.dealers.filter(d => (d.currentStage || autoDetectStage(d)) === 'Onboarded' && !isDropped(d)).length;
-  document.getElementById('stage-count-interested').innerText = interestedCount; 
-  document.getElementById('stage-count-shortlisted').innerText = shortlistedCount; 
-  document.getElementById('stage-count-cft').innerText = cftCount; 
-  document.getElementById('stage-count-docs').innerText = docsCount; 
-  document.getElementById('stage-count-onboarded').innerText = onboardedCount;
-  
-  const stageCounts = [interestedCount, shortlistedCount, cftCount, docsCount, onboardedCount]; 
-  const maxStageIndex = stageCounts.indexOf(Math.max(...stageCounts)); 
-  document.getElementById('stat-current-stage-focus').innerText = DEALER_STAGES[maxStageIndex] || '--';
-  const planFinishPct = (active + completed) > 0 ? Math.round((onboardedCount / (active + completed)) * 100) : 0; 
-  document.getElementById('stat-plan-finish-pct').innerText = planFinishPct + '%';
-  const pendingDocsCount = state.dealers.filter(d => (d.currentStage || autoDetectStage(d)) === 'Documentation' && !isDropped(d) && d.status !== 'Completed').length; 
-  document.getElementById('stat-docs-pending').innerHTML = `${pendingDocsCount}<br><span style="font-size:0.7rem;">dealers in Documentation</span>`;
-  
-  const rmMap = new Map(); 
-  dealers.forEach(d => { 
-    const rm = d.rm || 'Unassigned'; 
-    if (!rmMap.has(rm)) rmMap.set(rm, { total: 0, completed: 0, active: 0, dropped: 0 }); 
-    const stats = rmMap.get(rm); 
-    stats.total++; 
-    if (d.status === 'Completed') stats.completed++; 
-    else if (isDropped(d)) stats.dropped++; 
-    else if (d.status === 'Active') stats.active++; 
-  });
-  document.getElementById('rm-analytics-body').innerHTML = Array.from(rmMap.entries()).map(([rm, stats]) => `<div style="margin-bottom:10px; padding:8px; background:#f8f9fa; border-radius:6px;"><strong>${escapeHtml(rm)}</strong><br>Total: ${stats.total} | Active: ${stats.active} | Completed: ${stats.completed} | Dropped: ${stats.dropped}</div>`).join('') || '<div>No data available</div>';
-  
-  const isAdmin = sessionStorage.getItem("ais_user_role") === 'admin';
-  grid.innerHTML = dealers.map(d => { 
-    const status = d.status || 'Active'; 
-    const badgeClass = isDropped(d) ? 'status-delayed' : (status === 'Completed' ? 'status-ontime' : 'status-upcoming'); 
-    const stage = d.currentStage || autoDetectStage(d); 
-    return `<div class="showroom-card" style="border-left:4px solid var(--primary-blue);"><h4>${escapeHtml(d.name || '')}</h4><div class="showroom-meta"><span>${escapeHtml(d.city || '')} | RM: ${escapeHtml(d.rm || '')}</span><span class="status-pill ${badgeClass}">${status}</span></div><div style="font-size:.75rem;margin-top:6px;">Stage: <strong>${escapeHtml(stage)}</strong> | Docs: ${docProgress(d.documents).pct}%</div><div class="dealer-card-actions"><button class="btn btn-add" style="flex:1;" onclick="openDealer('${d.id}')">Open</button></div></div>`; 
-  }).join('');
-  if (dealers.length === 0) grid.innerHTML = '<div class="card" style="grid-column: 1/-1;">No dealers found. Click "+ Add Dealer" to get started.</div>';
-}
+    function renderDealerDashboard() {
+      if (state.view !== 'dealer') return;
+      
+      const grid = document.getElementById('dealer-grid');
+      let dealers = state.dealers || [];
+      if (state.searchTerm) dealers = dealers.filter(d => (d.name?.toLowerCase() || '').includes(state.searchTerm) || (d.city?.toLowerCase() || '').includes(state.searchTerm));
+      if (filterState.status !== 'all') { 
+        dealers = dealers.filter(d => { 
+          if (filterState.status === 'delayed') { 
+            const timeline = calculateDealerTimeline(d); 
+            return timeline.isDelayed && !isDropped(d) && d.status !== 'Completed'; 
+          } 
+          if (filterState.status === 'dropped') return isDropped(d); 
+          if (filterState.status === 'completed') return d.status === 'Completed'; 
+          if (filterState.status === 'active') return d.status === 'Active' && !isDropped(d); 
+          return true; 
+        }); 
+      }
+      if (filterState.stage !== 'all') dealers = dealers.filter(d => (d.currentStage || autoDetectStage(d)) === filterState.stage);
+      if (filterState.rm !== 'all') dealers = dealers.filter(d => (d.rm || 'Unassigned') === filterState.rm);
+      
+      const total = dealers.length; 
+      const active = dealers.filter(d => d.status === 'Active' && !isDropped(d)).length; 
+      const completed = dealers.filter(d => d.status === 'Completed').length; 
+      const dropped = dealers.filter(d => isDropped(d)).length;
+      const delayedDealers = dealers.filter(d => { if (isDropped(d) || d.status === 'Completed') return false; const timeline = calculateDealerTimeline(d); return timeline.isDelayed; }); 
+      const delayed = delayedDealers.length;
+      const totalDelayDays = dealers.reduce((sum, d) => { const timeline = calculateDealerTimeline(d); return sum + (timeline.delayDays || 0); }, 0); 
+      const avgDelay = dealers.length > 0 ? Math.round(totalDelayDays / dealers.length) : 0;
+      const avgCompletion = active > 0 ? Math.round(dealers.filter(d => d.status === 'Active' && !isDropped(d)).reduce((sum, d) => sum + docProgress(d.documents).pct, 0) / active) : 0;
+      const kpis = calculateDealerKPIs();
+      
+      document.getElementById('dealer-stat-total').innerText = total; 
+      document.getElementById('dealer-stat-active').innerText = active; 
+      document.getElementById('dealer-stat-completed').innerText = completed; 
+      document.getElementById('dealer-stat-dropped').innerText = dropped; 
+      document.getElementById('dealer-stat-delayed').innerText = delayed; 
+      document.getElementById('dealer-stat-avg-delay').innerText = avgDelay; 
+      document.getElementById('dealer-stat-avg-completion').innerText = avgCompletion + '%'; 
+      document.getElementById('dealer-stat-forecast').innerText = kpis.forecastCompletion + '%';
+      
+      const interestedCount = state.dealers.filter(d => (d.currentStage || autoDetectStage(d)) === 'Interested' && !isDropped(d)).length;
+      const shortlistedCount = state.dealers.filter(d => (d.currentStage || autoDetectStage(d)) === 'Shortlisted' && !isDropped(d)).length;
+      const cftCount = state.dealers.filter(d => (d.currentStage || autoDetectStage(d)) === 'CFT Selected' && !isDropped(d)).length;
+      const docsCount = state.dealers.filter(d => (d.currentStage || autoDetectStage(d)) === 'Documentation' && !isDropped(d)).length;
+      const onboardedCount = state.dealers.filter(d => (d.currentStage || autoDetectStage(d)) === 'Onboarded' && !isDropped(d)).length;
+      document.getElementById('stage-count-interested').innerText = interestedCount; 
+      document.getElementById('stage-count-shortlisted').innerText = shortlistedCount; 
+      document.getElementById('stage-count-cft').innerText = cftCount; 
+      document.getElementById('stage-count-docs').innerText = docsCount; 
+      document.getElementById('stage-count-onboarded').innerText = onboardedCount;
+      
+      const stageCounts = [interestedCount, shortlistedCount, cftCount, docsCount, onboardedCount]; 
+      const maxStageIndex = stageCounts.indexOf(Math.max(...stageCounts)); 
+      document.getElementById('stat-current-stage-focus').innerText = DEALER_STAGES[maxStageIndex] || '--';
+      const planFinishPct = (active + completed) > 0 ? Math.round((onboardedCount / (active + completed)) * 100) : 0; 
+      document.getElementById('stat-plan-finish-pct').innerText = planFinishPct + '%';
+      const pendingDocsCount = state.dealers.filter(d => (d.currentStage || autoDetectStage(d)) === 'Documentation' && !isDropped(d) && d.status !== 'Completed').length; 
+      document.getElementById('stat-docs-pending').innerHTML = `${pendingDocsCount}<br><span style="font-size:0.7rem;">dealers in Documentation</span>`;
+      
+      const rmMap = new Map(); 
+      dealers.forEach(d => { const rm = d.rm || 'Unassigned'; if (!rmMap.has(rm)) rmMap.set(rm, { total: 0, completed: 0, active: 0, dropped: 0 }); const stats = rmMap.get(rm); stats.total++; if (d.status === 'Completed') stats.completed++; else if (isDropped(d)) stats.dropped++; else if (d.status === 'Active') stats.active++; });
+      document.getElementById('rm-analytics-body').innerHTML = Array.from(rmMap.entries()).map(([rm, stats]) => `<div style="margin-bottom:10px; padding:8px; background:#f8f9fa; border-radius:6px;"><strong>${escapeHtml(rm)}</strong><br>Total: ${stats.total} | Active: ${stats.active} | Completed: ${stats.completed} | Dropped: ${stats.dropped}</div>`).join('') || '<div>No data available</div>';
+      
+      const isAdmin = sessionStorage.getItem("ais_user_role") === 'admin';
+      grid.innerHTML = dealers.map(d => { 
+        const status = d.status || 'Active'; 
+        const badgeClass = isDropped(d) ? 'status-delayed' : (status === 'Completed' ? 'status-ontime' : 'status-upcoming'); 
+        const stage = d.currentStage || autoDetectStage(d); 
+        return `<div class="showroom-card" style="border-left:4px solid var(--primary-blue);"><h4>${escapeHtml(d.name || '')}</h4><div class="showroom-meta"><span>${escapeHtml(d.city || '')} | RM: ${escapeHtml(d.rm || '')}</span><span class="status-pill ${badgeClass}">${status}</span></div><div style="font-size:.75rem;margin-top:6px;">Stage: <strong>${escapeHtml(stage)}</strong> | Docs: ${docProgress(d.documents).pct}%</div><div class="dealer-card-actions"><button class="btn btn-add" style="flex:1;" onclick="openDealer('${d.id}')">Open</button></div></div>`; 
+      }).join('');
+      if (dealers.length === 0) grid.innerHTML = '<div class="card" style="grid-column: 1/-1;">No dealers found. Click "+ Add Dealer" to get started.</div>';
+    }
     
     function renderStageToggles(dealer) {
       const container = document.getElementById('stage-toggle-container'); if (!container) return;
@@ -1560,13 +1796,11 @@ function renderDealerDashboard() {
     
     window.confirmAddDealer = async () => { const name = document.getElementById('new-dealer-name').value.trim(); const city = document.getElementById('new-dealer-city').value.trim(); const rm = document.getElementById('new-dealer-rm').value.trim(); const startDate = document.getElementById('new-dealer-start').value; const errEl = document.getElementById('dealer-modal-error'); const btn = document.getElementById('create-dealer-btn'); if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; } if (!name || !city || !rm || !startDate) { if (errEl) { errEl.textContent = 'Please fill all fields.'; errEl.style.display = 'block'; } return; } showLoading(btn); try { const dealer = { name, city, rm, startDate, currentStage: 'Interested', status: 'Active', documents: {}, selectedStages: {}, createdAt: new Date().toISOString() }; await addDoc(collection(db, "dealerOnboarding"), dealer); await logAction('ADD_DEALER', `Dealer ${name} created`); document.getElementById('modal-dealer-overlay').style.display = 'none'; document.getElementById('new-dealer-name').value = ''; document.getElementById('new-dealer-city').value = ''; document.getElementById('new-dealer-rm').value = ''; document.getElementById('new-dealer-start').value = ''; renderDealerDashboard(); showToast(`Dealer "${name}" created`, 'success'); } catch (error) { if (errEl) { errEl.textContent = error?.message || 'Unknown error.'; errEl.style.display = 'block'; } } finally { hideLoading(btn); } };
     window.openDealerModal = () => { document.getElementById('modal-dealer-overlay').style.display = 'flex'; };
-    window.closeModal = () => { const modals = ['modal-overlay', 'modal-dealer-overlay', 'bulk-import-modal', 'pdf-export-modal']; modals.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; }); };
+    window.closeModal = () => { const modals = ['modal-overlay', 'modal-dealer-overlay', 'pdf-export-modal', 'edit-showroom-modal', 'edit-dealer-modal']; modals.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; }); };
     window.openModal = () => { document.getElementById('modal-overlay').style.display = 'flex'; };
     
-    // =============== EXPORT ===============
     window.exportDashboardReport = () => { try { if (!window.XLSX) { showToast('Export library not loaded.', 'error'); return; } const wb = XLSX.utils.book_new(); const showroomSummary = state.showrooms.map(s => { const stats = calculateShowroomStats(s); return { 'Showroom Name': s.name || '', 'Start Date': formatDate(s.startDate), 'Completion %': stats.pct, 'Avg Delay (Days)': stats.avgDelay }; }); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(showroomSummary), 'SHOWROOMS'); const dealerSummary = state.dealers.map(d => ({ 'Dealer Name': d.name || '', 'City': d.city || '', 'RM': d.rm || '', 'Start Date': formatDate(d.startDate), 'Current Stage': d.currentStage || autoDetectStage(d), 'Status': d.status || 'Active', 'Document %': `${docProgress(d.documents).pct}%`, 'Drop Reason': d.dropReason || '' })); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dealerSummary), 'DEALERS'); XLSX.writeFile(wb, `AIS_Report_${new Date().toISOString().slice(0,10)}.xlsx`); logAction('EXPORT_REPORT', 'Dashboard report exported'); showToast('Report exported', 'success'); } catch (err) { showToast('Export failed', 'error'); } };
     
-    // =============== INIT ===============
     window.addEventListener('load', () => { checkAuth(); const addMainBtn = document.getElementById('add-main-btn'); if (addMainBtn) addMainBtn.onclick = () => { if (state.view === 'showroom') openModal(); else openDealerModal(); }; const addDealerBtn = document.getElementById('add-dealer-btn'); if (addDealerBtn) addDealerBtn.onclick = openDealerModal; if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission(); });
   </script>
 </body>
