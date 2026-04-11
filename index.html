@@ -1381,62 +1381,22 @@ import {
       templateId: "template_ew3tqbg"
     };
 
-    // User credentials resolution order:
-    // 1) window.__AIS_USERS__ (preferred for hosted deployments)
-    // 2) localStorage.ais_users_config (JSON object)
-    // 3) built-in fallback for local/demo usage
-    const DEFAULT_USERS = {
+    // User credentials (kept in code for now; can be moved later)
+    const USERS = {
       AISteam: { pass: 'AIS@005', role: 'viewer' },
       channeladmin: { pass: 'Shivji$01', role: 'admin' }
     };
 
-    function readUsersFromLocalStorage() {
-      try {
-        const raw = localStorage.getItem('ais_users_config');
-        if (!raw) return null;
-        const parsed = JSON.parse(raw);
-        return (parsed && typeof parsed === 'object') ? parsed : null;
-      } catch {
-        return null;
-      }
-    }
-
-    const USERS = (
-      (window.__AIS_USERS__ && typeof window.__AIS_USERS__ === 'object' && Object.keys(window.__AIS_USERS__).length > 0 && window.__AIS_USERS__)
-      || readUsersFromLocalStorage()
-      || DEFAULT_USERS
-    );
-    const AUTH_STORAGE_KEY = 'ais_auth_session';
-    const SESSION_SECRET = Array.from(crypto.getRandomValues(new Uint8Array(16)))
-      .map(b => b.toString(16).padStart(2, '0'))
-      .join('');
-
-    function encodeAuthToken(role) {
-      return btoa(`${role}:${SESSION_SECRET}`);
-    }
-
     function saveAuthSession(role) {
-      sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({
-        role,
-        token: encodeAuthToken(role),
-        issuedAt: Date.now()
-      }));
+      sessionStorage.setItem("ais_user_role", role);
     }
 
     function clearAuthSession() {
-      sessionStorage.removeItem(AUTH_STORAGE_KEY);
+      sessionStorage.removeItem("ais_user_role");
     }
 
     function getCurrentRole() {
-      const raw = sessionStorage.getItem(AUTH_STORAGE_KEY);
-      if (!raw) return null;
-      try {
-        const parsed = JSON.parse(raw);
-        if (!parsed?.role || !parsed?.token) return null;
-        return parsed.token === encodeAuthToken(parsed.role) ? parsed.role : null;
-      } catch {
-        return null;
-      }
+      return sessionStorage.getItem("ais_user_role");
     }
 
     // Phase Configuration
@@ -1915,31 +1875,13 @@ import {
     };
 
     // =============== AUTHENTICATION ===============
-    function findUserRecord(username) {
-      if (!username) return null;
-      const exact = USERS[username];
-      if (exact) return { username, ...exact };
-      const normalized = String(username).toLowerCase();
-      const matchedKey = Object.keys(USERS).find(key => key.toLowerCase() === normalized);
-      if (!matchedKey) return null;
-      return { username: matchedKey, ...USERS[matchedKey] };
-    }
-
     window.handleLogin = async () => {
       const u = document.getElementById('username').value.trim();
       const p = document.getElementById('password').value;
       const loginError = document.getElementById('login-error');
       const loginBtn = document.querySelector('#login-screen .btn-add');
-      const userRecord = findUserRecord(u);
 
-      if (Object.keys(USERS).length === 0) {
-        loginError.textContent = 'Login is not configured. Please set window.__AIS_USERS__ or localStorage.ais_users_config.';
-        loginError.style.display = 'block';
-        showToast('Login is not configured for this environment', 'error');
-        return;
-      }
-
-      if (userRecord && userRecord.pass === p) {
+      if (USERS[u] && USERS[u].pass === p) {
         try {
           loginBtn.disabled = true;
           loginBtn.textContent = 'Logging in...';
@@ -1947,9 +1889,9 @@ import {
           
           // ✅ NEW: Get IP and store login record
           const ip = await getUserIP();
-          await storeLoginRecord(userRecord.username, userRecord.role, ip);
+          await storeLoginRecord(u, USERS[u].role, ip);
           
-          saveAuthSession(userRecord.role);
+          saveAuthSession(USERS[u].role);
           
           const auth = getAuth();
           await signInAnonymously(auth);
@@ -1960,10 +1902,7 @@ import {
           
         } catch (e) {
           console.error('Anonymous sign-in failed:', e);
-          saveAuthSession(userRecord.role);
-          loginError.textContent = 'Network issue detected. Logged in with offline mode, please verify data sync.';
-          loginError.style.display = 'block';
-          showToast('Network issue during sign-in. Proceeding with offline mode.', 'warning');
+          saveAuthSession(USERS[u].role);
           setTimeout(() => {
             checkAuth();
           }, 100);
