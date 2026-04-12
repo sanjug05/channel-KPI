@@ -658,6 +658,11 @@
 
   function formatDate(date) { if (!date) return '--'; const d = new Date(date); return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }); }
   function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, function(m) { if (m === '&') return '&amp;'; if (m === '<') return '&lt;'; if (m === '>') return '&gt;'; return m; }); }
+  function normalizeName(v) { return (v || '').trim().toLowerCase().replace(/\s+/g, ' '); }
+  function hasDuplicateShowroomName(name, ignoreId = null) {
+    const normalized = normalizeName(name);
+    return state.showrooms.some(s => s.id !== ignoreId && normalizeName(s.name) === normalized);
+  }
 
   function calculateShowroomStats(s) {
     if (!s.startDate) return { pct: 0, avgDelay: 0, totalDelay: 0, maxDelay: 0, delayedPhases: [] };
@@ -715,14 +720,15 @@
     const totalShowrooms = state.showrooms.length;
     const completedShowrooms = state.showrooms.filter(s => calculateShowroomStats(s).pct === 100).length;
     const avgCompletion = totalShowrooms ? Math.round(state.showrooms.reduce((s, c) => s + calculateShowroomStats(c).pct, 0) / totalShowrooms) : 0;
-    const totalDelayed = state.showrooms.filter(s => calculateShowroomStats(s).avgDelay > 0).length;
+    const delayedShowrooms = state.showrooms.filter(s => calculateShowroomStats(s).maxDelay > 0).length;
     const activeDealers = state.dealers.filter(d => d.status === 'Active').length;
     const delayedDealers = state.dealers.filter(d => calculateDealerTimeline(d).isDelayed).length;
 
     kpiGrid.innerHTML = `
       <div class="kpi-card"><div class="kpi-label">Total Showrooms</div><div class="kpi-value">${totalShowrooms}</div></div>
       <div class="kpi-card"><div class="kpi-label">Avg Completion</div><div class="kpi-value">${avgCompletion}%</div><div class="kpi-trend">${avgCompletion > 70 ? '<span class="trend-up">▲ On track</span>' : '<span class="trend-down">▼ Behind</span>'}</div></div>
-      <div class="kpi-card"><div class="kpi-label">Delayed Projects</div><div class="kpi-value" style="color: var(--danger)">${totalDelayed + delayedDealers}</div><div class="kpi-trend">⚠️ Requires attention</div></div>
+      <div class="kpi-card"><div class="kpi-label">Showroom Delays</div><div class="kpi-value" style="color: var(--danger)">${delayedShowrooms}</div><div class="kpi-trend">⚠️ Showroom execution risk</div></div>
+      <div class="kpi-card"><div class="kpi-label">Dealer Delays</div><div class="kpi-value" style="color: var(--warning)">${delayedDealers}</div><div class="kpi-trend">⚠️ Onboarding slippage</div></div>
       <div class="kpi-card"><div class="kpi-label">Active Dealers</div><div class="kpi-value">${activeDealers}</div></div>
       <div class="kpi-card"><div class="kpi-label">Ready to Launch</div><div class="kpi-value" style="color: var(--success)">${completedShowrooms}</div></div>
       <div class="kpi-card"><div class="kpi-label">Dealer Conversion</div><div class="kpi-value">${(() => { const completed = state.dealers.filter(d => d.status === 'Completed').length; const active = state.dealers.filter(d => d.status === 'Active').length; return (active + completed) ? Math.round((completed / (active + completed)) * 100) : 0; })()}%</div></div>
@@ -754,7 +760,8 @@
         if (stats.maxDelay >= 10) { delayClass = 'delay-critical'; cardClass = 'critical-delay'; delayText = 'Critical Delay'; }
         else if (stats.maxDelay > 5) { delayClass = 'delay-warning'; cardClass = 'moderate-delay'; delayText = 'Moderate Delay'; }
         else if (stats.maxDelay > 0) { delayText = 'Minor Delay'; }
-        const nextBest = stats.delayedPhases.length ? `⚠️ ${stats.delayedPhases[0].phase} delayed ${stats.delayedPhases[0].days}d` : '✅ On schedule';
+const mostDelayedPhase = stats.delayedPhases.length ? stats.delayedPhases.reduce((a, b) => (b.days > a.days ? b : a), stats.delayedPhases[0]) : null;
+const nextBest = mostDelayedPhase ? `⚠️ ${mostDelayedPhase.phase} delayed ${mostDelayedPhase.days}d` : '✅ On schedule';
         return `
           <div class="showroom-item ${cardClass}">
             <div class="showroom-header"><div><div class="showroom-name">${escapeHtml(s.name)}</div><div class="showroom-meta"><span>📍 ${escapeHtml(s.city || 'N/A')}</span><span>👤 RM: ${escapeHtml(s.rm || 'Unassigned')}</span></div></div><div class="delay-badge ${delayClass}">${delayText}</div></div>
@@ -823,11 +830,12 @@
     if (rm !== 'all') dealers = dealers.filter(d => (d.rm || 'Unassigned') === rm);
     if (search) dealers = dealers.filter(d => d.name?.toLowerCase().includes(search) || d.city?.toLowerCase().includes(search));
     
+    const allDealers = state.dealers;
     document.getElementById('dealerKpiGrid').innerHTML = `
-      <div class="kpi-card"><div class="kpi-label">Total Dealers</div><div class="kpi-value">${dealers.length}</div></div>
-      <div class="kpi-card"><div class="kpi-label">Active</div><div class="kpi-value">${dealers.filter(d => d.status === 'Active').length}</div></div>
-      <div class="kpi-card"><div class="kpi-label">Completed</div><div class="kpi-value" style="color:var(--success)">${dealers.filter(d => d.status === 'Completed').length}</div></div>
-      <div class="kpi-card"><div class="kpi-label">Delayed</div><div class="kpi-value" style="color:var(--danger)">${dealers.filter(d => calculateDealerTimeline(d).isDelayed).length}</div></div>
+      <div class="kpi-card"><div class="kpi-label">Total Dealers</div><div class="kpi-value">${allDealers.length}</div></div>
+      <div class="kpi-card"><div class="kpi-label">Active</div><div class="kpi-value">${allDealers.filter(d => d.status === 'Active').length}</div></div>
+      <div class="kpi-card"><div class="kpi-label">Completed</div><div class="kpi-value" style="color:var(--success)">${allDealers.filter(d => d.status === 'Completed').length}</div></div>
+      <div class="kpi-card"><div class="kpi-label">Delayed</div><div class="kpi-value" style="color:var(--danger)">${allDealers.filter(d => calculateDealerTimeline(d).isDelayed).length}</div></div>
     `;
     
     const grid = document.getElementById('dealerGrid');
@@ -900,6 +908,8 @@
   window.deleteShowroomFromDetail = async () => {
     if (!currentShowroomIdForDetail || userRole !== 'admin') return;
     if (!confirm('⚠️ Delete this showroom permanently? This action cannot be undone.')) return;
+if (!confirm('⚠️ Delete this showroom permanently? This action cannot be undone.')) return;
+if (!confirm('Please confirm again: this showroom will be permanently removed.')) return;
     try {
       await deleteDoc(doc(db, "showrooms", currentShowroomIdForDetail));
       showToast('Showroom deleted', 'success');
@@ -933,7 +943,8 @@
     const city = document.getElementById('edit-showroom-city').value.trim();
     const rm = document.getElementById('edit-showroom-rm').value.trim();
     const startDate = document.getElementById('edit-showroom-start').value;
-    if (!name || !startDate) { showToast('Showroom name and start date are required', 'error'); return; }
+if (!name || !city || !rm || !startDate) { showToast('Name, city, RM, and start date are required', 'error'); return; }
+if (hasDuplicateShowroomName(name, currentEditShowroomId)) { showToast('Showroom name already exists', 'error'); return; }
     try {
       await updateDoc(doc(db, "showrooms", currentEditShowroomId), { name, city, rm, startDate, updatedAt: new Date().toISOString() });
       showToast('Showroom updated', 'success');
@@ -1031,6 +1042,8 @@
     const dealer = state.dealers.find(d => d.id === currentDealerIdForDetail);
     const dealerName = dealer?.name || 'this dealer';
     if (!confirm(`Delete ${dealerName} permanently? This action cannot be undone.`)) return;
+if (!confirm(`Delete ${dealerName} permanently? This action cannot be undone.`)) return;
+if (!confirm(`Second confirmation: remove ${dealerName} permanently now?`)) return;
     try {
       await deleteDoc(doc(db, "dealerOnboarding", currentDealerIdForDetail));
       showToast('Dealer deleted', 'success');
@@ -1077,7 +1090,8 @@
   window.closeModal = (id) => document.getElementById(id).style.display = 'none';
   window.confirmAddShowroom = async () => {
     const name = document.getElementById('newShowroomName').value.trim(); const city = document.getElementById('newShowroomCity').value.trim(); const rm = document.getElementById('newShowroomRM').value.trim(); const start = document.getElementById('newShowroomStart').value;
-    if (!name || !start) { showToast('Name and Start required', 'error'); return; }
+if (!name || !city || !rm || !start) { showToast('Name, city, RM, and start date are required', 'error'); return; }
+if (hasDuplicateShowroomName(name)) { showToast('Showroom name already exists', 'error'); return; }
     try {
       const newS = { id: Date.now().toString(), name, city, rm, startDate: start, data: {}, createdAt: new Date().toISOString() };
       await setDoc(doc(db, "showrooms", newS.id), newS);
@@ -1091,7 +1105,7 @@
   };
   window.confirmAddDealer = async () => {
     const name = document.getElementById('newDealerName').value.trim(); const city = document.getElementById('newDealerCity').value.trim(); const rm = document.getElementById('newDealerRM').value.trim(); const start = document.getElementById('newDealerStart').value;
-    if (!name || !city || !rm || !start) { showToast('All fields required', 'error'); return; }
+if (!name || !city || !rm || !start) { showToast('Dealer name, city, RM, and start date are required', 'error'); return; }
     try {
       const newD = { name, city, rm, startDate: start, currentStage: 'Interested', status: 'Active', documents: {} };
       await addDoc(collection(db, "dealerOnboarding"), newD);
