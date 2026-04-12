@@ -474,12 +474,12 @@
     <h2 style="color: var(--primary); margin-bottom: 8px;">Command Center</h2>
     <p style="color: var(--gray-600); margin-bottom: 24px;">Enterprise Intelligence Portal</p>
     <div class="login-field">
-      <label>Username</label>
-      <input type="text" id="loginUsername" placeholder="Enter username" value="channeladmin">
+      <label>Email</label>
+      <input type="email" id="loginUsername" placeholder="Enter email" autocomplete="username">
     </div>
     <div class="login-field">
       <label>Password</label>
-      <input type="password" id="loginPassword" placeholder="Enter password" value="Shivji$01">
+      <input type="password" id="loginPassword" placeholder="Enter password" autocomplete="current-password">
     </div>
     <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="handleLogin()">Login</button>
     <div id="loginError" style="color: var(--danger); font-size: 0.8rem; margin-top: 12px; display: none;">Invalid credentials</div>
@@ -613,7 +613,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getFirestore, collection, setDoc, doc, deleteDoc, onSnapshot, addDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getFirestore, collection, doc, deleteDoc, onSnapshot, addDoc, updateDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDav3rI7fTr8KrXYxvnz5LB82CgjRq4v20",
@@ -626,7 +627,7 @@
   
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
-  const USERS = { 'AISteam': { pass: 'AIS@005', role: 'viewer' }, 'channeladmin': { pass: 'Shivji$01', role: 'admin' } };
+  const auth = getAuth(app);
 
   const PHASES_CONFIG = [
     { id: 'dim', name: "Dimensions Submission", days: 5 }, { id: 'cad', name: "CAD Preparation", days: 12 },
@@ -647,9 +648,9 @@
   let currentShowroomIdForDetail = null;
   let currentDealerIdForDetail = null;
   let userRole = null;
+  let currentUserId = null;
+  let realtimeUnsubscribers = [];
   let isLoading = false;
-  let deleteTimeout = null;
-  let pendingDelete = null;
 
   function showToast(msg, type = 'info') {
     const container = document.getElementById('toastContainer');
@@ -660,6 +661,31 @@
     toast.textContent = msg;
     container.appendChild(toast);
     setTimeout(() => toast.remove(), 3500);
+  }
+
+  function isAdmin() { return userRole === 'admin'; }
+
+  function parseFirebaseError(error, fallbackMessage) {
+    const code = error?.code || '';
+    const mapping = {
+      'auth/invalid-credential': 'Invalid email or password.',
+      'auth/invalid-email': 'Please enter a valid email address.',
+      'auth/missing-password': 'Please enter your password.',
+      'auth/too-many-requests': 'Too many attempts. Please try again later.',
+      'permission-denied': 'You do not have permission to perform this action.',
+      'unavailable': 'Service temporarily unavailable. Please retry.'
+    };
+    return mapping[code] || fallbackMessage;
+  }
+
+  function toggleAuthenticatedUI() {
+    document.getElementById('loginScreen').style.display = currentUserId ? 'none' : 'flex';
+    document.getElementById('mainApp').style.display = currentUserId ? 'block' : 'none';
+    document.getElementById('roleBadge').innerHTML = isAdmin()
+      ? '<span class="badge-admin">Admin</span>'
+      : '<span class="badge-viewer">Viewer</span>';
+    const addShowroomBtn = document.getElementById('addShowroomBtn');
+    if (addShowroomBtn) addShowroomBtn.style.display = isAdmin() ? 'inline-flex' : 'none';
   }
 
   function formatDate(date) { if (!date) return '--'; const d = new Date(date); return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }); }
@@ -915,13 +941,13 @@
     }
     tableHtml += `</tbody></table><div class="modal-actions"><button class="btn btn-success" onclick="saveShowroomPhases('${id}')">Save Changes</button></div>`;
     document.getElementById('showroomDetailContent').innerHTML = tableHtml;
-    document.getElementById('showroomEditBtn').style.display = userRole === 'admin' ? 'inline-flex' : 'none';
-    document.getElementById('showroomDeleteBtn').style.display = userRole === 'admin' ? 'inline-flex' : 'none';
+    document.getElementById('showroomEditBtn').style.display = isAdmin() ? 'inline-flex' : 'none';
+    document.getElementById('showroomDeleteBtn').style.display = isAdmin() ? 'inline-flex' : 'none';
     document.getElementById('showroomDetailModal').style.display = 'flex';
   };
 
   window.openShowroomEditFromDetail = () => {
-    if (!currentShowroomIdForDetail || userRole !== 'admin') return;
+    if (!currentShowroomIdForDetail || !isAdmin()) return;
     const showroom = state.showrooms.find(s => s.id === currentShowroomIdForDetail);
     if (!showroom) { showToast('Showroom not found', 'error'); return; }
     currentEditShowroomId = showroom.id;
@@ -934,7 +960,7 @@
   };
 
   window.deleteShowroomFromDetail = async () => {
-    if (!currentShowroomIdForDetail || userRole !== 'admin') return;
+    if (!currentShowroomIdForDetail || !isAdmin()) return;
     const showroom = state.showrooms.find(s => s.id === currentShowroomIdForDetail);
     const name = showroom?.name || 'this showroom';
     if (!confirm(`⚠️ PERMANENTLY DELETE "${name}"? This action cannot be undone.`)) return;
@@ -956,7 +982,7 @@
       const updates = {};
       document.querySelectorAll('.phase-date').forEach(i => { const pid = i.getAttribute('data-phase'); if (!updates[pid]) updates[pid] = {}; updates[pid].actualDate = i.value; });
       document.querySelectorAll('.phase-note').forEach(i => { const pid = i.getAttribute('data-phase'); if (!updates[pid]) updates[pid] = {}; updates[pid].reason = i.value; });
-      await updateDoc(doc(db, "showrooms", id), { data: { ...showroom.data, ...updates }, updatedAt: new Date().toISOString() });
+      await updateDoc(doc(db, "showrooms", id), { data: { ...showroom.data, ...updates }, updatedAt: serverTimestamp() });
       showToast('Phases saved successfully', 'success');
       closeModal('showroomDetailModal');
       renderDashboard();
@@ -975,7 +1001,7 @@
     if (!name || !city || !rm || !startDate) { showToast('All fields are required', 'error'); return; }
     if (hasDuplicateShowroomName(name, currentEditShowroomId)) { showToast('Showroom name already exists', 'error'); return; }
     try {
-      await updateDoc(doc(db, "showrooms", currentEditShowroomId), { name, city, rm, startDate, updatedAt: new Date().toISOString() });
+      await updateDoc(doc(db, "showrooms", currentEditShowroomId), { name, city, rm, startDate, updatedAt: serverTimestamp() });
       showToast('Showroom updated successfully', 'success');
       closeModal('edit-showroom-modal');
       currentShowroomIdForDetail = currentEditShowroomId;
@@ -1001,7 +1027,7 @@
     try {
       const stageLog = { ...(dealer.stageLog || {}) };
       if (!stageLog[newStage]) stageLog[newStage] = new Date().toISOString();
-      await updateDoc(doc(db, "dealerOnboarding", id), { currentStage: newStage, status: newStage === 'Onboarded' ? 'Completed' : 'Active', stageLog, updatedAt: new Date().toISOString() });
+      await updateDoc(doc(db, "dealerOnboarding", id), { currentStage: newStage, status: newStage === 'Onboarded' ? 'Completed' : 'Active', stageLog, updatedAt: serverTimestamp() });
       showToast(`Stage updated to ${newStage}`, 'success');
       await openDealerDetail(id);
       if (currentView === 'dealer') renderDealerView();
@@ -1016,7 +1042,7 @@
     const dealer = state.dealers.find(d => d.id === id); if (!dealer) return;
     const docs = { ...(dealer.documents || {}), [docKey]: checked };
     try {
-      const updates = { documents: docs, updatedAt: new Date().toISOString() };
+      const updates = { documents: docs, updatedAt: serverTimestamp() };
       if (DOC_KEYS.every(k => docs[k])) {
         updates.currentStage = 'Onboarded';
         updates.status = 'Completed';
@@ -1033,7 +1059,7 @@
   };
 
   window.openDealerEditFromDetail = () => {
-    if (!currentDealerIdForDetail || userRole !== 'admin') return;
+    if (!currentDealerIdForDetail || !isAdmin()) return;
     const dealer = state.dealers.find(d => d.id === currentDealerIdForDetail);
     if (!dealer) { showToast('Dealer not found', 'error'); return; }
     currentEditDealerId = dealer.id;
@@ -1053,7 +1079,7 @@
     const startDate = document.getElementById('edit-dealer-start').value;
     if (!name || !city || !rm || !startDate) { showToast('All dealer fields are required', 'error'); return; }
     try {
-      await updateDoc(doc(db, "dealerOnboarding", currentEditDealerId), { name, city, rm, startDate, updatedAt: new Date().toISOString() });
+      await updateDoc(doc(db, "dealerOnboarding", currentEditDealerId), { name, city, rm, startDate, updatedAt: serverTimestamp() });
       showToast('Dealer updated successfully', 'success');
       closeModal('edit-dealer-modal');
       currentDealerIdForDetail = currentEditDealerId;
@@ -1067,7 +1093,7 @@
   };
 
   window.deleteDealerFromDetail = async () => {
-    if (!currentDealerIdForDetail || userRole !== 'admin') return;
+    if (!currentDealerIdForDetail || !isAdmin()) return;
     const dealer = state.dealers.find(d => d.id === currentDealerIdForDetail);
     const dealerName = dealer?.name || 'this dealer';
     if (!confirm(`Delete "${dealerName}" permanently? This action cannot be undone.`)) return;
@@ -1102,8 +1128,8 @@
     docsHtml += `</div></div>`;
     const timeline = calculateDealerTimeline(dealer);
     document.getElementById('dealerDetailContent').innerHTML = stagesHtml + docsHtml + `<div style="margin-top:20px;"><strong>Delay:</strong> ${timeline.delayDays} days (${timeline.level})</div>`;
-    document.getElementById('dealerEditBtn').style.display = userRole === 'admin' ? 'inline-flex' : 'none';
-    document.getElementById('dealerDeleteBtn').style.display = userRole === 'admin' ? 'inline-flex' : 'none';
+    document.getElementById('dealerEditBtn').style.display = isAdmin() ? 'inline-flex' : 'none';
+    document.getElementById('dealerDeleteBtn').style.display = isAdmin() ? 'inline-flex' : 'none';
     document.getElementById('dealerDetailModal').style.display = 'flex';
   };
 
@@ -1126,7 +1152,7 @@
     if (!name || !city || !rm || !start) { showToast('All fields are required', 'error'); return; }
     if (hasDuplicateShowroomName(name)) { showToast('Showroom name already exists', 'error'); return; }
     try {
-      await addDoc(collection(db, "showrooms"), { name, city, rm, startDate: start, data: {}, createdAt: new Date().toISOString() });
+      await addDoc(collection(db, "showrooms"), { name, city, rm, startDate: start, data: {}, createdBy: currentUserId, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
       closeModal('addShowroomModal');
       showToast(`Showroom "${name}" created successfully`, 'success');
       document.getElementById('newShowroomName').value = '';
@@ -1147,7 +1173,7 @@
     const start = document.getElementById('newDealerStart').value;
     if (!name || !city || !rm || !start) { showToast('All fields are required', 'error'); return; }
     try {
-      await addDoc(collection(db, "dealerOnboarding"), { name, city, rm, startDate: start, currentStage: 'Interested', status: 'Active', documents: {}, createdAt: new Date().toISOString() });
+      await addDoc(collection(db, "dealerOnboarding"), { name, city, rm, startDate: start, currentStage: 'Interested', status: 'Active', documents: {}, createdBy: currentUserId, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
       closeModal('addDealerModal');
       showToast(`Dealer "${name}" created successfully`, 'success');
       document.getElementById('newDealerName').value = '';
@@ -1234,12 +1260,26 @@
     }
   };
   
-  window.logout = () => { sessionStorage.clear(); window.location.reload(); };
+  window.logout = async () => {
+    try {
+      await signOut(auth);
+      showToast('Logged out successfully', 'success');
+    } catch (error) {
+      console.error('Logout failed', error);
+      showToast(parseFirebaseError(error, 'Failed to log out. Please try again.'), 'error');
+    }
+  };
+
+  function cleanupRealtimeListeners() {
+    realtimeUnsubscribers.forEach(unsubscribe => unsubscribe());
+    realtimeUnsubscribers = [];
+  }
 
   function initRealtime() {
+    cleanupRealtimeListeners();
     isLoading = true;
     renderDashboard();
-    onSnapshot(collection(db, "showrooms"), (snap) => {
+    const showroomsUnsub = onSnapshot(collection(db, "showrooms"), (snap) => {
       state.showrooms = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       const rmSelect = document.getElementById('filterRM');
       if (rmSelect) {
@@ -1249,8 +1289,13 @@
       isLoading = false;
       if (currentView === 'dashboard') renderDashboard();
       else if (currentView === 'analytics') renderAnalytics();
+    }, (error) => {
+      console.error('Showrooms listener failed', error);
+      showToast(parseFirebaseError(error, 'Unable to load showrooms right now.'), 'error');
+      isLoading = false;
     });
-    onSnapshot(collection(db, "dealerOnboarding"), (snap) => {
+
+    const dealersUnsub = onSnapshot(collection(db, "dealerOnboarding"), (snap) => {
       state.dealers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       const rmSelect = document.getElementById('dealerFilterRM');
       if (rmSelect) {
@@ -1260,42 +1305,72 @@
       if (currentView === 'dashboard') renderDashboard();
       else if (currentView === 'analytics') renderAnalytics();
       else if (currentView === 'dealer') renderDealerView();
+    }, (error) => {
+      console.error('Dealers listener failed', error);
+      showToast(parseFirebaseError(error, 'Unable to load dealer data right now.'), 'error');
     });
+
+    realtimeUnsubscribers = [showroomsUnsub, dealersUnsub];
   }
 
-  window.handleLogin = () => {
-    const u = document.getElementById('loginUsername').value.trim();
-    const p = document.getElementById('loginPassword').value;
-    if (USERS[u] && USERS[u].pass === p) {
-      userRole = USERS[u].role;
-      sessionStorage.setItem("ais_user_role", userRole);
-      document.getElementById('loginScreen').style.display = 'none';
-      document.getElementById('mainApp').style.display = 'block';
-      document.getElementById('roleBadge').innerHTML = userRole === 'admin' ? '<span class="badge-admin">Admin</span>' : '<span class="badge-viewer">Viewer</span>';
-      if (userRole !== 'admin') {
-        const addShowroomBtn = document.getElementById('addShowroomBtn');
-        if (addShowroomBtn) addShowroomBtn.style.display = 'none';
-      }
-      initRealtime();
-      showDashboard();
-    } else {
-      document.getElementById('loginError').style.display = 'block';
-      setTimeout(() => document.getElementById('loginError').style.display = 'none', 3000);
+  async function loadUserRole(uid) {
+    try {
+      const snap = await getDoc(doc(db, "users", uid));
+      if (!snap.exists()) throw new Error('missing-user-role');
+      const role = snap.data()?.role;
+      if (role !== 'admin' && role !== 'viewer') throw new Error('invalid-user-role');
+      userRole = role;
+      return role;
+    } catch (error) {
+      console.error('Load user role failed', error);
+      throw error;
+    }
+  }
+
+  function setLoginError(message) {
+    const errorEl = document.getElementById('loginError');
+    errorEl.textContent = message;
+    errorEl.style.display = 'block';
+    setTimeout(() => { errorEl.style.display = 'none'; }, 3500);
+  }
+
+  window.handleLogin = async () => {
+    const email = document.getElementById('loginUsername').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      document.getElementById('loginPassword').value = '';
+    } catch (error) {
+      console.error('Login failed', error);
+      setLoginError(parseFirebaseError(error, 'Login failed. Please verify your credentials.'));
     }
   };
 
-  if (sessionStorage.getItem("ais_user_role")) {
-    userRole = sessionStorage.getItem("ais_user_role");
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('mainApp').style.display = 'block';
-    document.getElementById('roleBadge').innerHTML = userRole === 'admin' ? '<span class="badge-admin">Admin</span>' : '<span class="badge-viewer">Viewer</span>';
-    if (userRole !== 'admin') {
-      const addShowroomBtn = document.getElementById('addShowroomBtn');
-      if (addShowroomBtn) addShowroomBtn.style.display = 'none';
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      cleanupRealtimeListeners();
+      currentUserId = null;
+      userRole = null;
+      state = { showrooms: [], dealers: [] };
+      toggleAuthenticatedUI();
+      return;
     }
-    initRealtime();
-    showDashboard();
-  }
+
+    currentUserId = user.uid;
+    try {
+      await loadUserRole(user.uid);
+      toggleAuthenticatedUI();
+      initRealtime();
+      showDashboard();
+    } catch (error) {
+      showToast('Unable to load your access role. Contact your administrator.', 'error');
+      try {
+        await signOut(auth);
+      } catch (logoutError) {
+        console.error('Forced sign-out failed', logoutError);
+      }
+    }
+  });
 </script>
 </body>
 </html>
