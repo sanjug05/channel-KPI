@@ -444,6 +444,12 @@
     }
     @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
+    .empty-state {
+      text-align: center;
+      padding: 48px !important;
+      background: var(--white);
+    }
+
     @media (max-width: 768px) {
       .main-content { padding: 16px; }
       .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
@@ -488,7 +494,7 @@
       <div class="logo-brand">
         <img src="https://www.aiswindows.com/assets/images/ais-windows-logo.svg" alt="AIS Logo" class="logo-img">
         <div class="brand-text">AIS Command Center</div>
-        <div class="brand-sub">Enterprise Execution · Multi‑showroom Intelligence</div>
+        <div class="brand-sub">Enterprise Execution · Showrooms & Dealers</div>
       </div>
       <div class="header-controls">
         <span id="roleBadge"></span>
@@ -607,7 +613,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import { getFirestore, collection, setDoc, doc, deleteDoc, onSnapshot, addDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -627,7 +632,7 @@
     { id: 'dim', name: "Dimensions Submission", days: 5 }, { id: 'cad', name: "CAD Preparation", days: 12 },
     { id: 'plan', name: "Planning & Order Loading", days: 15 }, { id: 'civil', name: "Structure & Civil Work", days: 30 },
     { id: 'interior', name: "Interior Development", days: 50 }, { id: 'brand', name: "Branding & Display Setup", days: 55 },
-    { id: 'delivery', name: "Window Delivery", days: 65 }, { id: 'window', name: "Window Installation", days: 85 },
+    { id: 'delivery', name: "Window Delivery", days: 65 }, { id: 'window', name: "Window Installation", days: 80 },
     { id: 'launch', name: "Final Handover / Launch", days: 90 }
   ];
 
@@ -639,11 +644,12 @@
   let currentView = 'dashboard';
   let currentEditShowroomId = null;
   let currentEditDealerId = null;
-  let currentDeleteDealerId = null;
   let currentShowroomIdForDetail = null;
   let currentDealerIdForDetail = null;
   let userRole = null;
   let isLoading = false;
+  let deleteTimeout = null;
+  let pendingDelete = null;
 
   function showToast(msg, type = 'info') {
     const container = document.getElementById('toastContainer');
@@ -653,11 +659,11 @@
     toast.style.background = colors[type] || colors.info;
     toast.textContent = msg;
     container.appendChild(toast);
-    setTimeout(() => toast.remove(), 3000);
+    setTimeout(() => toast.remove(), 3500);
   }
 
   function formatDate(date) { if (!date) return '--'; const d = new Date(date); return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }); }
-  function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, function(m) { if (m === '&') return '&amp;'; if (m === '<') return '&lt;'; if (m === '>') return '&gt;'; return m; }); }
+  function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[m] || m); }
   function normalizeName(v) { return (v || '').trim().toLowerCase().replace(/\s+/g, ' '); }
   function hasDuplicateShowroomName(name, ignoreId = null) {
     const normalized = normalizeName(name);
@@ -677,39 +683,50 @@
       if (actual) { comp++; diff = Math.ceil((actual - target) / 86400000); if (diff > 0) { totalDelay += diff; delayCount++; maxDelay = Math.max(maxDelay, diff); delayedPhases.push({ phase: p.name, days: diff }); } }
       else { diff = Math.ceil((today - target) / 86400000); if (diff > 0) { totalDelay += diff; delayCount++; maxDelay = Math.max(maxDelay, diff); delayedPhases.push({ phase: p.name, days: diff }); } }
     });
+    delayedPhases.sort((a, b) => b.days - a.days);
     return { pct: Math.round((comp / PHASES_CONFIG.length) * 100), avgDelay: delayCount ? Math.round(totalDelay / delayCount) : 0, totalDelay, maxDelay, delayedPhases };
   }
 
   function calculateDealerTimeline(d) {
-    if (!d.startDate) return { delayDays: 0, isDelayed: false };
+    if (!d.startDate) return { delayDays: 0, isDelayed: false, level: 'normal' };
     const start = new Date(d.startDate);
     const daysElapsed = Math.floor((new Date() - start) / 86400000);
     const stageTargets = { 'Interested': 0, 'Shortlisted': 3, 'CFT Selected': 8, 'Documentation': 15, 'Onboarded': 22 };
     const currentStage = d.currentStage || 'Interested';
     const targetDays = stageTargets[currentStage] || 0;
     const delayDays = Math.max(0, daysElapsed - targetDays);
-    return { delayDays, isDelayed: delayDays > 5 };
+    let level = 'normal';
+    if (delayDays >= 10) level = 'critical';
+    else if (delayDays >= 6) level = 'warning';
+    return { delayDays, isDelayed: delayDays >= 6, level };
   }
 
   function docProgress(docObj) { const done = DOC_KEYS.filter(k => docObj?.[k]).length; return Math.round((done / DOC_KEYS.length) * 100); }
 
-  // TOP SUMMARY STRIP
   function updateTopSummary() {
     const criticalShowrooms = state.showrooms.filter(s => calculateShowroomStats(s).maxDelay >= 10).length;
-    const criticalDealers = state.dealers.filter(d => calculateDealerTimeline(d).delayDays >= 10).length;
-    const immediateActions = state.showrooms.filter(s => { const stats = calculateShowroomStats(s); return stats.avgDelay >= 5 && stats.avgDelay <= 14; }).length
-                           + state.dealers.filter(d => { const dly = calculateDealerTimeline(d).delayDays; return dly >= 6 && dly < 10; }).length;
-    const todayPriority = state.showrooms.filter(s => calculateShowroomStats(s).maxDelay > 0).length
-      + state.dealers.filter(d => {
-        const t = calculateDealerTimeline(d);
-        return t.delayDays > 0 || (d.currentStage && d.currentStage !== 'Onboarded' && t.delayDays >= 6);
-      }).length;
+    const criticalDealers = state.dealers.filter(d => calculateDealerTimeline(d).level === 'critical').length;
+    const immediateActions = state.showrooms.filter(s => { const stats = calculateShowroomStats(s); return stats.maxDelay >= 6 && stats.maxDelay < 10; }).length
+                           + state.dealers.filter(d => calculateDealerTimeline(d).level === 'warning').length;
+    const today = new Date();
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const todayPriority = state.showrooms.filter(s => {
+      if (!s.startDate) return false;
+      const start = new Date(s.startDate);
+      const overdue = calculateShowroomStats(s).maxDelay > 0;
+      const startsToday = start.getFullYear() === today.getFullYear() && start.getMonth() === today.getMonth() && start.getDate() === today.getDate();
+      return overdue || startsToday;
+    }).length + state.dealers.filter(d => {
+      const timeline = calculateDealerTimeline(d);
+      return timeline.delayDays >= 5 || (d.currentStage && d.currentStage !== 'Onboarded' && timeline.delayDays >= 3);
+    }).length;
+    
     const strip = document.getElementById('topSummaryStrip');
     if (strip) {
       strip.innerHTML = `
         <div class="summary-item"><i class="fas fa-exclamation-triangle" style="color:var(--danger);"></i> Critical delays: <span class="summary-badge" style="background:var(--danger);">${criticalShowrooms + criticalDealers}</span></div>
-        <div class="summary-item"><i class="fas fa-clock" style="color:var(--warning);"></i> Immediate action items: <strong>${immediateActions}</strong></div>
-        <div class="summary-item"><i class="fas fa-calendar-check" style="color:var(--primary);"></i> Today's priority: <strong>${todayPriority} high-priority</strong></div>
+        <div class="summary-item"><i class="fas fa-clock" style="color:var(--warning);"></i> Immediate action: <strong>${immediateActions}</strong></div>
+        <div class="summary-item"><i class="fas fa-calendar-check" style="color:var(--primary);"></i> Today's priority: <strong>${todayPriority}</strong></div>
       `;
     }
   }
@@ -723,25 +740,27 @@
     const delayedShowrooms = state.showrooms.filter(s => calculateShowroomStats(s).maxDelay > 0).length;
     const activeDealers = state.dealers.filter(d => d.status === 'Active').length;
     const delayedDealers = state.dealers.filter(d => calculateDealerTimeline(d).isDelayed).length;
-
+    const completedDealers = state.dealers.filter(d => d.status === 'Completed').length;
+    const conversionBase = state.dealers.filter(d => d.status === 'Active' || d.status === 'Completed').length;
+    
     kpiGrid.innerHTML = `
       <div class="kpi-card"><div class="kpi-label">Total Showrooms</div><div class="kpi-value">${totalShowrooms}</div></div>
       <div class="kpi-card"><div class="kpi-label">Avg Completion</div><div class="kpi-value">${avgCompletion}%</div><div class="kpi-trend">${avgCompletion > 70 ? '<span class="trend-up">▲ On track</span>' : '<span class="trend-down">▼ Behind</span>'}</div></div>
-      <div class="kpi-card"><div class="kpi-label">Showroom Delays</div><div class="kpi-value" style="color: var(--danger)">${delayedShowrooms}</div><div class="kpi-trend">⚠️ Showroom execution risk</div></div>
+      <div class="kpi-card"><div class="kpi-label">Showroom Delays</div><div class="kpi-value" style="color: var(--danger)">${delayedShowrooms}</div><div class="kpi-trend">⚠️ Execution risk</div></div>
       <div class="kpi-card"><div class="kpi-label">Dealer Delays</div><div class="kpi-value" style="color: var(--warning)">${delayedDealers}</div><div class="kpi-trend">⚠️ Onboarding slippage</div></div>
       <div class="kpi-card"><div class="kpi-label">Active Dealers</div><div class="kpi-value">${activeDealers}</div></div>
       <div class="kpi-card"><div class="kpi-label">Ready to Launch</div><div class="kpi-value" style="color: var(--success)">${completedShowrooms}</div></div>
-      <div class="kpi-card"><div class="kpi-label">Dealer Conversion</div><div class="kpi-value">${(() => { const completed = state.dealers.filter(d => d.status === 'Completed').length; const active = state.dealers.filter(d => d.status === 'Active').length; return (active + completed) ? Math.round((completed / (active + completed)) * 100) : 0; })()}%</div></div>
+      <div class="kpi-card"><div class="kpi-label">Dealer Conversion</div><div class="kpi-value">${conversionBase ? Math.round((completedDealers / conversionBase) * 100) : 0}%</div></div>
     `;
 
     const insightsDiv = document.getElementById('insightsBanner');
-    const criticalDelays = state.showrooms.filter(s => calculateShowroomStats(s).avgDelay > 14);
+    const criticalDelays = state.showrooms.filter(s => calculateShowroomStats(s).maxDelay >= 10);
     if (criticalDelays.length) {
       insightsDiv.style.display = 'block';
-      insightsDiv.innerHTML = `<div><i class="fas fa-bell insight-icon"></i><strong>⚠️ Critical Alert:</strong> ${criticalDelays.length} showroom(s) delayed by 15+ days. Immediate action required.</div>`;
+      insightsDiv.innerHTML = `<div><i class="fas fa-bell insight-icon"></i><strong>⚠️ Critical Alert:</strong> ${criticalDelays.length} showroom(s) with critical delays (10+ days).</div>`;
     } else if (delayedDealers > 5) {
       insightsDiv.style.display = 'block';
-      insightsDiv.innerHTML = `<div><i class="fas fa-clock insight-icon"></i><strong>⚠️ Attention Needed:</strong> ${delayedDealers} dealers are delayed in onboarding.</div>`;
+      insightsDiv.innerHTML = `<div><i class="fas fa-clock insight-icon"></i><strong>⚠️ Attention Needed:</strong> ${delayedDealers} dealers delayed in onboarding.</div>`;
     } else { insightsDiv.style.display = 'none'; }
 
     const grid = document.getElementById('showroomGrid');
@@ -757,21 +776,21 @@
       grid.innerHTML = filtered.map(s => {
         const stats = calculateShowroomStats(s);
         let delayClass = 'delay-normal', cardClass = '', delayText = 'On Track';
-        if (stats.maxDelay >= 10) { delayClass = 'delay-critical'; cardClass = 'critical-delay'; delayText = 'Critical Delay'; }
-        else if (stats.maxDelay > 5) { delayClass = 'delay-warning'; cardClass = 'moderate-delay'; delayText = 'Moderate Delay'; }
-        else if (stats.maxDelay > 0) { delayText = 'Minor Delay'; }
-const mostDelayedPhase = stats.delayedPhases.length ? stats.delayedPhases.reduce((a, b) => (b.days > a.days ? b : a), stats.delayedPhases[0]) : null;
-const nextBest = mostDelayedPhase ? `⚠️ ${mostDelayedPhase.phase} delayed ${mostDelayedPhase.days}d` : '✅ On schedule';
+        if (stats.maxDelay >= 10) { delayClass = 'delay-critical'; cardClass = 'critical-delay'; delayText = 'Critical'; }
+        else if (stats.maxDelay >= 6) { delayClass = 'delay-warning'; cardClass = 'moderate-delay'; delayText = 'Warning'; }
+        else if (stats.maxDelay > 0) { delayText = 'Minor'; }
+        const mostDelayedPhase = stats.delayedPhases.length ? stats.delayedPhases[0] : null;
+        const nextBest = mostDelayedPhase ? `⚠️ ${mostDelayedPhase.phase} delayed ${mostDelayedPhase.days}d` : '✅ On schedule';
         return `
           <div class="showroom-item ${cardClass}">
             <div class="showroom-header"><div><div class="showroom-name">${escapeHtml(s.name)}</div><div class="showroom-meta"><span>📍 ${escapeHtml(s.city || 'N/A')}</span><span>👤 RM: ${escapeHtml(s.rm || 'Unassigned')}</span></div></div><div class="delay-badge ${delayClass}">${delayText}</div></div>
             <div class="progress-section"><div class="progress-bar-container"><div class="progress-fill" style="width: ${stats.pct}%"></div></div></div>
-            <div class="showroom-stats"><span>📊 Progress: ${stats.pct}%</span><span>⏱️ Avg Delay: ${stats.avgDelay}d · Total: ${stats.totalDelay}d</span></div>
+            <div class="showroom-stats"><span>📊 Progress: ${stats.pct}%</span><span>⏱️ Max: ${stats.maxDelay}d · Total: ${stats.totalDelay}d</span></div>
             <div class="action-insight"><i class="fas fa-lightbulb"></i> ${nextBest}</div>
             <div class="showroom-actions"><button class="btn btn-primary btn-sm" onclick="openShowroomDetail('${s.id}')">Open Tracker</button></div>
           </div>`;
       }).join('');
-      if (!filtered.length) grid.innerHTML = '<div class="card" style="grid-column:1/-1; text-align:center; padding:40px;">No showrooms found.</div>';
+      if (!filtered.length) grid.innerHTML = `<div class="card empty-state" style="grid-column:1/-1;"><i class="fas fa-building" style="font-size:2rem;opacity:0.5;"></i><h3>No showrooms yet</h3><button class="btn btn-primary" onclick="openAddShowroomModal()">+ Add Showroom</button></div>`;
     }
   }
 
@@ -825,12 +844,14 @@ const nextBest = mostDelayedPhase ? `⚠️ ${mostDelayedPhase.phase} delayed ${
     const rm = document.getElementById('dealerFilterRM').value;
     const search = document.getElementById('dealerSearch').value.toLowerCase();
     
-    if (status !== 'all') dealers = dealers.filter(d => status === 'delayed' ? calculateDealerTimeline(d).isDelayed : d.status?.toLowerCase() === status);
+    if (status === 'delayed') dealers = dealers.filter(d => calculateDealerTimeline(d).isDelayed);
+    else if (status !== 'all') dealers = dealers.filter(d => d.status?.toLowerCase() === status);
     if (stage !== 'all') dealers = dealers.filter(d => (d.currentStage || 'Interested') === stage);
     if (rm !== 'all') dealers = dealers.filter(d => (d.rm || 'Unassigned') === rm);
     if (search) dealers = dealers.filter(d => d.name?.toLowerCase().includes(search) || d.city?.toLowerCase().includes(search));
     
     const allDealers = state.dealers;
+    const conversionBase = allDealers.filter(d => d.status === 'Active' || d.status === 'Completed').length;
     document.getElementById('dealerKpiGrid').innerHTML = `
       <div class="kpi-card"><div class="kpi-label">Total Dealers</div><div class="kpi-value">${allDealers.length}</div></div>
       <div class="kpi-card"><div class="kpi-label">Active</div><div class="kpi-value">${allDealers.filter(d => d.status === 'Active').length}</div></div>
@@ -839,22 +860,29 @@ const nextBest = mostDelayedPhase ? `⚠️ ${mostDelayedPhase.phase} delayed ${
     `;
     
     const grid = document.getElementById('dealerGrid');
-    grid.innerHTML = dealers.map(d => {
-      const timeline = calculateDealerTimeline(d);
-      let delayClass = 'delay-normal', cardClass = '';
-      if (timeline.delayDays >= 10) { delayClass = 'delay-critical'; cardClass = 'critical-delay'; }
-      else if (timeline.delayDays >= 6) { delayClass = 'delay-warning'; cardClass = 'moderate-delay'; }
-      const actionMsg = timeline.delayDays > 5 ? `⚠️ Dealer stuck in ${d.currentStage || 'stage'}` : '✅ Proceed';
-      return `
-        <div class="showroom-item ${cardClass}">
-          <div class="showroom-header"><div><div class="showroom-name">${escapeHtml(d.name)}</div><div class="showroom-meta"><span>📍 ${escapeHtml(d.city)}</span><span>👤 RM: ${escapeHtml(d.rm)}</span></div></div><div class="delay-badge ${delayClass}">${timeline.delayDays > 0 ? `${timeline.delayDays}d delay` : 'On Track'}</div></div>
-          <div class="progress-section"><div class="progress-bar-container"><div class="progress-fill" style="width: ${docProgress(d.documents)}%"></div></div></div>
-          <div class="showroom-stats"><span>📌 Stage: ${d.currentStage || 'Interested'}</span><span>📄 Docs: ${docProgress(d.documents)}%</span></div>
-          <div class="action-insight"><i class="fas fa-tasks"></i> ${actionMsg}</div>
-          <div class="showroom-actions"><button class="btn btn-primary btn-sm" onclick="openDealerDetail('${d.id}')">View Details</button></div>
-        </div>`;
-    }).join('');
-    if (!dealers.length) grid.innerHTML = '<div class="card" style="grid-column:1/-1; text-align:center; padding:40px;">No dealers found.</div>';
+    if (isLoading) {
+      grid.innerHTML = Array(4).fill(0).map(() => `<div class="showroom-item skeleton-loader" style="height:200px;"></div>`).join('');
+    } else {
+      grid.innerHTML = dealers.map(d => {
+        const timeline = calculateDealerTimeline(d);
+        let delayClass = 'delay-normal', cardClass = '';
+        if (timeline.level === 'critical') { delayClass = 'delay-critical'; cardClass = 'critical-delay'; }
+        else if (timeline.level === 'warning') { delayClass = 'delay-warning'; cardClass = 'moderate-delay'; }
+        const missingDocs = DOC_KEYS.filter(k => !d.documents?.[k]);
+        let actionMsg = '✅ On track';
+        if (timeline.delayDays >= 6) actionMsg = `⚠️ Stuck in ${d.currentStage || 'stage'} for ${timeline.delayDays}d`;
+        else if (missingDocs.length > 0) actionMsg = `📄 ${missingDocs.length} doc(s) pending`;
+        return `
+          <div class="showroom-item ${cardClass}">
+            <div class="showroom-header"><div><div class="showroom-name">${escapeHtml(d.name)}</div><div class="showroom-meta"><span>📍 ${escapeHtml(d.city)}</span><span>👤 RM: ${escapeHtml(d.rm)}</span></div></div><div class="delay-badge ${delayClass}">${timeline.delayDays > 0 ? `${timeline.delayDays}d` : 'On Track'}</div></div>
+            <div class="progress-section"><div class="progress-bar-container"><div class="progress-fill" style="width: ${docProgress(d.documents)}%"></div></div></div>
+            <div class="showroom-stats"><span>📌 Stage: ${d.currentStage || 'Interested'}</span><span>📄 Docs: ${docProgress(d.documents)}%</span></div>
+            <div class="action-insight"><i class="fas fa-tasks"></i> ${actionMsg}</div>
+            <div class="showroom-actions"><button class="btn btn-primary btn-sm" onclick="openDealerDetail('${d.id}')">View Details</button></div>
+          </div>`;
+      }).join('');
+      if (!dealers.length) grid.innerHTML = `<div class="card empty-state" style="grid-column:1/-1;"><i class="fas fa-users" style="font-size:2rem;opacity:0.5;"></i><h3>No dealers found</h3><button class="btn btn-primary" onclick="openAddDealerModal()">+ Add Dealer</button></div>`;
+    }
   }
 
   window.openShowroomDetail = async (id) => {
@@ -907,12 +935,13 @@ const nextBest = mostDelayedPhase ? `⚠️ ${mostDelayedPhase.phase} delayed ${
 
   window.deleteShowroomFromDetail = async () => {
     if (!currentShowroomIdForDetail || userRole !== 'admin') return;
-    if (!confirm('⚠️ Delete this showroom permanently? This action cannot be undone.')) return;
-if (!confirm('⚠️ Delete this showroom permanently? This action cannot be undone.')) return;
-if (!confirm('Please confirm again: this showroom will be permanently removed.')) return;
+    const showroom = state.showrooms.find(s => s.id === currentShowroomIdForDetail);
+    const name = showroom?.name || 'this showroom';
+    if (!confirm(`⚠️ PERMANENTLY DELETE "${name}"? This action cannot be undone.`)) return;
+    if (!confirm(`Please confirm again: "${name}" will be permanently removed.`)) return;
     try {
       await deleteDoc(doc(db, "showrooms", currentShowroomIdForDetail));
-      showToast('Showroom deleted', 'success');
+      showToast(`Showroom "${name}" deleted`, 'success');
       closeModal('showroomDetailModal');
       renderDashboard();
     } catch (error) {
@@ -928,7 +957,7 @@ if (!confirm('Please confirm again: this showroom will be permanently removed.')
       document.querySelectorAll('.phase-date').forEach(i => { const pid = i.getAttribute('data-phase'); if (!updates[pid]) updates[pid] = {}; updates[pid].actualDate = i.value; });
       document.querySelectorAll('.phase-note').forEach(i => { const pid = i.getAttribute('data-phase'); if (!updates[pid]) updates[pid] = {}; updates[pid].reason = i.value; });
       await updateDoc(doc(db, "showrooms", id), { data: { ...showroom.data, ...updates }, updatedAt: new Date().toISOString() });
-      showToast('Phases saved', 'success');
+      showToast('Phases saved successfully', 'success');
       closeModal('showroomDetailModal');
       renderDashboard();
     } catch (error) {
@@ -943,11 +972,11 @@ if (!confirm('Please confirm again: this showroom will be permanently removed.')
     const city = document.getElementById('edit-showroom-city').value.trim();
     const rm = document.getElementById('edit-showroom-rm').value.trim();
     const startDate = document.getElementById('edit-showroom-start').value;
-if (!name || !city || !rm || !startDate) { showToast('Name, city, RM, and start date are required', 'error'); return; }
-if (hasDuplicateShowroomName(name, currentEditShowroomId)) { showToast('Showroom name already exists', 'error'); return; }
+    if (!name || !city || !rm || !startDate) { showToast('All fields are required', 'error'); return; }
+    if (hasDuplicateShowroomName(name, currentEditShowroomId)) { showToast('Showroom name already exists', 'error'); return; }
     try {
       await updateDoc(doc(db, "showrooms", currentEditShowroomId), { name, city, rm, startDate, updatedAt: new Date().toISOString() });
-      showToast('Showroom updated', 'success');
+      showToast('Showroom updated successfully', 'success');
       closeModal('edit-showroom-modal');
       currentShowroomIdForDetail = currentEditShowroomId;
       renderDashboard();
@@ -968,7 +997,7 @@ if (hasDuplicateShowroomName(name, currentEditShowroomId)) { showToast('Showroom
       showToast('Only adjacent stage transitions are allowed', 'warning');
       return;
     }
-    if (!confirm(`Move dealer to ${newStage}?`)) return;
+    if (!confirm(`Move dealer from ${currentStage} to ${newStage}?`)) return;
     try {
       const stageLog = { ...(dealer.stageLog || {}) };
       if (!stageLog[newStage]) stageLog[newStage] = new Date().toISOString();
@@ -1025,7 +1054,7 @@ if (hasDuplicateShowroomName(name, currentEditShowroomId)) { showToast('Showroom
     if (!name || !city || !rm || !startDate) { showToast('All dealer fields are required', 'error'); return; }
     try {
       await updateDoc(doc(db, "dealerOnboarding", currentEditDealerId), { name, city, rm, startDate, updatedAt: new Date().toISOString() });
-      showToast('Dealer updated', 'success');
+      showToast('Dealer updated successfully', 'success');
       closeModal('edit-dealer-modal');
       currentDealerIdForDetail = currentEditDealerId;
       if (currentView === 'dealer') renderDealerView();
@@ -1041,12 +1070,11 @@ if (hasDuplicateShowroomName(name, currentEditShowroomId)) { showToast('Showroom
     if (!currentDealerIdForDetail || userRole !== 'admin') return;
     const dealer = state.dealers.find(d => d.id === currentDealerIdForDetail);
     const dealerName = dealer?.name || 'this dealer';
-    if (!confirm(`Delete ${dealerName} permanently? This action cannot be undone.`)) return;
-if (!confirm(`Delete ${dealerName} permanently? This action cannot be undone.`)) return;
-if (!confirm(`Second confirmation: remove ${dealerName} permanently now?`)) return;
+    if (!confirm(`Delete "${dealerName}" permanently? This action cannot be undone.`)) return;
+    if (!confirm(`Second confirmation: remove "${dealerName}" permanently now?`)) return;
     try {
       await deleteDoc(doc(db, "dealerOnboarding", currentDealerIdForDetail));
-      showToast('Dealer deleted', 'success');
+      showToast(`Dealer "${dealerName}" deleted`, 'success');
       closeModal('dealerDetailModal');
       if (currentView === 'dealer') renderDealerView();
       if (currentView === 'dashboard') renderDashboard();
@@ -1073,44 +1101,59 @@ if (!confirm(`Second confirmation: remove ${dealerName} permanently now?`)) retu
     });
     docsHtml += `</div></div>`;
     const timeline = calculateDealerTimeline(dealer);
-    document.getElementById('dealerDetailContent').innerHTML = stagesHtml + docsHtml + `<div style="margin-top:20px;"><strong>Delay:</strong> ${timeline.delayDays} days</div>`;
+    document.getElementById('dealerDetailContent').innerHTML = stagesHtml + docsHtml + `<div style="margin-top:20px;"><strong>Delay:</strong> ${timeline.delayDays} days (${timeline.level})</div>`;
     document.getElementById('dealerEditBtn').style.display = userRole === 'admin' ? 'inline-flex' : 'none';
     document.getElementById('dealerDeleteBtn').style.display = userRole === 'admin' ? 'inline-flex' : 'none';
     document.getElementById('dealerDetailModal').style.display = 'flex';
   };
 
-  // Remaining functions unchanged (view toggles, filters, etc.)
   window.showDashboard = () => { currentView = 'dashboard'; document.getElementById('dashboardView').style.display = 'block'; document.getElementById('analyticsView').style.display = 'none'; document.getElementById('dealerView').style.display = 'none'; renderDashboard(); };
   window.showAnalytics = () => { currentView = 'analytics'; document.getElementById('dashboardView').style.display = 'none'; document.getElementById('analyticsView').style.display = 'block'; document.getElementById('dealerView').style.display = 'none'; renderAnalytics(); };
   window.openDealerModule = () => { currentView = 'dealer'; document.getElementById('dashboardView').style.display = 'none'; document.getElementById('analyticsView').style.display = 'none'; document.getElementById('dealerView').style.display = 'block'; renderDealerView(); };
-  window.applyFilters = renderDashboard; window.resetFilters = () => { document.getElementById('globalSearch').value = ''; document.getElementById('filterRM').value = 'all'; renderDashboard(); };
-  window.filterDealers = renderDealerView; window.resetDealerFilters = () => { document.getElementById('dealerFilterStatus').value = 'all'; document.getElementById('dealerFilterStage').value = 'all'; document.getElementById('dealerFilterRM').value = 'all'; document.getElementById('dealerSearch').value = ''; renderDealerView(); };
+  window.applyFilters = renderDashboard;
+  window.resetFilters = () => { document.getElementById('globalSearch').value = ''; document.getElementById('filterRM').value = 'all'; renderDashboard(); };
+  window.filterDealers = renderDealerView;
+  window.resetDealerFilters = () => { document.getElementById('dealerFilterStatus').value = 'all'; document.getElementById('dealerFilterStage').value = 'all'; document.getElementById('dealerFilterRM').value = 'all'; document.getElementById('dealerSearch').value = ''; renderDealerView(); };
   window.openAddDealerModal = () => document.getElementById('addDealerModal').style.display = 'flex';
   window.openAddShowroomModal = () => document.getElementById('addShowroomModal').style.display = 'flex';
   window.closeModal = (id) => document.getElementById(id).style.display = 'none';
+  
   window.confirmAddShowroom = async () => {
-    const name = document.getElementById('newShowroomName').value.trim(); const city = document.getElementById('newShowroomCity').value.trim(); const rm = document.getElementById('newShowroomRM').value.trim(); const start = document.getElementById('newShowroomStart').value;
-if (!name || !city || !rm || !start) { showToast('Name, city, RM, and start date are required', 'error'); return; }
-if (hasDuplicateShowroomName(name)) { showToast('Showroom name already exists', 'error'); return; }
+    const name = document.getElementById('newShowroomName').value.trim();
+    const city = document.getElementById('newShowroomCity').value.trim();
+    const rm = document.getElementById('newShowroomRM').value.trim();
+    const start = document.getElementById('newShowroomStart').value;
+    if (!name || !city || !rm || !start) { showToast('All fields are required', 'error'); return; }
+    if (hasDuplicateShowroomName(name)) { showToast('Showroom name already exists', 'error'); return; }
     try {
-      const newS = { id: Date.now().toString(), name, city, rm, startDate: start, data: {}, createdAt: new Date().toISOString() };
-      await setDoc(doc(db, "showrooms", newS.id), newS);
+      await addDoc(collection(db, "showrooms"), { name, city, rm, startDate: start, data: {}, createdAt: new Date().toISOString() });
       closeModal('addShowroomModal');
-      showToast('Showroom created', 'success');
+      showToast(`Showroom "${name}" created successfully`, 'success');
+      document.getElementById('newShowroomName').value = '';
+      document.getElementById('newShowroomCity').value = '';
+      document.getElementById('newShowroomRM').value = '';
+      document.getElementById('newShowroomStart').value = '';
       renderDashboard();
     } catch (error) {
       console.error('Create showroom failed', error);
       showToast('Failed to create showroom', 'error');
     }
   };
+  
   window.confirmAddDealer = async () => {
-    const name = document.getElementById('newDealerName').value.trim(); const city = document.getElementById('newDealerCity').value.trim(); const rm = document.getElementById('newDealerRM').value.trim(); const start = document.getElementById('newDealerStart').value;
-if (!name || !city || !rm || !start) { showToast('Dealer name, city, RM, and start date are required', 'error'); return; }
+    const name = document.getElementById('newDealerName').value.trim();
+    const city = document.getElementById('newDealerCity').value.trim();
+    const rm = document.getElementById('newDealerRM').value.trim();
+    const start = document.getElementById('newDealerStart').value;
+    if (!name || !city || !rm || !start) { showToast('All fields are required', 'error'); return; }
     try {
-      const newD = { name, city, rm, startDate: start, currentStage: 'Interested', status: 'Active', documents: {} };
-      await addDoc(collection(db, "dealerOnboarding"), newD);
+      await addDoc(collection(db, "dealerOnboarding"), { name, city, rm, startDate: start, currentStage: 'Interested', status: 'Active', documents: {}, createdAt: new Date().toISOString() });
       closeModal('addDealerModal');
-      showToast('Dealer created', 'success');
+      showToast(`Dealer "${name}" created successfully`, 'success');
+      document.getElementById('newDealerName').value = '';
+      document.getElementById('newDealerCity').value = '';
+      document.getElementById('newDealerRM').value = '';
+      document.getElementById('newDealerStart').value = '';
       if (currentView === 'dealer') renderDealerView();
       if (currentView === 'dashboard') renderDashboard();
     } catch (error) {
@@ -1118,22 +1161,141 @@ if (!name || !city || !rm || !start) { showToast('Dealer name, city, RM, and sta
       showToast('Failed to create dealer', 'error');
     }
   };
-  window.exportDashboardReport = () => { /* same */ showToast('Report exported', 'success'); };
-  window.generatePDF = () => { showToast('PDF ready', 'success'); };
-  window.backupData = () => { showToast('Backup downloaded', 'success'); };
+  
+  window.exportDashboardReport = () => {
+    try {
+      const wb = XLSX.utils.book_new();
+      const showroomData = state.showrooms.map(s => {
+        const stats = calculateShowroomStats(s);
+        return {
+          'Showroom Name': s.name || '',
+          'City': s.city || '',
+          'RM': s.rm || '',
+          'Start Date': s.startDate || '',
+          'Completion %': stats.pct,
+          'Avg Delay (days)': stats.avgDelay,
+          'Max Delay (days)': stats.maxDelay,
+          'Total Delay (days)': stats.totalDelay
+        };
+      });
+      const dealerData = state.dealers.map(d => ({
+        'Dealer Name': d.name || '',
+        'City': d.city || '',
+        'RM': d.rm || '',
+        'Start Date': d.startDate || '',
+        'Current Stage': d.currentStage || 'Interested',
+        'Status': d.status || '',
+        'Doc Completion %': docProgress(d.documents),
+        'Delay Days': calculateDealerTimeline(d).delayDays,
+        'Delay Level': calculateDealerTimeline(d).level
+      }));
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(showroomData), 'Showrooms');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dealerData), 'Dealers');
+      XLSX.writeFile(wb, `AIS_Report_${new Date().toISOString().slice(0,10)}.xlsx`);
+      showToast('Report exported successfully', 'success');
+    } catch(e) {
+      console.error('Export failed', e);
+      showToast('Export failed', 'error');
+    }
+  };
+  
+  window.generatePDF = async () => {
+    try {
+      const element = document.getElementById('mainContent');
+      const canvas = await html2canvas(element, { scale: 2 });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jspdf.jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`AIS_Dashboard_${new Date().toISOString().slice(0,10)}.pdf`);
+      showToast('PDF generated successfully', 'success');
+    } catch(e) {
+      console.error('PDF generation failed', e);
+      showToast('PDF generation failed', 'error');
+    }
+  };
+  
+  window.backupData = () => {
+    try {
+      const backup = { showrooms: state.showrooms, dealers: state.dealers, exportedAt: new Date().toISOString() };
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ais_backup_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('Backup downloaded successfully', 'success');
+    } catch(e) {
+      console.error('Backup failed', e);
+      showToast('Backup failed', 'error');
+    }
+  };
+  
   window.logout = () => { sessionStorage.clear(); window.location.reload(); };
 
   function initRealtime() {
-    isLoading = true; renderDashboard();
-    onSnapshot(collection(db, "showrooms"), (snap) => { state.showrooms = snap.docs.map(d => ({ id: d.id, ...d.data() })); isLoading = false; if (currentView === 'dashboard') renderDashboard(); else if (currentView === 'analytics') renderAnalytics(); });
-    onSnapshot(collection(db, "dealerOnboarding"), (snap) => { state.dealers = snap.docs.map(d => ({ id: d.id, ...d.data() })); if (currentView === 'dashboard') renderDashboard(); else if (currentView === 'analytics') renderAnalytics(); else if (currentView === 'dealer') renderDealerView(); });
+    isLoading = true;
+    renderDashboard();
+    onSnapshot(collection(db, "showrooms"), (snap) => {
+      state.showrooms = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      const rmSelect = document.getElementById('filterRM');
+      if (rmSelect) {
+        const rms = [...new Set(state.showrooms.map(s => s.rm).filter(Boolean))];
+        rmSelect.innerHTML = '<option value="all">All RMs</option>' + rms.map(rm => `<option value="${rm}">${rm}</option>`).join('');
+      }
+      isLoading = false;
+      if (currentView === 'dashboard') renderDashboard();
+      else if (currentView === 'analytics') renderAnalytics();
+    });
+    onSnapshot(collection(db, "dealerOnboarding"), (snap) => {
+      state.dealers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      const rmSelect = document.getElementById('dealerFilterRM');
+      if (rmSelect) {
+        const rms = [...new Set(state.dealers.map(d => d.rm).filter(Boolean))];
+        rmSelect.innerHTML = '<option value="all">All RMs</option>' + rms.map(rm => `<option value="${rm}">${rm}</option>`).join('');
+      }
+      if (currentView === 'dashboard') renderDashboard();
+      else if (currentView === 'analytics') renderAnalytics();
+      else if (currentView === 'dealer') renderDealerView();
+    });
   }
+
   window.handleLogin = () => {
-    const u = document.getElementById('loginUsername').value.trim(); const p = document.getElementById('loginPassword').value;
-    if (USERS[u] && USERS[u].pass === p) { userRole = USERS[u].role; sessionStorage.setItem("ais_user_role", userRole); document.getElementById('loginScreen').style.display = 'none'; document.getElementById('mainApp').style.display = 'block'; document.getElementById('roleBadge').innerHTML = userRole === 'admin' ? '<span class="badge-admin">Admin</span>' : '<span class="badge-viewer">Viewer</span>'; initRealtime(); showDashboard(); }
-    else { document.getElementById('loginError').style.display = 'block'; }
+    const u = document.getElementById('loginUsername').value.trim();
+    const p = document.getElementById('loginPassword').value;
+    if (USERS[u] && USERS[u].pass === p) {
+      userRole = USERS[u].role;
+      sessionStorage.setItem("ais_user_role", userRole);
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('mainApp').style.display = 'block';
+      document.getElementById('roleBadge').innerHTML = userRole === 'admin' ? '<span class="badge-admin">Admin</span>' : '<span class="badge-viewer">Viewer</span>';
+      if (userRole !== 'admin') {
+        const addShowroomBtn = document.getElementById('addShowroomBtn');
+        if (addShowroomBtn) addShowroomBtn.style.display = 'none';
+      }
+      initRealtime();
+      showDashboard();
+    } else {
+      document.getElementById('loginError').style.display = 'block';
+      setTimeout(() => document.getElementById('loginError').style.display = 'none', 3000);
+    }
   };
-  if (sessionStorage.getItem("ais_user_role")) { userRole = sessionStorage.getItem("ais_user_role"); document.getElementById('loginScreen').style.display = 'none'; document.getElementById('mainApp').style.display = 'block'; document.getElementById('roleBadge').innerHTML = userRole === 'admin' ? '<span class="badge-admin">Admin</span>' : '<span class="badge-viewer">Viewer</span>'; initRealtime(); showDashboard(); }
+
+  if (sessionStorage.getItem("ais_user_role")) {
+    userRole = sessionStorage.getItem("ais_user_role");
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    document.getElementById('roleBadge').innerHTML = userRole === 'admin' ? '<span class="badge-admin">Admin</span>' : '<span class="badge-viewer">Viewer</span>';
+    if (userRole !== 'admin') {
+      const addShowroomBtn = document.getElementById('addShowroomBtn');
+      if (addShowroomBtn) addShowroomBtn.style.display = 'none';
+    }
+    initRealtime();
+    showDashboard();
+  }
 </script>
 </body>
 </html>
