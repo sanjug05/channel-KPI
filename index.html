@@ -1,1376 +1,1252 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="description" content="AIS Showroom Execution Dashboard for tracking multi-showroom rollout, installation progress, and delay monitoring.">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AIS Command Center | Enterprise Execution Dashboard</title>
-  <style>
-    /* ========== ENTERPRISE DESIGN SYSTEM ========== */
-    :root {
-      --primary: #0054A6;
-      --primary-dark: #003a75;
-      --primary-light: #e8f0fe;
-      --secondary: #2c3e50;
-      --success: #27ae60;
-      --warning: #f39c12;
-      --danger: #e74c3c;
-      --danger-dark: #c0392b;
-      --info: #3498db;
-      --purple: #9b59b6;
-      --gray-100: #f8f9fc;
-      --gray-200: #f1f3f5;
-      --gray-300: #e9ecef;
-      --gray-400: #dee2e6;
-      --gray-500: #ced4da;
-      --gray-600: #6c757d;
-      --gray-700: #495057;
-      --gray-800: #343a40;
-      --gray-900: #212529;
-      --white: #ffffff;
-      --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
-      --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
-      --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
-      --shadow-xl: 0 12px 36px rgba(0,0,0,0.15);
-      --radius-sm: 6px;
-      --radius-md: 10px;
-      --radius-lg: 16px;
-      --radius-xl: 24px;
-      --transition: all 0.2s ease;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: var(--gray-100);
-      color: var(--gray-800);
-      line-height: 1.5;
-      min-height: 100vh;
-      transition: var(--transition);
-    }
-
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: var(--gray-200); border-radius: 10px; }
-    ::-webkit-scrollbar-thumb { background: var(--gray-500); border-radius: 10px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--gray-600); }
-
-    h1, h2, h3, h4, .h1, .h2, .h3, .h4 { font-weight: 600; letter-spacing: -0.02em; }
-    .text-muted { color: var(--gray-600); }
-    .text-primary { color: var(--primary); }
-    .text-success { color: var(--success); }
-    .text-warning { color: var(--warning); }
-    .text-danger { color: var(--danger); }
-
-    .app-container { display: flex; flex-direction: column; min-height: 100vh; }
-    .main-content { flex: 1; max-width: 1600px; margin: 0 auto; padding: 24px 32px; width: 100%; }
-    
-    /* ENHANCED ENTERPRISE HEADER — Logo ABOVE text, both LEFT aligned */
-    .app-header {
-      background: var(--white);
-      border-bottom: 1px solid var(--gray-200);
-      padding: 0 32px;
-      height: 90px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      backdrop-filter: blur(10px);
-      background: rgba(255,255,255,0.95);
-      box-shadow: var(--shadow-sm);
-    }
-    .logo-brand {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      justify-content: center;
-      gap: 2px;
-    }
-    .logo-img {
-      height: 34px;
-      width: auto;
-      margin-bottom: 2px;
-    }
-    .brand-text {
-      font-size: 1.6rem;
-      font-weight: 700;
-      color: var(--primary);
-      letter-spacing: -0.5px;
-      line-height: 1.2;
-    }
-    .brand-sub {
-      font-size: 0.9rem;
-      font-weight: 400;
-      color: var(--gray-600);
-      margin-top: -2px;
-    }
-    .header-controls { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-
-    .card {
-      background: var(--white);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-sm);
-      transition: var(--transition);
-      border: 1px solid var(--gray-200);
-      overflow: hidden;
-    }
-    .card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
-    .card-header {
-      padding: 20px 24px;
-      border-bottom: 1px solid var(--gray-200);
-      background: var(--white);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    .card-title { font-size: 1rem; font-weight: 600; color: var(--gray-800); text-transform: uppercase; letter-spacing: 0.5px; }
-    .card-body { padding: 24px; }
-
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 20px;
-      margin-bottom: 28px;
-    }
-    .kpi-card {
-      background: var(--white);
-      border-radius: var(--radius-lg);
-      padding: 20px;
-      box-shadow: var(--shadow-sm);
-      border-left: 4px solid var(--primary);
-      transition: var(--transition);
-    }
-    .kpi-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
-    .kpi-label { font-size: 0.7rem; text-transform: uppercase; font-weight: 600; color: var(--gray-500); letter-spacing: 0.5px; margin-bottom: 8px; }
-    .kpi-value { font-size: 2rem; font-weight: 700; color: var(--gray-800); line-height: 1.2; margin-bottom: 4px; }
-    .kpi-trend { font-size: 0.7rem; display: flex; align-items: center; gap: 4px; margin-top: 8px; }
-    .trend-up { color: var(--success); }
-    .trend-down { color: var(--danger); }
-
-    /* TOP SUMMARY STRIP */
-    .summary-strip {
-      background: linear-gradient(102deg, #f0f4fa 0%, #ffffff 100%);
-      border-radius: var(--radius-lg);
-      padding: 16px 24px;
-      margin-bottom: 24px;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      border: 1px solid var(--gray-300);
-      box-shadow: var(--shadow-sm);
-    }
-    .summary-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-weight: 500;
-    }
-    .summary-badge {
-      background: var(--danger);
-      color: white;
-      border-radius: 40px;
-      padding: 4px 14px;
-      font-weight: 700;
-      font-size: 0.9rem;
-    }
-
-    .filter-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-bottom: 24px;
-      align-items: center;
-    }
-    .filter-group {
-      background: var(--white);
-      border: 1px solid var(--gray-300);
-      border-radius: var(--radius-md);
-      padding: 8px 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      min-width: 160px;
-    }
-    .filter-group i { color: var(--gray-500); font-size: 0.9rem; }
-    .filter-group select, .filter-group input {
-      border: none;
-      background: transparent;
-      font-size: 0.85rem;
-      padding: 4px 0;
-      outline: none;
-      font-family: inherit;
-      color: var(--gray-700);
-      width: 100%;
-    }
-    .search-group { flex: 1; min-width: 250px; }
-    .btn {
-      padding: 10px 18px;
-      border-radius: var(--radius-md);
-      font-weight: 600;
-      font-size: 0.8rem;
-      transition: var(--transition);
-      cursor: pointer;
-      border: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--white);
-      color: var(--gray-700);
-      border: 1px solid var(--gray-300);
-    }
-    .btn-primary { background: var(--primary); color: white; border: none; }
-    .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: var(--shadow-md); }
-    .btn-outline { border: 1px solid var(--gray-300); background: white; }
-    .btn-outline:hover { background: var(--gray-100); border-color: var(--gray-400); transform: translateY(-1px); }
-    .btn-danger { background: var(--danger); color: white; border: none; }
-    .btn-danger:hover { background: var(--danger-dark); }
-    .btn-sm { padding: 6px 12px; font-size: 0.75rem; }
-    .btn-success { background: var(--success); color: white; border: none; }
-    .btn-success:hover { background: #219a52; }
-
-    .showroom-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-      gap: 24px;
-      margin-top: 20px;
-    }
-    .showroom-item {
-      background: var(--white);
-      border-radius: var(--radius-lg);
-      padding: 20px;
-      box-shadow: var(--shadow-sm);
-      transition: var(--transition);
-      border: 1px solid var(--gray-200);
-      position: relative;
-      overflow: hidden;
-    }
-    .showroom-item:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
-    .showroom-item.critical-delay { border-left: 4px solid var(--danger); background: linear-gradient(to right, rgba(231,76,60,0.05), var(--white)); }
-    .showroom-item.moderate-delay { border-left: 4px solid var(--warning); background: linear-gradient(to right, rgba(243,156,18,0.05), var(--white)); }
-    .showroom-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
-    .showroom-name { font-size: 1.1rem; font-weight: 700; color: var(--primary); }
-    .showroom-meta { font-size: 0.7rem; color: var(--gray-500); margin-top: 4px; display: flex; gap: 12px; }
-    .progress-section { margin: 16px 0; }
-    .progress-bar-container { height: 8px; background: var(--gray-200); border-radius: 10px; overflow: hidden; }
-    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--info)); border-radius: 10px; transition: width 0.6s ease; }
-    .showroom-stats { display: flex; justify-content: space-between; margin-top: 12px; font-size: 0.75rem; }
-    .delay-badge { padding: 4px 8px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
-    .delay-critical { background: #fee2e2; color: var(--danger); font-weight: 700; border: 1px solid var(--danger); }
-    .delay-warning { background: #fff3e0; color: var(--warning); }
-    .delay-normal { background: #e3fcec; color: var(--success); }
-    .showroom-actions { display: flex; gap: 10px; margin-top: 16px; }
-    .showroom-actions button { flex: 1; }
-
-    /* Next Best Action & Insight style */
-    .action-insight {
-      background: #fef6e0;
-      border-radius: var(--radius-md);
-      padding: 10px 14px;
-      margin: 12px 0;
-      font-size: 0.8rem;
-      border-left: 4px solid var(--warning);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .analytics-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-      gap: 24px;
-      margin-bottom: 28px;
-    }
-    .chart-card { padding: 20px; }
-    canvas { max-height: 280px; width: 100%; }
-
-    .phase-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-    .phase-table th, .phase-table td { padding: 10px; text-align: left; border-bottom: 1px solid var(--gray-200); font-size: 0.8rem; }
-    .phase-table th { background: var(--gray-100); font-weight: 600; color: var(--gray-600); }
-    .phase-table tr:hover { background: var(--gray-50); }
-    .status-badge { padding: 4px 8px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
-    .status-completed { background: #e3fcec; color: var(--success); }
-    .status-delayed { background: #fee2e2; color: var(--danger); font-weight: 700; }
-    .status-pending { background: #fff3e0; color: var(--warning); }
-
-    .stage-stepper { display: flex; justify-content: space-between; margin: 20px 0; flex-wrap: wrap; gap: 10px; }
-    .stage-step { flex: 1; text-align: center; cursor: pointer; padding: 12px 8px; border-radius: var(--radius-md); transition: var(--transition); font-weight: 600; }
-    .stage-step:hover { background: var(--gray-100); transform: translateY(-2px); }
-    .stage-step.active { background: var(--primary); color: white; box-shadow: var(--shadow-md); }
-    .stage-step.completed { background: var(--success); color: white; }
-
-    .insight-card {
-      background: linear-gradient(135deg, var(--primary-light), var(--white));
-      border-radius: var(--radius-lg);
-      padding: 16px 20px;
-      margin-bottom: 20px;
-      border-left: 4px solid var(--primary);
-    }
-    .insight-icon { font-size: 1.2rem; margin-right: 8px; }
-
-    .modal-overlay {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5);
-      backdrop-filter: blur(4px);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-    .modal-container {
-      background: white;
-      border-radius: var(--radius-xl);
-      width: 90%;
-      max-width: 800px;
-      max-height: 85vh;
-      overflow-y: auto;
-      padding: 28px;
-      animation: fadeInUp 0.2s ease;
-    }
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .modal-title { font-size: 1.25rem; font-weight: 700; color: var(--primary); }
-    .form-group { margin-bottom: 18px; }
-    .form-label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 6px; color: var(--gray-700); }
-    .form-input, .form-select, .form-textarea {
-      width: 100%;
-      padding: 10px 14px;
-      border: 1px solid var(--gray-300);
-      border-radius: var(--radius-md);
-      font-size: 0.85rem;
-      transition: var(--transition);
-      font-family: inherit;
-    }
-    .form-input:focus, .form-select:focus, .form-textarea:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(0,84,166,0.1);
-    }
-    .modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; }
-
-    .toast-container {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      z-index: 1100;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .toast {
-      background: var(--gray-800);
-      color: white;
-      padding: 12px 20px;
-      border-radius: var(--radius-md);
-      font-size: 0.85rem;
-      animation: slideInRight 0.3s ease;
-      box-shadow: var(--shadow-lg);
-    }
-    @keyframes slideInRight {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-
-    .login-screen {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 2000;
-    }
-    .login-card {
-      background: white;
-      padding: 40px;
-      border-radius: var(--radius-xl);
-      width: 100%;
-      max-width: 400px;
-      text-align: center;
-      animation: fadeInUp 0.3s ease;
-    }
-    .login-logo { height: 48px; margin-bottom: 24px; }
-    .login-field { margin-bottom: 20px; text-align: left; }
-    .login-field label { font-size: 0.8rem; font-weight: 600; margin-bottom: 6px; display: block; }
-    .login-field input { width: 100%; padding: 12px; border: 1px solid var(--gray-300); border-radius: var(--radius-md); }
-
-    /* Document Checklist */
-    .doc-section { margin-top: 20px; background: var(--gray-100); border-radius: var(--radius-lg); padding: 20px; }
-    .doc-section h4 { margin-bottom: 15px; color: var(--primary); }
-    .doc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
-    .doc-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--white); border-radius: var(--radius-md); transition: var(--transition); }
-    .doc-item:hover { background: var(--gray-200); transform: translateX(4px); }
-    .doc-checkbox { width: 18px; height: 18px; cursor: pointer; accent-color: var(--success); }
-    .doc-label { font-size: 0.85rem; color: var(--gray-700); cursor: pointer; flex: 1; }
-    .doc-status { font-size: 0.7rem; font-weight: 600; }
-    .doc-status.completed { color: var(--success); }
-    .doc-status.pending { color: var(--warning); }
-
-    .badge-admin {
-      background: #e1effe;
-      color: var(--primary);
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      margin-right: 15px;
-    }
-    .badge-viewer {
-      background: #f3f4f6;
-      color: #4b5563;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      margin-right: 15px;
-    }
-
-    /* LOADER / SKELETON */
-    .skeleton-loader {
-      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-      background-size: 200% 100%;
-      animation: loading 1.5s infinite;
-      border-radius: var(--radius-md);
-    }
-    @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-
-    .empty-state {
-      text-align: center;
-      padding: 48px !important;
-      background: var(--white);
-    }
-
-    @media (max-width: 768px) {
-      .main-content { padding: 16px; }
-      .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-      .kpi-value { font-size: 1.4rem; }
-      .analytics-grid { grid-template-columns: 1fr; }
-      .showroom-grid { grid-template-columns: 1fr; }
-      .filter-bar { flex-direction: column; }
-      .filter-group { width: 100%; }
-      .stage-stepper { flex-direction: column; }
-      .doc-grid { grid-template-columns: 1fr; }
-    }
-  </style>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>KPI Control Tower | Enterprise Edition</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{background:#f0f2f8;font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;padding:32px 28px;color:#0a1e2f;}
+    .dashboard-container{max-width:1600px;margin:0 auto;}
+
+    .summary-bar{background:linear-gradient(135deg,#1a3c5e,#0f2b44);color:white;padding:20px 28px;border-radius:28px;margin-bottom:28px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;position:sticky;top:16px;z-index:100;box-shadow:0 8px 20px rgba(0,0,0,0.15);}
+    .summary-stats{display:flex;gap:32px;flex-wrap:wrap;}
+    .summary-stat{display:flex;flex-direction:column;}
+    .summary-label{font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;opacity:0.8;}
+    .summary-value{font-size:1.6rem;font-weight:800;}
+    .health-indicators{display:flex;gap:16px;background:rgba(255,255,255,0.15);padding:12px 20px;border-radius:60px;flex-wrap:wrap;}
+    .health-badge{padding:4px 12px;border-radius:30px;font-size:0.8rem;font-weight:700;}
+    .health-green{background:#2b9e5c;color:white;}
+    .health-amber{background:#e68a2e;color:white;}
+    .health-red{background:#dc5a3c;color:white;}
+    .user-info{display:flex;align-items:center;gap:16px;background:rgba(255,255,255,0.12);padding:8px 20px;border-radius:60px;}
+    .user-avatar{width:36px;height:36px;background:#2c7cb6;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;}
+    .role-badge{background:#2c7cb6;padding:4px 12px;border-radius:20px;font-size:0.7rem;font-weight:700;}
+
+    .header-section{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;margin-bottom:28px;gap:20px;}
+    .title-area h1{font-size:1.9rem;font-weight:700;background:linear-gradient(135deg,#1a3c5e,#0f2b44);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-0.3px;}
+    .title-area p{color:#5b6e8c;font-size:0.9rem;margin-top:6px;}
+    .action-buttons{display:flex;gap:14px;flex-wrap:wrap;}
+    .btn{padding:10px 18px;border-radius:12px;font-weight:600;font-size:0.8rem;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all 0.2s ease;background:white;box-shadow:0 1px 2px rgba(0,0,0,0.05);}
+    .btn-primary{background:#1f6392;color:white;}
+    .btn-primary:hover{background:#0e4a70;transform:translateY(-1px);}
+    .btn-outline{background:white;border:1px solid #cfdfed;color:#2c4c6e;}
+    .btn-outline:hover{background:#eef3fc;border-color:#9bb7d0;}
+
+    .filters-panel{background:white;border-radius:24px;padding:16px 24px;margin-bottom:28px;display:flex;flex-wrap:wrap;align-items:center;gap:24px;box-shadow:0 4px 12px rgba(0,0,0,0.03);border:1px solid #e6edf4;}
+    .filter-group{display:flex;align-items:center;gap:12px;background:#f8fafd;padding:5px 16px;border-radius:40px;}
+    .filter-group label{font-weight:600;font-size:0.75rem;color:#2c4c6e;}
+    select,input[type="date"]{background:transparent;border:none;padding:8px 0;font-weight:500;font-size:0.85rem;outline:none;color:#0a2b44;}
+
+    .fy-label{font-size:0.72rem;font-weight:700;color:#1f6392;background:#eef3fc;padding:6px 16px;border-radius:20px;}
+
+    .kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:22px;margin-bottom:40px;}
+    .kpi-card{background:white;border-radius:28px;padding:20px;box-shadow:0 8px 20px rgba(0,0,0,0.02),0 2px 6px rgba(0,0,0,0.05);transition:all 0.2s;border:1px solid #eef3fa;cursor:pointer;}
+    .kpi-card:hover{transform:translateY(-3px);box-shadow:0 20px 30px -12px rgba(0,0,0,0.1);border-color:#cddfef;}
+    .card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+    .kpi-name{font-weight:700;font-size:0.95rem;background:#eef3fc;padding:4px 12px;border-radius:30px;color:#1e4a76;}
+    .status-badge{font-size:0.7rem;font-weight:700;padding:5px 12px;border-radius:40px;}
+    .status-green{background:#e0f6e9;color:#0d6e3e;}
+    .status-amber{background:#fff0db;color:#b45f06;}
+    .status-red{background:#ffe6e3;color:#bc3f2c;}
+
+    .kpi-dual-section{display:flex;gap:12px;margin:14px 0;}
+    .kpi-block{flex:1;background:#f9fbfe;border-radius:20px;padding:12px;text-align:center;}
+    .block-label{font-size:0.62rem;font-weight:700;text-transform:uppercase;color:#6f8eae;margin-bottom:6px;}
+    .block-value{font-weight:800;font-size:1.15rem;color:#0a1e2f;}
+    .block-sub{font-size:0.6rem;color:#8faabb;margin-top:4px;}
+    .forecast-badge{font-size:0.68rem;padding:3px 10px;border-radius:20px;margin-top:6px;display:inline-block;font-weight:600;}
+    .forecast-good{background:#e0f6e9;color:#0d6e3e;}
+    .forecast-warning{background:#fff0db;color:#b45f06;}
+    .forecast-bad{background:#ffe6e3;color:#bc3f2c;}
+
+    .progress-section{margin-top:10px;}
+    .progress-meta{display:flex;justify-content:space-between;font-size:0.68rem;color:#8faabb;margin-bottom:4px;}
+    .progress-bar-bg{background:#e2e9f2;border-radius:40px;height:7px;overflow:hidden;margin:4px 0;}
+    .progress-fill{height:100%;border-radius:40px;transition:width 0.6s ease;}
+    .fill-green{background:linear-gradient(90deg,#2b9e5c,#34c977);}
+    .fill-amber{background:linear-gradient(90deg,#e68a2e,#f5a74b);}
+    .fill-red{background:linear-gradient(90deg,#dc5a3c,#f07a62);}
+
+    .card-footer-row{display:flex;justify-content:space-between;align-items:center;margin-top:12px;flex-wrap:wrap;gap:8px;}
+    .gap-text{font-size:0.72rem;color:#5b6e8c;}
+
+    .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:36px;}
+    .chart-card{background:white;border-radius:24px;padding:22px 24px;box-shadow:0 4px 12px rgba(0,0,0,0.04);border:1px solid #e6edf4;}
+    .chart-card h4{font-size:0.9rem;font-weight:700;color:#1a3c5e;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+
+    .table-wrapper{background:white;border-radius:24px;padding:6px 0 0 0;border:1px solid #e9f0f5;overflow-x:auto;margin-bottom:36px;}
+    .data-table{width:100%;border-collapse:collapse;font-size:0.84rem;}
+    .data-table th{text-align:left;padding:14px 14px;background:#fafcff;font-weight:700;color:#254e73;border-bottom:2px solid #e4edf5;}
+    .data-table td{padding:13px 14px;border-bottom:1px solid #eef3fa;vertical-align:middle;}
+    .data-table tbody tr:hover{background:#fafcff;}
+    .editable-input{width:90px;padding:7px 10px;border-radius:12px;border:1px solid #cbdde9;font-weight:600;text-align:center;font-size:0.82rem;font-family:inherit;transition:border-color 0.2s;}
+    .editable-input:focus{outline:none;border-color:#2c7cb6;box-shadow:0 0 0 2px rgba(31,99,146,0.15);}
+    .editable-input:disabled{opacity:0.5;background:#f0f2f5;cursor:not-allowed;}
+    .input-locked{opacity:0.4;background:#f0f4f8;cursor:not-allowed;border-color:#d0dce8;}
+    .locked-icon{font-size:0.65rem;color:#8faabb;margin-left:4px;}
+
+    .status-chip{font-size:0.68rem;font-weight:700;padding:4px 10px;border-radius:20px;}
+
+    .audit-panel{background:white;border-radius:24px;padding:22px 24px;box-shadow:0 4px 12px rgba(0,0,0,0.04);border:1px solid #e6edf4;margin-bottom:36px;}
+    .audit-panel h4{font-size:0.9rem;font-weight:700;color:#1a3c5e;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+    .audit-scroll{overflow-x:auto;max-height:320px;overflow-y:auto;border:1px solid #e6edf4;border-radius:16px;}
+    .activity-table{font-size:0.76rem;}
+    .activity-table th{font-size:0.68rem;padding:10px 12px;}
+    .activity-table td{padding:10px 12px;}
+
+    .modal-overlay{position:fixed;inset:0;background:rgba(10,30,47,0.65);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:1000;visibility:hidden;opacity:0;transition:0.2s;}
+    .modal-overlay.active{visibility:visible;opacity:1;}
+    .modal-content{background:white;max-width:920px;width:93%;border-radius:32px;padding:28px;max-height:88vh;overflow-y:auto;}
+    .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
+    .modal-header h3{font-size:1rem;font-weight:700;color:#1a3c5e;}
+    .close-modal{background:#f0f2f5;border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;}
+    .close-modal:hover{background:#e2e9f2;}
+    .month-selector{margin:14px 0;display:flex;gap:8px;flex-wrap:wrap;}
+    .month-btn{padding:6px 14px;border-radius:30px;border:1px solid #cbdde9;background:white;cursor:pointer;font-size:0.74rem;font-weight:600;transition:all 0.15s;}
+    .month-btn.active{background:#1f6392;color:white;border-color:#1f6392;}
+    .month-btn.past{opacity:0.6;}
+    .month-btn.future{opacity:0.45;cursor:not-allowed;}
+    .month-table-wrap{overflow-x:auto;max-height:220px;overflow-y:auto;border:1px solid #e6edf4;border-radius:14px;margin-bottom:16px;}
+    .month-table{width:100%;border-collapse:collapse;font-size:0.8rem;}
+    .month-table th{padding:10px 12px;background:#f8fafd;font-weight:700;color:#254e73;border-bottom:1px solid #e4edf5;text-align:left;}
+    .month-table td{padding:10px 12px;border-bottom:1px solid #eef3fa;vertical-align:middle;}
+
+    .login-screen{position:fixed;inset:0;background:linear-gradient(135deg,#0a2b3c,#071a28);display:flex;align-items:center;justify-content:center;z-index:2000;}
+    .login-card{background:rgba(255,255,255,0.05);backdrop-filter:blur(16px);border-radius:32px;padding:40px;width:380px;border:1px solid rgba(255,255,255,0.12);}
+    .login-card h2{color:white;margin-bottom:8px;font-size:1.4rem;}
+    .login-sub{color:rgba(255,255,255,0.5);font-size:0.82rem;margin-bottom:28px;}
+    .login-field{margin-bottom:16px;}
+    .login-field label{display:block;font-size:0.72rem;font-weight:600;color:rgba(255,255,255,0.6);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:8px;}
+    .login-field input{width:100%;padding:13px 16px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:14px;color:white;font-size:0.88rem;outline:none;font-family:inherit;transition:border-color 0.2s;}
+    .login-field input::placeholder{color:rgba(255,255,255,0.3);}
+    .login-field input:focus{border-color:rgba(44,124,182,0.7);background:rgba(255,255,255,0.11);}
+    .btn-login{width:100%;padding:13px;background:#1f6392;color:white;border:none;border-radius:14px;font-weight:700;font-size:0.9rem;cursor:pointer;font-family:inherit;transition:background 0.2s;}
+    .btn-login:hover{background:#0e4a70;}
+    #loginError{color:#ff9e8f;margin-top:14px;display:none;text-align:center;font-size:0.82rem;padding:10px;background:rgba(220,90,60,0.12);border-radius:10px;}
+
+    #mainApp{display:none;}
+    .toast-container{position:fixed;bottom:24px;right:24px;z-index:2000;display:flex;flex-direction:column;gap:10px;}
+    .toast{background:#1e293b;color:white;padding:12px 20px;border-radius:40px;font-size:0.84rem;animation:slideIn 0.3s ease;display:flex;align-items:center;gap:10px;}
+    @keyframes slideIn{from{transform:translateX(110%);opacity:0;}to{transform:translateX(0);opacity:1;}}
+
+    .empty-audit{padding:32px;text-align:center;color:#8faabb;font-size:0.84rem;}
+    .readonly-notice{background:#fff8e6;border:1px solid #fde68a;border-radius:14px;padding:10px 18px;font-size:0.8rem;color:#92650a;margin-bottom:20px;display:none;align-items:center;gap:8px;}
+    .readonly-notice.visible{display:flex;}
+
+    .footer-note{text-align:center;font-size:0.76rem;color:#8faabb;padding:16px 0 0;border-top:1px solid #e6edf4;margin-top:8px;}
+
+    @media(max-width:900px){.charts-row{grid-template-columns:1fr;}.kpi-grid{grid-template-columns:1fr;}}
+    @media(max-width:600px){body{padding:16px 12px;}.summary-bar{flex-direction:column;}.kpi-dual-section{flex-direction:column;}}
+  </style>
 </head>
 <body>
 
-<!-- Login Screen -->
 <div id="loginScreen" class="login-screen">
   <div class="login-card">
-    <img src="https://www.aiswindows.com/assets/images/ais-windows-logo.svg" alt="AIS Logo" class="login-logo">
-    <h2 style="color: var(--primary); margin-bottom: 8px;">Command Center</h2>
-    <p style="color: var(--gray-600); margin-bottom: 24px;">Enterprise Intelligence Portal</p>
-    <div class="login-field">
-      <label>Email</label>
-      <input type="email" id="loginUsername" placeholder="Enter email" autocomplete="username">
-    </div>
-    <div class="login-field">
-      <label>Password</label>
-      <input type="password" id="loginPassword" placeholder="Enter password" autocomplete="current-password">
-    </div>
-    <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="handleLogin()">Login</button>
-    <div id="loginError" style="color: var(--danger); font-size: 0.8rem; margin-top: 12px; display: none;">Invalid credentials</div>
+    <h2><i class="fas fa-chart-line" style="color:#2c7cb6;"></i> KPI Control Tower</h2>
+    <div class="login-sub">Enterprise Edition · Financial Year Apr–Mar</div>
+    <div class="login-field"><label>Email Address</label><input type="email" id="loginEmail" placeholder="your@email.com" autocomplete="username"></div>
+    <div class="login-field"><label>Password</label><input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password"></div>
+    <button class="btn-login" id="doLoginBtn">Sign In →</button>
+    <div id="loginError"></div>
   </div>
 </div>
 
-<!-- Main App -->
-<div id="mainApp" style="display: none;">
-  <div class="app-container">
-    <!-- ENTERPRISE HEADER: Logo above text, left aligned -->
-    <header class="app-header">
-      <div class="logo-brand">
-        <img src="https://www.aiswindows.com/assets/images/ais-windows-logo.svg" alt="AIS Logo" class="logo-img">
-        <div class="brand-text">AIS Command Center</div>
-        <div class="brand-sub">Enterprise Execution · Showrooms & Dealers</div>
-      </div>
-      <div class="header-controls">
-        <span id="roleBadge"></span>
-        <button class="btn btn-outline btn-sm" onclick="showDashboard()">🏠 Showrooms</button>
-        <button class="btn btn-outline btn-sm" onclick="showAnalytics()">📊 Analytics</button>
-        <button class="btn btn-outline btn-sm" onclick="openDealerModule()">👥 Dealers</button>
-        <button class="btn btn-outline btn-sm" onclick="exportDashboardReport()">📥 Excel</button>
-        <button class="btn btn-outline btn-sm" onclick="generatePDF()">📄 PDF</button>
-        <button class="btn btn-outline btn-sm" onclick="backupData()">💾 Backup</button>
-        <button class="btn btn-outline btn-sm" onclick="logout()">🚪 Logout</button>
-      </div>
-    </header>
+<div id="mainApp">
+<div class="dashboard-container">
 
-    <main class="main-content" id="mainContent">
-      <!-- Dashboard View -->
-      <div id="dashboardView">
-        <!-- TOP SUMMARY STRIP -->
-        <div id="topSummaryStrip" class="summary-strip">
-          <!-- dynamic js fill -->
-        </div>
-        <div id="insightsBanner" class="insight-card" style="display: none;"></div>
-        <div class="kpi-grid" id="kpiGrid"></div>
-        <div class="filter-bar">
-          <div class="filter-group"><i class="fas fa-user-tie"></i><select id="filterRM"><option value="all">All RMs</option></select></div>
-          <div class="filter-group search-group"><i class="fas fa-search"></i><input type="text" id="globalSearch" placeholder="Search by name, city, RM..."></div>
-          <button class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
-          <button class="btn btn-outline" onclick="resetFilters()">Reset</button>
-          <button class="btn btn-primary" id="addShowroomBtn" onclick="openAddShowroomModal()">+ Add Showroom</button>
-        </div>
-        <!-- LOADING STATE: skeleton placeholder when empty -->
-        <div id="showroomGrid" class="showroom-grid"></div>
-      </div>
-
-      <!-- Analytics View (unchanged) -->
-      <div id="analyticsView" style="display: none;">
-        <div class="kpi-grid" id="analyticsKpiGrid"></div>
-        <div class="analytics-grid">
-          <div class="card chart-card"><h3 class="card-title">🎯 Dealer Onboarding Funnel</h3><canvas id="funnelChart" height="200"></canvas></div>
-          <div class="card chart-card"><h3 class="card-title">📈 Completion Trend</h3><canvas id="trendChart" height="200"></canvas></div>
-        </div>
-        <div class="analytics-grid">
-          <div class="card chart-card"><h3 class="card-title">👥 RM Leaderboard</h3><div id="rmLeaderboard" style="max-height: 300px; overflow-y: auto;"></div></div>
-          <div class="card chart-card"><h3 class="card-title">⏰ Delay Distribution</h3><div id="delayDistribution"></div></div>
-        </div>
-        <div class="card chart-card"><h3 class="card-title">📋 Document Completion by Stage</h3><canvas id="docsChart" height="150"></canvas></div>
-      </div>
-
-      <!-- Dealer View -->
-      <div id="dealerView" style="display: none;">
-        <div class="kpi-grid" id="dealerKpiGrid"></div>
-        <div class="filter-bar">
-          <div class="filter-group"><i class="fas fa-tag"></i><select id="dealerFilterStatus"><option value="all">All Status</option><option value="active">Active</option><option value="completed">Completed</option><option value="delayed">Delayed</option><option value="dropped">Dropped</option></select></div>
-          <div class="filter-group"><i class="fas fa-chart-simple"></i><select id="dealerFilterStage"><option value="all">All Stages</option><option value="Interested">Interested</option><option value="Shortlisted">Shortlisted</option><option value="CFT Selected">CFT Selected</option><option value="Documentation">Documentation</option><option value="Onboarded">Onboarded</option></select></div>
-          <div class="filter-group"><i class="fas fa-user-tie"></i><select id="dealerFilterRM"><option value="all">All RMs</option></select></div>
-          <div class="filter-group search-group"><i class="fas fa-search"></i><input type="text" id="dealerSearch" placeholder="Search dealers..."></div>
-          <button class="btn btn-primary" onclick="filterDealers()">Apply</button>
-          <button class="btn btn-outline" onclick="resetDealerFilters()">Reset Filters</button>
-          <button class="btn btn-outline" onclick="openAddDealerModal()">+ Add Dealer</button>
-        </div>
-        <div id="dealerGrid" class="showroom-grid"></div>
-      </div>
-    </main>
-
-    <footer class="app-footer" style="text-align: center; padding: 20px; border-top: 1px solid var(--gray-200); margin-top: 32px;">
-      <span>Powered with ❤️ by <strong>Sanju G</strong> | AIS Windows</span>
-    </footer>
+  <div class="summary-bar">
+    <div class="summary-stats">
+      <div class="summary-stat"><span class="summary-label">Overall Achievement</span><span class="summary-value" id="overallScore">—</span></div>
+      <div class="summary-stat"><span class="summary-label">Avg Yearly Gap</span><span class="summary-value" id="avgGap">—</span></div>
+      <div class="summary-stat"><span class="summary-label">Forecast vs Plan</span><span class="summary-value" id="forecastRatio">—</span></div>
+    </div>
+    <div class="health-indicators" id="healthIndicators">
+      <span class="health-badge health-green">🟢 Green: 0</span>
+      <span class="health-badge health-amber">🟡 Amber: 0</span>
+      <span class="health-badge health-red">🔴 Red: 0</span>
+    </div>
+    <div class="user-info">
+      <div class="user-avatar" id="userAvatar">U</div>
+      <span id="userEmailDisplay" style="font-size:0.82rem;">—</span>
+      <span class="role-badge" id="roleBadge">Viewer</span>
+      <button class="btn-outline" id="logoutMainBtn" style="padding:6px 14px;font-size:0.76rem;"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
   </div>
+
+  <div class="header-section">
+    <div class="title-area">
+      <h1><i class="fas fa-chart-column" style="color:#1f6392;"></i> KPI Control Tower <span style="font-size:0.75rem;background:#eef3fc;padding:4px 12px;border-radius:40px;">Enterprise Edition</span></h1>
+      <p>Financial Year Apr–Mar · Monthly Tracking · Forecast Engine · Real-time Audit Trail</p>
+    </div>
+    <div class="action-buttons">
+      <button class="btn btn-primary" id="exportExcelBtn"><i class="fas fa-file-excel"></i> Export Excel</button>
+      <button class="btn btn-outline" id="showAuditBtn"><i class="fas fa-history"></i> Audit Log</button>
+    </div>
+  </div>
+
+  <div id="readonlyNotice" class="readonly-notice">
+    <i class="fas fa-lock"></i> You are in <strong>Viewer mode</strong>. All inputs are read-only. Contact an admin to make changes.
+  </div>
+
+  <div class="filters-panel">
+    <div class="filter-group">
+      <label><i class="fas fa-calendar-alt"></i> Month</label>
+      <select id="monthSelect"></select>
+    </div>
+    <div class="filter-group">
+      <label><i class="fas fa-chart-simple"></i> KPI Filter</label>
+      <select id="kpiSelectFilter"><option value="all">All KPIs</option></select>
+    </div>
+    <div class="filter-group">
+      <label><i class="fas fa-sort-amount-down"></i> Sort</label>
+      <select id="sortTableSelect">
+        <option value="default">Default</option>
+        <option value="achievement">% Achievement ↓</option>
+        <option value="gap">Gap (High → Low)</option>
+      </select>
+    </div>
+    <span class="fy-label" id="fyLabel">FY —</span>
+    <div class="filter-group"><span style="font-size:0.7rem;color:#3b7c9e;"><i class="fas fa-circle" style="color:#2b9e5c;font-size:0.5rem;"></i> Real-time Sync Active</span></div>
+  </div>
+
+  <div class="kpi-grid" id="kpiCardsContainer"></div>
+
+  <div class="charts-row">
+    <div class="chart-card">
+      <h4><i class="fas fa-chart-bar" style="color:#1f6392;"></i> Yearly Plan vs Actual</h4>
+      <canvas id="barPlanActualChart"></canvas>
+    </div>
+    <div class="chart-card">
+      <h4><i class="fas fa-percent" style="color:#2b9e5c;"></i> Yearly Achievement %</h4>
+      <canvas id="horizontalAchievementChart"></canvas>
+    </div>
+  </div>
+
+  <div class="table-wrapper">
+    <table class="data-table" id="kpiTable">
+      <thead>
+        <tr>
+          <th>KPI</th>
+          <th>Yearly Plan</th>
+          <th>Yearly Actual</th>
+          <th>Yearly %</th>
+          <th>Monthly Plan</th>
+          <th>Monthly Actual <span id="tableMonthLabel" style="font-size:0.7rem;font-weight:400;color:#8faabb;"></span></th>
+          <th>Monthly %</th>
+          <th>Forecast (FY)</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="kpiTableBody"></tbody>
+    </table>
+  </div>
+
+  <div class="audit-panel" id="auditPanel">
+    <h4>
+      <span><i class="fas fa-history" style="color:#1f6392;"></i> Audit Trail (Real-time)</span>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <select id="auditKpiFilter" style="font-size:0.76rem;padding:4px 10px;border:1px solid #cbdde9;border-radius:10px;outline:none;background:white;"><option value="all">All KPIs</option></select>
+        <select id="auditUserFilter" style="font-size:0.76rem;padding:4px 10px;border:1px solid #cbdde9;border-radius:10px;outline:none;background:white;"><option value="all">All Users</option></select>
+        <input type="date" id="auditDateFilter" style="font-size:0.76rem;padding:4px 10px;border:1px solid #cbdde9;border-radius:10px;outline:none;background:white;">
+      </div>
+    </h4>
+    <div class="audit-scroll">
+      <table class="data-table activity-table">
+        <thead><tr><th>KPI</th><th>Field</th><th>Old Value</th><th>New Value</th><th>User</th><th>Timestamp</th></tr></thead>
+        <tbody id="auditTableBody"><tr><td colspan="6" class="empty-audit"><i class="fas fa-spinner fa-spin"></i> Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="footer-note"><i class="fas fa-lock"></i> Enterprise KPI Control Tower · Financial Year Apr–Mar · Real-time Sync · Full Audit Trail</div>
+</div>
 </div>
 
-<!-- Showroom Detail Modal -->
-<div id="showroomDetailModal" class="modal-overlay">
-  <div class="modal-container" style="max-width: 1000px;">
+<div id="kpiModal" class="modal-overlay">
+  <div class="modal-content">
     <div class="modal-header">
-      <h3 class="modal-title" id="showroomDetailTitle"></h3>
-      <button onclick="closeModal('showroomDetailModal')" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+      <h3 id="modalKpiName">Monthly Breakdown</h3>
+      <button class="close-modal" id="closeModalBtn">&times;</button>
     </div>
-    <div id="showroomDetailContent"></div>
-    <div class="modal-actions">
-      <button class="btn btn-primary" id="showroomEditBtn" style="display: none;" onclick="openShowroomEditFromDetail()">✏️ Edit Showroom</button>
-      <button class="btn btn-danger" id="showroomDeleteBtn" style="display: none;" onclick="deleteShowroomFromDetail()">🗑️ Delete Showroom</button>
-      <button class="btn btn-outline" onclick="closeModal('showroomDetailModal')">Close</button>
-    </div>
+    <div class="month-selector" id="monthSelectorContainer"></div>
+    <div class="month-table-wrap" id="modalHistoryContainer"></div>
+    <canvas id="trendChartCanvas" style="max-height:240px;"></canvas>
   </div>
 </div>
-
-<!-- Dealer Detail Modal with Stage Tracking -->
-<div id="dealerDetailModal" class="modal-overlay">
-  <div class="modal-container" style="max-width: 700px;">
-    <div class="modal-header">
-      <h3 class="modal-title" id="detailDealerName"></h3>
-      <button onclick="closeModal('dealerDetailModal')" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
-    </div>
-    <div id="dealerDetailContent"></div>
-    <div class="modal-actions">
-      <button class="btn btn-primary" id="dealerEditBtn" style="display: none;" onclick="openDealerEditFromDetail()">✏️ Edit Dealer</button>
-      <button class="btn btn-danger" id="dealerDeleteBtn" style="display: none;" onclick="deleteDealerFromDetail()">🗑️ Delete Dealer</button>
-      <button class="btn btn-outline" onclick="closeModal('dealerDetailModal')">Close</button>
-    </div>
-  </div>
-</div>
-
-<!-- Add/Edit Modals (same) -->
-<div id="addShowroomModal" class="modal-overlay"><div class="modal-container"><div class="modal-header"><h3 class="modal-title">Add New Showroom</h3><button onclick="closeModal('addShowroomModal')" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button></div><div class="form-group"><label class="form-label">Showroom Name</label><input type="text" id="newShowroomName" class="form-input" placeholder="Enter name"></div><div class="form-group"><label class="form-label">City</label><input type="text" id="newShowroomCity" class="form-input" placeholder="Enter city"></div><div class="form-group"><label class="form-label">RM Name</label><input type="text" id="newShowroomRM" class="form-input" placeholder="Enter RM name"></div><div class="form-group"><label class="form-label">Start Date</label><input type="date" id="newShowroomStart" class="form-input"></div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal('addShowroomModal')">Cancel</button><button class="btn btn-primary" onclick="confirmAddShowroom()">Create</button></div></div></div>
-
-<div id="addDealerModal" class="modal-overlay"><div class="modal-container"><div class="modal-header"><h3 class="modal-title">Add New Dealer</h3><button onclick="closeModal('addDealerModal')" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button></div><div class="form-group"><label class="form-label">Dealer Name</label><input type="text" id="newDealerName" class="form-input"></div><div class="form-group"><label class="form-label">City</label><input type="text" id="newDealerCity" class="form-input"></div><div class="form-group"><label class="form-label">RM Name</label><input type="text" id="newDealerRM" class="form-input"></div><div class="form-group"><label class="form-label">Start Date</label><input type="date" id="newDealerStart" class="form-input"></div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal('addDealerModal')">Cancel</button><button class="btn btn-primary" onclick="confirmAddDealer()">Create</button></div></div></div>
-
-<div id="edit-showroom-modal" class="modal-overlay"><div class="modal-container"><div class="modal-header"><h3 class="modal-title">✏️ Edit Showroom</h3><button onclick="closeModal('edit-showroom-modal')" style="background: none; border: none; font-size: 1.5rem;">&times;</button></div><div class="form-group"><label class="form-label">Name</label><input type="text" id="edit-showroom-name" class="form-input"></div><div class="form-group"><label class="form-label">City</label><input type="text" id="edit-showroom-city" class="form-input"></div><div class="form-group"><label class="form-label">RM</label><input type="text" id="edit-showroom-rm" class="form-input"></div><div class="form-group"><label class="form-label">Start Date</label><input type="date" id="edit-showroom-start" class="form-input"></div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal('edit-showroom-modal')">Cancel</button><button class="btn btn-primary" onclick="saveEditShowroom()">Save</button></div></div></div>
-
-<div id="edit-dealer-modal" class="modal-overlay"><div class="modal-container"><div class="modal-header"><h3 class="modal-title">✏️ Edit Dealer</h3><button onclick="closeModal('edit-dealer-modal')" style="background: none; border: none; font-size: 1.5rem;">&times;</button></div><div class="form-group"><label class="form-label">Name</label><input type="text" id="edit-dealer-name" class="form-input"></div><div class="form-group"><label class="form-label">City</label><input type="text" id="edit-dealer-city" class="form-input"></div><div class="form-group"><label class="form-label">RM</label><input type="text" id="edit-dealer-rm" class="form-input"></div><div class="form-group"><label class="form-label">Start Date</label><input type="date" id="edit-dealer-start" class="form-input"></div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal('edit-dealer-modal')">Cancel</button><button class="btn btn-primary" onclick="saveEditDealer()">Save</button></div></div></div>
 
 <div id="toastContainer" class="toast-container"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getFirestore, collection, doc, deleteDoc, onSnapshot, addDoc, updateDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, doc, onSnapshot, updateDoc, getDoc, serverTimestamp, setDoc, addDoc, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDav3rI7fTr8KrXYxvnz5LB82CgjRq4v20",
-    authDomain: "ais-showroom-dashboard.firebaseapp.com",
-    projectId: "ais-showroom-dashboard",
-    storageBucket: "ais-showroom-dashboard.firebasestorage.app",
-    messagingSenderId: "175667492150",
-    appId: "1:175667492150:web:cb124eb267b4689e6a2f97"
+const firebaseConfig = {
+  apiKey: "AIzaSyDav3rI7fTr8KrXYxvnz5LB82CgjRq4v20",
+  authDomain: "ais-showroom-dashboard.firebaseapp.com",
+  projectId: "ais-showroom-dashboard",
+  storageBucket: "ais-showroom-dashboard.firebasestorage.app",
+  messagingSenderId: "175667492150",
+  appId: "1:175667492150:web:cb124eb267b4689e6a2f97"
+};
+
+const app  = initializeApp(firebaseConfig);
+const db   = getFirestore(app);
+const auth = getAuth(app);
+
+/* ═══════════════════════════════
+   FINANCIAL YEAR CONFIG (APR–MAR)
+═══════════════════════════════ */
+const FY_MONTHS = ["Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec","Jan","Feb","Mar"];
+
+function getFinancialMonth() {
+  const cal = new Date().getMonth();
+  return (cal + 9) % 12;
+}
+
+function getCurrentCalendarMonth() {
+  return new Date().getMonth();
+}
+
+function getFYLabel() {
+  const now = new Date();
+  const cal = now.getMonth();
+  const yr  = now.getFullYear();
+  const startYr = cal >= 3 ? yr : yr - 1;
+  return `FY ${startYr}–${String(startYr + 1).slice(2)}`;
+}
+
+/* ═══════════════════════════════
+   KPI DEFINITIONS
+═══════════════════════════════ */
+const KPI_DEFINITIONS = [
+  { id:"showroom_audit_count",    name:"Showroom Audit Count",          yearlyPlan:504,  unit:"count"  },
+  { id:"showroom_audit_score",    name:"Showroom Audit Score (A & A+)", yearlyPlan:336,  unit:"count"  },
+  { id:"partner_survey_count",    name:"Partner Survey Count",          yearlyPlan:420,  unit:"count"  },
+  { id:"partner_survey_score",    name:"Partner Survey Score (A & A+)", yearlyPlan:288,  unit:"count"  },
+  { id:"rr_total",                name:"R&R (Rewards People)",          yearlyPlan:600,  unit:"people" },
+  { id:"first_time_calls",        name:"First Time Calls",              yearlyPlan:2160, unit:"calls"  },
+  { id:"shortlisted",             name:"Shortlisted",                   yearlyPlan:780,  unit:"count"  },
+  { id:"cft_done",                name:"CFT Done",                      yearlyPlan:576,  unit:"count"  },
+  { id:"cft_feedback_adherence",  name:"CFT Feedback Adherence",        yearlyPlan:100,  unit:"%"      },
+  { id:"collection",              name:"Collection (CRM/CSE/Branding)", yearlyPlan:1500, unit:"lakhs"  }
+];
+
+function buildEmptyMonthlyActuals() {
+  const m = {};
+  for (let i = 0; i < 12; i++) m[i] = 0;
+  return m;
+}
+
+/* ═══════════════════════════════
+   STATE
+═══════════════════════════════ */
+let kpiData         = [];
+let allAuditLogs    = [];
+let currentUserId   = null;
+let currentUserEmail = null;
+let currentUserRole = "viewer";
+let barChart, horizChart, trendChartInstance;
+let currentSort       = "default";
+let currentKpiFilter  = "all";
+let currentMonth      = getFinancialMonth();
+let currentModalKpiId = null;
+let realtimeUnsub     = null;
+let auditUnsub        = null;
+let isAdmin           = false;
+
+/* ═══════════════════════════════
+   HELPERS
+═══════════════════════════════ */
+function esc(str) {
+  if (str == null) return "";
+  return String(str).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[m]);
+}
+
+function fmt(n, decimals = 0) {
+  const num = parseFloat(n);
+  if (isNaN(num)) return "0";
+  return num.toFixed(decimals).replace(/\.0+$/, "");
+}
+
+function pct(n) { return fmt(n) + "%"; }
+
+function showToast(msg, type = "info") {
+  const icons = { success:"fa-check-circle", error:"fa-exclamation-triangle", info:"fa-info-circle" };
+  const colors = { success:"#2b9e5c", error:"#dc5a3c", info:"#1f6392" };
+  const c = document.getElementById("toastContainer");
+  const t = document.createElement("div");
+  t.className = "toast";
+  t.style.borderLeft = `4px solid ${colors[type] || colors.info}`;
+  t.innerHTML = `<i class="fas ${icons[type] || icons.info}" style="color:${colors[type]||colors.info}"></i> ${msg}`;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 3400);
+}
+
+function parseFirebaseError(err, fallback) {
+  const map = {
+    "auth/invalid-credential":"Invalid email or password.",
+    "auth/invalid-email":"Please enter a valid email.",
+    "auth/missing-password":"Please enter your password.",
+    "auth/too-many-requests":"Too many attempts. Try again later.",
+    "permission-denied":"Access denied."
   };
+  return map[err?.code] || fallback;
+}
+
+/* ═══════════════════════════════
+   CALCULATION ENGINE (FIXED)
+═══════════════════════════════ */
+function calculateMetrics(kpi) {
+  const monthlyActuals = kpi.monthlyActuals || buildEmptyMonthlyActuals();
+  const isPercentKpi = (kpi.unit === "%") || (kpi.id === "cft_feedback_adherence");
   
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const auth = getAuth(app);
-
-  const PHASES_CONFIG = [
-    { id: 'dim', name: "Dimensions Submission", days: 5 }, { id: 'cad', name: "CAD Preparation", days: 12 },
-    { id: 'plan', name: "Planning & Order Loading", days: 15 }, { id: 'civil', name: "Structure & Civil Work", days: 30 },
-    { id: 'interior', name: "Interior Development", days: 50 }, { id: 'brand', name: "Branding & Display Setup", days: 55 },
-    { id: 'delivery', name: "Window Delivery", days: 65 }, { id: 'window', name: "Window Installation", days: 80 },
-    { id: 'launch', name: "Final Handover / Launch", days: 90 }
-  ];
-
-  const DEALER_STAGES = ['Interested', 'Shortlisted', 'CFT Selected', 'Documentation', 'Onboarded'];
-  const DOC_KEYS = ['securityDeposit', 'crmCharges', 'agreement', 'gst', 'pan', 'aadhaar', 'bankDetails', 'cheque', 'passportPhotos', 'companyRegistration', 'spaceFinalized'];
-
-  let state = { showrooms: [], dealers: [] };
-  let charts = { funnel: null, trend: null, docs: null };
-  let currentView = 'dashboard';
-  let currentEditShowroomId = null;
-  let currentEditDealerId = null;
-  let currentShowroomIdForDetail = null;
-  let currentDealerIdForDetail = null;
-  let userRole = null;
-  let currentUserId = null;
-  let realtimeUnsubscribers = [];
-  let isLoading = false;
-
-  function showToast(msg, type = 'info') {
-    const container = document.getElementById('toastContainer');
-    const toast = document.createElement('div');
-    toast.className = 'toast';
-    const colors = { success: '#27ae60', error: '#e74c3c', warning: '#f39c12', info: '#3498db' };
-    toast.style.background = colors[type] || colors.info;
-    toast.textContent = msg;
-    container.appendChild(toast);
-    setTimeout(() => toast.remove(), 3500);
-  }
-
-  function isAdmin() { return userRole === 'admin'; }
-
-  function parseFirebaseError(error, fallbackMessage) {
-    const code = error?.code || '';
-    const mapping = {
-      'auth/invalid-credential': 'Invalid email or password.',
-      'auth/invalid-email': 'Please enter a valid email address.',
-      'auth/missing-password': 'Please enter your password.',
-      'auth/too-many-requests': 'Too many attempts. Please try again later.',
-      'permission-denied': 'You do not have permission to perform this action.',
-      'unavailable': 'Service temporarily unavailable. Please retry.'
-    };
-    return mapping[code] || fallbackMessage;
-  }
-
-  function toggleAuthenticatedUI() {
-    document.getElementById('loginScreen').style.display = currentUserId ? 'none' : 'flex';
-    document.getElementById('mainApp').style.display = currentUserId ? 'block' : 'none';
-    document.getElementById('roleBadge').innerHTML = isAdmin()
-      ? '<span class="badge-admin">Admin</span>'
-      : '<span class="badge-viewer">Viewer</span>';
-    const addShowroomBtn = document.getElementById('addShowroomBtn');
-    if (addShowroomBtn) addShowroomBtn.style.display = isAdmin() ? 'inline-flex' : 'none';
-  }
-
-  function formatDate(date) { if (!date) return '--'; const d = new Date(date); return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }); }
-  function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[m] || m); }
-  function normalizeName(v) { return (v || '').trim().toLowerCase().replace(/\s+/g, ' '); }
-  function hasDuplicateShowroomName(name, ignoreId = null) {
-    const normalized = normalizeName(name);
-    return state.showrooms.some(s => s.id !== ignoreId && normalizeName(s.name) === normalized);
-  }
-
-  function calculateShowroomStats(s) {
-    if (!s.startDate) return { pct: 0, avgDelay: 0, totalDelay: 0, maxDelay: 0, delayedPhases: [] };
-    const start = new Date(s.startDate);
-    const today = new Date();
-    let comp = 0, totalDelay = 0, delayCount = 0, maxDelay = 0;
-    const delayedPhases = [];
-    PHASES_CONFIG.forEach(p => {
-      const target = new Date(start); target.setDate(start.getDate() + p.days);
-      const actual = s.data?.[p.id]?.actualDate ? new Date(s.data[p.id].actualDate) : null;
-      let diff = 0;
-      if (actual) { comp++; diff = Math.ceil((actual - target) / 86400000); if (diff > 0) { totalDelay += diff; delayCount++; maxDelay = Math.max(maxDelay, diff); delayedPhases.push({ phase: p.name, days: diff }); } }
-      else { diff = Math.ceil((today - target) / 86400000); if (diff > 0) { totalDelay += diff; delayCount++; maxDelay = Math.max(maxDelay, diff); delayedPhases.push({ phase: p.name, days: diff }); } }
-    });
-    delayedPhases.sort((a, b) => b.days - a.days);
-    return { pct: Math.round((comp / PHASES_CONFIG.length) * 100), avgDelay: delayCount ? Math.round(totalDelay / delayCount) : 0, totalDelay, maxDelay, delayedPhases };
-  }
-
-  function calculateDealerTimeline(d) {
-    if (!d.startDate) return { delayDays: 0, isDelayed: false, level: 'normal' };
-    const start = new Date(d.startDate);
-    const daysElapsed = Math.floor((new Date() - start) / 86400000);
-    const stageTargets = { 'Interested': 0, 'Shortlisted': 3, 'CFT Selected': 8, 'Documentation': 15, 'Onboarded': 22 };
-    const currentStage = d.currentStage || 'Interested';
-    const targetDays = stageTargets[currentStage] || 0;
-    const delayDays = Math.max(0, daysElapsed - targetDays);
-    let level = 'normal';
-    if (delayDays >= 10) level = 'critical';
-    else if (delayDays >= 6) level = 'warning';
-    return { delayDays, isDelayed: delayDays >= 6, level };
-  }
-
-  function docProgress(docObj) { const done = DOC_KEYS.filter(k => docObj?.[k]).length; return Math.round((done / DOC_KEYS.length) * 100); }
-
-  function updateTopSummary() {
-    const criticalShowrooms = state.showrooms.filter(s => calculateShowroomStats(s).maxDelay >= 10).length;
-    const criticalDealers = state.dealers.filter(d => calculateDealerTimeline(d).level === 'critical').length;
-    const immediateActions = state.showrooms.filter(s => { const stats = calculateShowroomStats(s); return stats.maxDelay >= 6 && stats.maxDelay < 10; }).length
-                           + state.dealers.filter(d => calculateDealerTimeline(d).level === 'warning').length;
-    const today = new Date();
-    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    const todayPriority = state.showrooms.filter(s => {
-      if (!s.startDate) return false;
-      const start = new Date(s.startDate);
-      const overdue = calculateShowroomStats(s).maxDelay > 0;
-      const startsToday = start.getFullYear() === today.getFullYear() && start.getMonth() === today.getMonth() && start.getDate() === today.getDate();
-      return overdue || startsToday;
-    }).length + state.dealers.filter(d => {
-      const timeline = calculateDealerTimeline(d);
-      return timeline.delayDays >= 5 || (d.currentStage && d.currentStage !== 'Onboarded' && timeline.delayDays >= 3);
-    }).length;
-    
-    const strip = document.getElementById('topSummaryStrip');
-    if (strip) {
-      strip.innerHTML = `
-        <div class="summary-item"><i class="fas fa-exclamation-triangle" style="color:var(--danger);"></i> Critical delays: <span class="summary-badge" style="background:var(--danger);">${criticalShowrooms + criticalDealers}</span></div>
-        <div class="summary-item"><i class="fas fa-clock" style="color:var(--warning);"></i> Immediate action: <strong>${immediateActions}</strong></div>
-        <div class="summary-item"><i class="fas fa-calendar-check" style="color:var(--primary);"></i> Today's priority: <strong>${todayPriority}</strong></div>
-      `;
+  // Monthly plan: For % KPIs, plan is yearlyPlan/12 (e.g., 100/12 = 8.33)
+  // For regular KPIs, also yearlyPlan/12
+  const monthlyPlan = kpi.yearlyPlan / 12;
+  
+  // Get current month actual
+  const monthlyActual = parseFloat(monthlyActuals[currentMonth] || 0);
+  
+  // Calculate yearly actual (ONLY up to current month, NOT all 12 months)
+  let yearlyActual = 0;
+  let monthsWithData = 0;
+  
+  if (isPercentKpi) {
+    // For % KPIs: Yearly actual = average of months up to current month
+    let sum = 0;
+    for (let i = 0; i <= currentMonth; i++) {
+      const val = parseFloat(monthlyActuals[i] || 0);
+      sum += Math.min(100, Math.max(0, val));
+      if (val > 0 || i === 0) monthsWithData++;
+    }
+    yearlyActual = monthsWithData > 0 ? sum / monthsWithData : 0;
+  } else {
+    // For regular KPIs: Sum of months up to current month only
+    for (let i = 0; i <= currentMonth; i++) {
+      yearlyActual += parseFloat(monthlyActuals[i] || 0);
     }
   }
-
-  async function renderDashboard() {
-    updateTopSummary();
-    const kpiGrid = document.getElementById('kpiGrid');
-    const totalShowrooms = state.showrooms.length;
-    const completedShowrooms = state.showrooms.filter(s => calculateShowroomStats(s).pct === 100).length;
-    const avgCompletion = totalShowrooms ? Math.round(state.showrooms.reduce((s, c) => s + calculateShowroomStats(c).pct, 0) / totalShowrooms) : 0;
-    const delayedShowrooms = state.showrooms.filter(s => calculateShowroomStats(s).maxDelay > 0).length;
-    const activeDealers = state.dealers.filter(d => d.status === 'Active').length;
-    const delayedDealers = state.dealers.filter(d => calculateDealerTimeline(d).isDelayed).length;
-    const completedDealers = state.dealers.filter(d => d.status === 'Completed').length;
-    const conversionBase = state.dealers.filter(d => d.status === 'Active' || d.status === 'Completed').length;
-    
-    kpiGrid.innerHTML = `
-      <div class="kpi-card"><div class="kpi-label">Total Showrooms</div><div class="kpi-value">${totalShowrooms}</div></div>
-      <div class="kpi-card"><div class="kpi-label">Avg Completion</div><div class="kpi-value">${avgCompletion}%</div><div class="kpi-trend">${avgCompletion > 70 ? '<span class="trend-up">▲ On track</span>' : '<span class="trend-down">▼ Behind</span>'}</div></div>
-      <div class="kpi-card"><div class="kpi-label">Showroom Delays</div><div class="kpi-value" style="color: var(--danger)">${delayedShowrooms}</div><div class="kpi-trend">⚠️ Execution risk</div></div>
-      <div class="kpi-card"><div class="kpi-label">Dealer Delays</div><div class="kpi-value" style="color: var(--warning)">${delayedDealers}</div><div class="kpi-trend">⚠️ Onboarding slippage</div></div>
-      <div class="kpi-card"><div class="kpi-label">Active Dealers</div><div class="kpi-value">${activeDealers}</div></div>
-      <div class="kpi-card"><div class="kpi-label">Ready to Launch</div><div class="kpi-value" style="color: var(--success)">${completedShowrooms}</div></div>
-      <div class="kpi-card"><div class="kpi-label">Dealer Conversion</div><div class="kpi-value">${conversionBase ? Math.round((completedDealers / conversionBase) * 100) : 0}%</div></div>
-    `;
-
-    const insightsDiv = document.getElementById('insightsBanner');
-    const criticalDelays = state.showrooms.filter(s => calculateShowroomStats(s).maxDelay >= 10);
-    if (criticalDelays.length) {
-      insightsDiv.style.display = 'block';
-      insightsDiv.innerHTML = `<div><i class="fas fa-bell insight-icon"></i><strong>⚠️ Critical Alert:</strong> ${criticalDelays.length} showroom(s) with critical delays (10+ days).</div>`;
-    } else if (delayedDealers > 5) {
-      insightsDiv.style.display = 'block';
-      insightsDiv.innerHTML = `<div><i class="fas fa-clock insight-icon"></i><strong>⚠️ Attention Needed:</strong> ${delayedDealers} dealers delayed in onboarding.</div>`;
-    } else { insightsDiv.style.display = 'none'; }
-
-    const grid = document.getElementById('showroomGrid');
-    const searchTerm = document.getElementById('globalSearch')?.value.toLowerCase() || '';
-    const rmFilter = document.getElementById('filterRM')?.value || 'all';
-    let filtered = [...state.showrooms];
-    if (searchTerm) filtered = filtered.filter(s => s.name?.toLowerCase().includes(searchTerm) || s.city?.toLowerCase().includes(searchTerm) || s.rm?.toLowerCase().includes(searchTerm));
-    if (rmFilter !== 'all') filtered = filtered.filter(s => s.rm === rmFilter);
-    
-    if (isLoading) {
-      grid.innerHTML = Array(4).fill(0).map(() => `<div class="showroom-item skeleton-loader" style="height:200px;"></div>`).join('');
+  
+  // Calculate percentages
+  const monthlyPct = monthlyPlan > 0 ? Math.min((monthlyActual / monthlyPlan) * 100, 100) : 0;
+  const yearlyPct = kpi.yearlyPlan > 0 ? Math.min((yearlyActual / kpi.yearlyPlan) * 100, 100) : 0;
+  const gap = kpi.yearlyPlan - yearlyActual;
+  
+  // Forecast calculation
+  const elapsedMonths = currentMonth + 1;
+  let forecastYearly = 0;
+  let forecastPct = 0;
+  
+  if (isPercentKpi) {
+    // For % KPIs, forecast stays at current average
+    forecastYearly = yearlyActual;
+    forecastPct = yearlyPct;
+  } else {
+    // Annualized run-rate forecast
+    if (elapsedMonths > 0 && yearlyActual > 0) {
+      forecastYearly = (yearlyActual / elapsedMonths) * 12;
+      forecastPct = (forecastYearly / kpi.yearlyPlan) * 100;
     } else {
-      grid.innerHTML = filtered.map(s => {
-        const stats = calculateShowroomStats(s);
-        let delayClass = 'delay-normal', cardClass = '', delayText = 'On Track';
-        if (stats.maxDelay >= 10) { delayClass = 'delay-critical'; cardClass = 'critical-delay'; delayText = 'Critical'; }
-        else if (stats.maxDelay >= 6) { delayClass = 'delay-warning'; cardClass = 'moderate-delay'; delayText = 'Warning'; }
-        else if (stats.maxDelay > 0) { delayText = 'Minor'; }
-        const mostDelayedPhase = stats.delayedPhases.length ? stats.delayedPhases[0] : null;
-        const nextBest = mostDelayedPhase ? `⚠️ ${mostDelayedPhase.phase} delayed ${mostDelayedPhase.days}d` : '✅ On schedule';
-        return `
-          <div class="showroom-item ${cardClass}">
-            <div class="showroom-header"><div><div class="showroom-name">${escapeHtml(s.name)}</div><div class="showroom-meta"><span>📍 ${escapeHtml(s.city || 'N/A')}</span><span>👤 RM: ${escapeHtml(s.rm || 'Unassigned')}</span></div></div><div class="delay-badge ${delayClass}">${delayText}</div></div>
-            <div class="progress-section"><div class="progress-bar-container"><div class="progress-fill" style="width: ${stats.pct}%"></div></div></div>
-            <div class="showroom-stats"><span>📊 Progress: ${stats.pct}%</span><span>⏱️ Max: ${stats.maxDelay}d · Total: ${stats.totalDelay}d</span></div>
-            <div class="action-insight"><i class="fas fa-lightbulb"></i> ${nextBest}</div>
-            <div class="showroom-actions"><button class="btn btn-primary btn-sm" onclick="openShowroomDetail('${s.id}')">Open Tracker</button></div>
-          </div>`;
-      }).join('');
-      if (!filtered.length) grid.innerHTML = `<div class="card empty-state" style="grid-column:1/-1;"><i class="fas fa-building" style="font-size:2rem;opacity:0.5;"></i><h3>No showrooms yet</h3><button class="btn btn-primary" onclick="openAddShowroomModal()">+ Add Showroom</button></div>`;
+      forecastYearly = 0;
+      forecastPct = 0;
     }
   }
+  
+  // Status determination
+  let status = "red";
+  if (yearlyPct >= 90) status = "green";
+  else if (yearlyPct >= 60) status = "amber";
+  
+  return { 
+    monthlyPlan, 
+    monthlyActual, 
+    monthlyPct: Math.min(monthlyPct, 100),
+    yearlyActual, 
+    yearlyPct: Math.min(yearlyPct, 100), 
+    gap, 
+    forecastYearly, 
+    forecastPct: Math.min(forecastPct, 100), 
+    status 
+  };
+}
 
-  async function renderAnalytics() {
-    const totalShowrooms = state.showrooms.length;
-    const completedShowrooms = state.showrooms.filter(s => calculateShowroomStats(s).pct === 100).length;
-    const totalDealers = state.dealers.length;
-    const onboarded = state.dealers.filter(d => d.status === 'Completed' || d.currentStage === 'Onboarded').length;
-    const analyticsCompleted = state.dealers.filter(d => d.status === 'Completed').length;
-    const analyticsActive = state.dealers.filter(d => d.status === 'Active').length;
-    document.getElementById('analyticsKpiGrid').innerHTML = `
-      <div class="kpi-card"><div class="kpi-label">Showroom Velocity</div><div class="kpi-value">${totalShowrooms ? Math.round((completedShowrooms / totalShowrooms) * 100) : 0}%</div></div>
-      <div class="kpi-card"><div class="kpi-label">Dealer Conversion</div><div class="kpi-value">${(analyticsActive + analyticsCompleted) ? Math.round((analyticsCompleted / (analyticsActive + analyticsCompleted)) * 100) : 0}%</div></div>
-      <div class="kpi-card"><div class="kpi-label">Avg Onboarding Time</div><div class="kpi-value">--</div></div>
-      <div class="kpi-card"><div class="kpi-label">Forecast Completion</div><div class="kpi-value">${Math.min(100, Math.round((onboarded / (totalDealers || 1)) * 100))}%</div></div>
-    `;
+function getEnrichedKpis() {
+  return kpiData.map(k => ({ ...k, metrics: calculateMetrics(k) }));
+}
 
-    const stageCounts = DEALER_STAGES.map(stage => state.dealers.filter(d => (d.currentStage || 'Interested') === stage).length);
-    if (charts.funnel) charts.funnel.destroy();
-    const funnelCtx = document.getElementById('funnelChart').getContext('2d');
-    charts.funnel = new Chart(funnelCtx, { type: 'bar', data: { labels: DEALER_STAGES, datasets: [{ label: 'Dealers', data: stageCounts, backgroundColor: 'rgba(0,84,166,0.7)' }] }, options: { responsive: true } });
-    
-    const completionData = state.showrooms.map(s => calculateShowroomStats(s).pct);
-    if (charts.trend) charts.trend.destroy();
-    const trendCtx = document.getElementById('trendChart').getContext('2d');
-    charts.trend = new Chart(trendCtx, { type: 'line', data: { labels: state.showrooms.map(s => s.name?.substring(0,15)), datasets: [{ label: 'Completion %', data: completionData, borderColor: '#27ae60', fill: true }] }, options: { responsive: true } });
-    
-    const rmMap = new Map();
-    state.dealers.forEach(d => { const rm = d.rm || 'Unassigned'; rmMap.set(rm, (rmMap.get(rm) || 0) + 1); });
-    document.getElementById('rmLeaderboard').innerHTML = Array.from(rmMap.entries()).sort((a,b) => b[1] - a[1]).map(([rm, count]) => `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid var(--gray-200);"><span>${escapeHtml(rm)}</span><span>${count} dealers</span></div>`).join('');
-    
-    const delays = { '0-5d': 0, '6-9d': 0, '10+d': 0 };
-    state.dealers.forEach(d => {
-      const dd = calculateDealerTimeline(d).delayDays;
-      if (dd <= 5) delays['0-5d']++;
-      else if (dd < 10) delays['6-9d']++;
-      else delays['10+d']++;
+/* ═══════════════════════════════
+   AUDIT (FIXED)
+═══════════════════════════════ */
+async function logAudit(kpiId, kpiName, fieldChanged, oldValue, newValue) {
+  if (!currentUserId) return;
+
+  const record = {
+    kpiId,
+    kpiName,
+    fieldChanged,
+    oldValue: String(oldValue),
+    newValue: String(newValue),
+    updatedBy: currentUserEmail || currentUserId,
+    userId: currentUserId,
+    timestamp: new Date().toISOString()
+  };
+
+  try {
+    await addDoc(collection(db, "kpi_audit_logs"), {
+      ...record,
+      updatedAt: serverTimestamp()
     });
-    document.getElementById('delayDistribution').innerHTML = `<div style="display:flex; gap:12px;">${Object.entries(delays).map(([k,v]) => `<div style="flex:1; text-align:center;"><div style="height:${Math.min(100, v * 20)}px; background:var(--danger); border-radius:6px; margin-bottom:6px;"></div><span>${k}</span><br><strong>${v}</strong></div>`).join('')}</div>`;
-    
-    const docData = DEALER_STAGES.map(stage => { const dealers = state.dealers.filter(d => (d.currentStage || 'Interested') === stage); return dealers.length ? Math.round(dealers.reduce((s,d) => s + docProgress(d.documents), 0) / dealers.length) : 0; });
-    if (charts.docs) charts.docs.destroy();
-    const docsCtx = document.getElementById('docsChart').getContext('2d');
-    charts.docs = new Chart(docsCtx, { type: 'bar', data: { labels: DEALER_STAGES, datasets: [{ label: 'Doc Completion %', data: docData, backgroundColor: '#3498db' }] }, options: { scales: { y: { max: 100 } } } });
+    return;
+  } catch (e) {
+    console.warn("Audit write failed (Firebase). Falling back to localStorage:", e);
   }
 
-  async function renderDealerView() {
-    let dealers = [...state.dealers];
-    const status = document.getElementById('dealerFilterStatus').value;
-    const stage = document.getElementById('dealerFilterStage').value;
-    const rm = document.getElementById('dealerFilterRM').value;
-    const search = document.getElementById('dealerSearch').value.toLowerCase();
-    
-    if (status === 'delayed') dealers = dealers.filter(d => calculateDealerTimeline(d).isDelayed);
-    else if (status !== 'all') dealers = dealers.filter(d => d.status?.toLowerCase() === status);
-    if (stage !== 'all') dealers = dealers.filter(d => (d.currentStage || 'Interested') === stage);
-    if (rm !== 'all') dealers = dealers.filter(d => (d.rm || 'Unassigned') === rm);
-    if (search) dealers = dealers.filter(d => d.name?.toLowerCase().includes(search) || d.city?.toLowerCase().includes(search));
-    
-    const allDealers = state.dealers;
-    const conversionBase = allDealers.filter(d => d.status === 'Active' || d.status === 'Completed').length;
-    document.getElementById('dealerKpiGrid').innerHTML = `
-      <div class="kpi-card"><div class="kpi-label">Total Dealers</div><div class="kpi-value">${allDealers.length}</div></div>
-      <div class="kpi-card"><div class="kpi-label">Active</div><div class="kpi-value">${allDealers.filter(d => d.status === 'Active').length}</div></div>
-      <div class="kpi-card"><div class="kpi-label">Completed</div><div class="kpi-value" style="color:var(--success)">${allDealers.filter(d => d.status === 'Completed').length}</div></div>
-      <div class="kpi-card"><div class="kpi-label">Delayed</div><div class="kpi-value" style="color:var(--danger)">${allDealers.filter(d => calculateDealerTimeline(d).isDelayed).length}</div></div>
-    `;
-    
-    const grid = document.getElementById('dealerGrid');
-    if (isLoading) {
-      grid.innerHTML = Array(4).fill(0).map(() => `<div class="showroom-item skeleton-loader" style="height:200px;"></div>`).join('');
-    } else {
-      grid.innerHTML = dealers.map(d => {
-        const timeline = calculateDealerTimeline(d);
-        let delayClass = 'delay-normal', cardClass = '';
-        if (timeline.level === 'critical') { delayClass = 'delay-critical'; cardClass = 'critical-delay'; }
-        else if (timeline.level === 'warning') { delayClass = 'delay-warning'; cardClass = 'moderate-delay'; }
-        const missingDocs = DOC_KEYS.filter(k => !d.documents?.[k]);
-        let actionMsg = '✅ On track';
-        if (timeline.delayDays >= 6) actionMsg = `⚠️ Stuck in ${d.currentStage || 'stage'} for ${timeline.delayDays}d`;
-        else if (missingDocs.length > 0) actionMsg = `📄 ${missingDocs.length} doc(s) pending`;
-        return `
-          <div class="showroom-item ${cardClass}">
-            <div class="showroom-header"><div><div class="showroom-name">${escapeHtml(d.name)}</div><div class="showroom-meta"><span>📍 ${escapeHtml(d.city)}</span><span>👤 RM: ${escapeHtml(d.rm)}</span></div></div><div class="delay-badge ${delayClass}">${timeline.delayDays > 0 ? `${timeline.delayDays}d` : 'On Track'}</div></div>
-            <div class="progress-section"><div class="progress-bar-container"><div class="progress-fill" style="width: ${docProgress(d.documents)}%"></div></div></div>
-            <div class="showroom-stats"><span>📌 Stage: ${d.currentStage || 'Interested'}</span><span>📄 Docs: ${docProgress(d.documents)}%</span></div>
-            <div class="action-insight"><i class="fas fa-tasks"></i> ${actionMsg}</div>
-            <div class="showroom-actions"><button class="btn btn-primary btn-sm" onclick="openDealerDetail('${d.id}')">View Details</button></div>
-          </div>`;
-      }).join('');
-      if (!dealers.length) grid.innerHTML = `<div class="card empty-state" style="grid-column:1/-1;"><i class="fas fa-users" style="font-size:2rem;opacity:0.5;"></i><h3>No dealers found</h3><button class="btn btn-primary" onclick="openAddDealerModal()">+ Add Dealer</button></div>`;
-    }
+  // Local fallback
+  try {
+    const key = "kpi_audit_local";
+    const existing = JSON.parse(localStorage.getItem(key) || "[]");
+    existing.unshift(record);
+    localStorage.setItem(key, JSON.stringify(existing.slice(0, 500)));
+    allAuditLogs = [record, ...allAuditLogs].slice(0, 500);
+    renderAuditTable();
+    populateAuditUserFilter();
+  } catch (e2) {
+    console.warn("Audit local save failed:", e2);
   }
+}
 
-  window.openShowroomDetail = async (id) => {
-    const showroom = state.showrooms.find(s => s.id === id);
-    if (!showroom) { showToast('Showroom not found', 'error'); return; }
-    currentShowroomIdForDetail = id;
-    document.getElementById('showroomDetailTitle').innerHTML = `${escapeHtml(showroom.name)} - Phase Tracker`;
-    const startDate = showroom.startDate ? new Date(showroom.startDate) : null;
-    const today = new Date();
-    let tableHtml = `<table class="phase-table"><thead><tr><th>Phase</th><th>Plan Days</th><th>Target Date</th><th>Actual</th><th>Status</th><th>Variance</th><th>Notes</th></tr></thead><tbody>`;
-    for (const phase of PHASES_CONFIG) {
-      const target = startDate ? new Date(startDate) : null;
-      if (target) target.setDate(startDate.getDate() + phase.days);
-      const actualDate = showroom.data?.[phase.id]?.actualDate || '';
-      let status = 'Pending', variance = '', statusClass = 'status-pending', isDelayed = false;
-      if (actualDate) {
-        const actual = new Date(actualDate);
-        const diff = Math.ceil((actual - target) / 86400000);
-        if (diff <= 0) { status = 'Completed'; statusClass = 'status-completed'; variance = diff < 0 ? `${Math.abs(diff)}d ahead` : 'On time'; }
-        else { status = 'Delayed'; statusClass = 'status-delayed'; variance = `${diff}d late`; isDelayed = true; }
-      } else if (target && target < today) {
-        const diff = Math.ceil((today - target) / 86400000);
-        status = 'Overdue'; statusClass = 'status-delayed'; variance = `${diff}d overdue`; isDelayed = true;
-      }
-      const rowStyle = isDelayed ? 'style="background:#fff5f5;"' : '';
-      tableHtml += `<tr ${rowStyle}><td><strong>${phase.name}</strong></td><td>${phase.days}</td><td>${target ? formatDate(target) : '--'}</td>
-        <td><input type="date" class="form-input phase-date" data-phase="${phase.id}" value="${actualDate}" style="width:130px;"></td>
-        <td><span class="status-badge ${statusClass}">${status}</span></td><td>${variance || '--'}</td>
-        <td><input type="text" class="form-input phase-note" data-phase="${phase.id}" value="${escapeHtml(showroom.data?.[phase.id]?.reason || '')}" placeholder="Notes..."></td></tr>`;
+function initAuditListener() {
+  if (auditUnsub) auditUnsub();
+
+  const q = query(
+    collection(db, "kpi_audit_logs"),
+    orderBy("timestamp", "desc"),
+    limit(300)
+  );
+
+  auditUnsub = onSnapshot(q, (snap) => {
+    const firebaseLogs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const localLogs = JSON.parse(localStorage.getItem("kpi_audit_local") || "[]");
+    allAuditLogs = [...localLogs, ...firebaseLogs]
+      .sort((a, b) => (b.timestamp || "").localeCompare(a.timestamp || ""))
+      .slice(0, 500);
+    renderAuditTable();
+    populateAuditUserFilter();
+  }, (err) => {
+    console.warn("Audit listener error:", err);
+    const tbody = document.getElementById("auditTableBody");
+    if (tbody) {
+      tbody.innerHTML = `<tr><td colspan="6" class="empty-audit"><i class="fas fa-exclamation-triangle" style="color:#dc5a3c;"></i> Error loading audit logs. Using local cache.</td></tr>`;
     }
-    tableHtml += `</tbody></table><div class="modal-actions"><button class="btn btn-success" onclick="saveShowroomPhases('${id}')">Save Changes</button></div>`;
-    document.getElementById('showroomDetailContent').innerHTML = tableHtml;
-    document.getElementById('showroomEditBtn').style.display = isAdmin() ? 'inline-flex' : 'none';
-    document.getElementById('showroomDeleteBtn').style.display = isAdmin() ? 'inline-flex' : 'none';
-    document.getElementById('showroomDetailModal').style.display = 'flex';
-  };
-
-  window.openShowroomEditFromDetail = () => {
-    if (!currentShowroomIdForDetail || !isAdmin()) return;
-    const showroom = state.showrooms.find(s => s.id === currentShowroomIdForDetail);
-    if (!showroom) { showToast('Showroom not found', 'error'); return; }
-    currentEditShowroomId = showroom.id;
-    document.getElementById('edit-showroom-name').value = showroom.name || '';
-    document.getElementById('edit-showroom-city').value = showroom.city || '';
-    document.getElementById('edit-showroom-rm').value = showroom.rm || '';
-    document.getElementById('edit-showroom-start').value = showroom.startDate || '';
-    closeModal('showroomDetailModal');
-    document.getElementById('edit-showroom-modal').style.display = 'flex';
-  };
-
-  window.deleteShowroomFromDetail = async () => {
-    if (!currentShowroomIdForDetail || !isAdmin()) return;
-    const showroom = state.showrooms.find(s => s.id === currentShowroomIdForDetail);
-    const name = showroom?.name || 'this showroom';
-    if (!confirm(`⚠️ PERMANENTLY DELETE "${name}"? This action cannot be undone.`)) return;
-    if (!confirm(`Please confirm again: "${name}" will be permanently removed.`)) return;
-    try {
-      await deleteDoc(doc(db, "showrooms", currentShowroomIdForDetail));
-      showToast(`Showroom "${name}" deleted`, 'success');
-      closeModal('showroomDetailModal');
-      renderDashboard();
-    } catch (error) {
-      console.error('Delete showroom failed', error);
-      showToast('Failed to delete showroom', 'error');
-    }
-  };
-
-  window.saveShowroomPhases = async (id) => {
-    const showroom = state.showrooms.find(s => s.id === id); if (!showroom) return;
-    try {
-      const updates = {};
-      document.querySelectorAll('.phase-date').forEach(i => { const pid = i.getAttribute('data-phase'); if (!updates[pid]) updates[pid] = {}; updates[pid].actualDate = i.value; });
-      document.querySelectorAll('.phase-note').forEach(i => { const pid = i.getAttribute('data-phase'); if (!updates[pid]) updates[pid] = {}; updates[pid].reason = i.value; });
-      await updateDoc(doc(db, "showrooms", id), { data: { ...showroom.data, ...updates }, updatedAt: serverTimestamp() });
-      showToast('Phases saved successfully', 'success');
-      closeModal('showroomDetailModal');
-      renderDashboard();
-    } catch (error) {
-      console.error('Save showroom phases failed', error);
-      showToast('Failed to save showroom phases', 'error');
-    }
-  };
-
-  window.saveEditShowroom = async () => {
-    if (!currentEditShowroomId) return;
-    const name = document.getElementById('edit-showroom-name').value.trim();
-    const city = document.getElementById('edit-showroom-city').value.trim();
-    const rm = document.getElementById('edit-showroom-rm').value.trim();
-    const startDate = document.getElementById('edit-showroom-start').value;
-    if (!name || !city || !rm || !startDate) { showToast('All fields are required', 'error'); return; }
-    if (hasDuplicateShowroomName(name, currentEditShowroomId)) { showToast('Showroom name already exists', 'error'); return; }
-    try {
-      await updateDoc(doc(db, "showrooms", currentEditShowroomId), { name, city, rm, startDate, updatedAt: serverTimestamp() });
-      showToast('Showroom updated successfully', 'success');
-      closeModal('edit-showroom-modal');
-      currentShowroomIdForDetail = currentEditShowroomId;
-      renderDashboard();
-      openShowroomDetail(currentEditShowroomId);
-    } catch (error) {
-      console.error('Edit showroom failed', error);
-      showToast('Failed to update showroom', 'error');
-    }
-  };
-
-  window.updateDealerStage = async (id, newStage) => {
-    const dealer = state.dealers.find(d => d.id === id); if (!dealer) return;
-    const currentStage = dealer.currentStage || 'Interested';
-    const currentIdx = DEALER_STAGES.indexOf(currentStage);
-    const nextIdx = DEALER_STAGES.indexOf(newStage);
-    if (nextIdx === -1) return;
-    if (Math.abs(nextIdx - currentIdx) > 1) {
-      showToast('Only adjacent stage transitions are allowed', 'warning');
-      return;
-    }
-    if (!confirm(`Move dealer from ${currentStage} to ${newStage}?`)) return;
-    try {
-      const stageLog = { ...(dealer.stageLog || {}) };
-      if (!stageLog[newStage]) stageLog[newStage] = new Date().toISOString();
-      await updateDoc(doc(db, "dealerOnboarding", id), { currentStage: newStage, status: newStage === 'Onboarded' ? 'Completed' : 'Active', stageLog, updatedAt: serverTimestamp() });
-      showToast(`Stage updated to ${newStage}`, 'success');
-      await openDealerDetail(id);
-      if (currentView === 'dealer') renderDealerView();
-      if (currentView === 'dashboard') renderDashboard();
-    } catch (error) {
-      console.error('Update dealer stage failed', error);
-      showToast('Failed to update dealer stage', 'error');
-    }
-  };
-
-  window.updateDealerDoc = async (id, docKey, checked) => {
-    const dealer = state.dealers.find(d => d.id === id); if (!dealer) return;
-    const docs = { ...(dealer.documents || {}), [docKey]: checked };
-    try {
-      const updates = { documents: docs, updatedAt: serverTimestamp() };
-      if (DOC_KEYS.every(k => docs[k])) {
-        updates.currentStage = 'Onboarded';
-        updates.status = 'Completed';
-      }
-      await updateDoc(doc(db, "dealerOnboarding", id), updates);
-      showToast('Document checklist updated', 'success');
-      await openDealerDetail(id);
-      if (currentView === 'dealer') renderDealerView();
-      if (currentView === 'dashboard') renderDashboard();
-    } catch (error) {
-      console.error('Update dealer document failed', error);
-      showToast('Failed to update checklist', 'error');
-    }
-  };
-
-  window.openDealerEditFromDetail = () => {
-    if (!currentDealerIdForDetail || !isAdmin()) return;
-    const dealer = state.dealers.find(d => d.id === currentDealerIdForDetail);
-    if (!dealer) { showToast('Dealer not found', 'error'); return; }
-    currentEditDealerId = dealer.id;
-    document.getElementById('edit-dealer-name').value = dealer.name || '';
-    document.getElementById('edit-dealer-city').value = dealer.city || '';
-    document.getElementById('edit-dealer-rm').value = dealer.rm || '';
-    document.getElementById('edit-dealer-start').value = dealer.startDate || '';
-    closeModal('dealerDetailModal');
-    document.getElementById('edit-dealer-modal').style.display = 'flex';
-  };
-
-  window.saveEditDealer = async () => {
-    if (!currentEditDealerId) return;
-    const name = document.getElementById('edit-dealer-name').value.trim();
-    const city = document.getElementById('edit-dealer-city').value.trim();
-    const rm = document.getElementById('edit-dealer-rm').value.trim();
-    const startDate = document.getElementById('edit-dealer-start').value;
-    if (!name || !city || !rm || !startDate) { showToast('All dealer fields are required', 'error'); return; }
-    try {
-      await updateDoc(doc(db, "dealerOnboarding", currentEditDealerId), { name, city, rm, startDate, updatedAt: serverTimestamp() });
-      showToast('Dealer updated successfully', 'success');
-      closeModal('edit-dealer-modal');
-      currentDealerIdForDetail = currentEditDealerId;
-      if (currentView === 'dealer') renderDealerView();
-      if (currentView === 'dashboard') renderDashboard();
-      openDealerDetail(currentEditDealerId);
-    } catch (error) {
-      console.error('Edit dealer failed', error);
-      showToast('Failed to update dealer', 'error');
-    }
-  };
-
-  window.deleteDealerFromDetail = async () => {
-    if (!currentDealerIdForDetail || !isAdmin()) return;
-    const dealer = state.dealers.find(d => d.id === currentDealerIdForDetail);
-    const dealerName = dealer?.name || 'this dealer';
-    if (!confirm(`Delete "${dealerName}" permanently? This action cannot be undone.`)) return;
-    if (!confirm(`Second confirmation: remove "${dealerName}" permanently now?`)) return;
-    try {
-      await deleteDoc(doc(db, "dealerOnboarding", currentDealerIdForDetail));
-      showToast(`Dealer "${dealerName}" deleted`, 'success');
-      closeModal('dealerDetailModal');
-      if (currentView === 'dealer') renderDealerView();
-      if (currentView === 'dashboard') renderDashboard();
-    } catch (error) {
-      console.error('Delete dealer failed', error);
-      showToast('Failed to delete dealer', 'error');
-    }
-  };
-
-  window.openDealerDetail = async (id) => {
-    const dealer = state.dealers.find(d => d.id === id); if (!dealer) return;
-    currentDealerIdForDetail = id;
-    document.getElementById('detailDealerName').innerHTML = escapeHtml(dealer.name);
-    const currentStage = dealer.currentStage || 'Interested';
-    const stageIndex = DEALER_STAGES.indexOf(currentStage);
-    let stagesHtml = `<div class="stage-stepper">`;
-    DEALER_STAGES.forEach((stage, idx) => { stagesHtml += `<div class="stage-step ${idx === stageIndex ? 'active' : (idx < stageIndex ? 'completed' : '')}" onclick="updateDealerStage('${id}', '${stage}')">${stage}</div>`; });
-    stagesHtml += `</div>`;
-    const documents = dealer.documents || {};
-    let docsHtml = `<div class="doc-section"><h4>📋 Document Checklist</h4><div class="doc-grid">`;
-    DOC_KEYS.forEach(key => {
-      const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
-      docsHtml += `<div class="doc-item"><input type="checkbox" class="doc-checkbox" ${documents[key] ? 'checked' : ''} onchange="updateDealerDoc('${id}', '${key}', this.checked)"><span class="doc-label">${label}</span><span class="doc-status ${documents[key] ? 'completed' : 'pending'}">${documents[key] ? '✓' : '⏳'}</span></div>`;
-    });
-    docsHtml += `</div></div>`;
-    const timeline = calculateDealerTimeline(dealer);
-    document.getElementById('dealerDetailContent').innerHTML = stagesHtml + docsHtml + `<div style="margin-top:20px;"><strong>Delay:</strong> ${timeline.delayDays} days (${timeline.level})</div>`;
-    document.getElementById('dealerEditBtn').style.display = isAdmin() ? 'inline-flex' : 'none';
-    document.getElementById('dealerDeleteBtn').style.display = isAdmin() ? 'inline-flex' : 'none';
-    document.getElementById('dealerDetailModal').style.display = 'flex';
-  };
-
-  window.showDashboard = () => { currentView = 'dashboard'; document.getElementById('dashboardView').style.display = 'block'; document.getElementById('analyticsView').style.display = 'none'; document.getElementById('dealerView').style.display = 'none'; renderDashboard(); };
-  window.showAnalytics = () => { currentView = 'analytics'; document.getElementById('dashboardView').style.display = 'none'; document.getElementById('analyticsView').style.display = 'block'; document.getElementById('dealerView').style.display = 'none'; renderAnalytics(); };
-  window.openDealerModule = () => { currentView = 'dealer'; document.getElementById('dashboardView').style.display = 'none'; document.getElementById('analyticsView').style.display = 'none'; document.getElementById('dealerView').style.display = 'block'; renderDealerView(); };
-  window.applyFilters = renderDashboard;
-  window.resetFilters = () => { document.getElementById('globalSearch').value = ''; document.getElementById('filterRM').value = 'all'; renderDashboard(); };
-  window.filterDealers = renderDealerView;
-  window.resetDealerFilters = () => { document.getElementById('dealerFilterStatus').value = 'all'; document.getElementById('dealerFilterStage').value = 'all'; document.getElementById('dealerFilterRM').value = 'all'; document.getElementById('dealerSearch').value = ''; renderDealerView(); };
-  window.openAddDealerModal = () => document.getElementById('addDealerModal').style.display = 'flex';
-  window.openAddShowroomModal = () => document.getElementById('addShowroomModal').style.display = 'flex';
-  window.closeModal = (id) => document.getElementById(id).style.display = 'none';
-  
-  window.confirmAddShowroom = async () => {
-    const name = document.getElementById('newShowroomName').value.trim();
-    const city = document.getElementById('newShowroomCity').value.trim();
-    const rm = document.getElementById('newShowroomRM').value.trim();
-    const start = document.getElementById('newShowroomStart').value;
-    if (!name || !city || !rm || !start) { showToast('All fields are required', 'error'); return; }
-    if (hasDuplicateShowroomName(name)) { showToast('Showroom name already exists', 'error'); return; }
-    try {
-      await addDoc(collection(db, "showrooms"), { name, city, rm, startDate: start, data: {}, createdBy: currentUserId, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
-      closeModal('addShowroomModal');
-      showToast(`Showroom "${name}" created successfully`, 'success');
-      document.getElementById('newShowroomName').value = '';
-      document.getElementById('newShowroomCity').value = '';
-      document.getElementById('newShowroomRM').value = '';
-      document.getElementById('newShowroomStart').value = '';
-      renderDashboard();
-    } catch (error) {
-      console.error('Create showroom failed', error);
-      showToast('Failed to create showroom', 'error');
-    }
-  };
-  
-  window.confirmAddDealer = async () => {
-    const name = document.getElementById('newDealerName').value.trim();
-    const city = document.getElementById('newDealerCity').value.trim();
-    const rm = document.getElementById('newDealerRM').value.trim();
-    const start = document.getElementById('newDealerStart').value;
-    if (!name || !city || !rm || !start) { showToast('All fields are required', 'error'); return; }
-    try {
-      await addDoc(collection(db, "dealerOnboarding"), { name, city, rm, startDate: start, currentStage: 'Interested', status: 'Active', documents: {}, createdBy: currentUserId, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
-      closeModal('addDealerModal');
-      showToast(`Dealer "${name}" created successfully`, 'success');
-      document.getElementById('newDealerName').value = '';
-      document.getElementById('newDealerCity').value = '';
-      document.getElementById('newDealerRM').value = '';
-      document.getElementById('newDealerStart').value = '';
-      if (currentView === 'dealer') renderDealerView();
-      if (currentView === 'dashboard') renderDashboard();
-    } catch (error) {
-      console.error('Create dealer failed', error);
-      showToast('Failed to create dealer', 'error');
-    }
-  };
-  
-  window.exportDashboardReport = () => {
-    try {
-      const wb = XLSX.utils.book_new();
-      const showroomData = state.showrooms.map(s => {
-        const stats = calculateShowroomStats(s);
-        return {
-          'Showroom Name': s.name || '',
-          'City': s.city || '',
-          'RM': s.rm || '',
-          'Start Date': s.startDate || '',
-          'Completion %': stats.pct,
-          'Avg Delay (days)': stats.avgDelay,
-          'Max Delay (days)': stats.maxDelay,
-          'Total Delay (days)': stats.totalDelay
-        };
-      });
-      const dealerData = state.dealers.map(d => ({
-        'Dealer Name': d.name || '',
-        'City': d.city || '',
-        'RM': d.rm || '',
-        'Start Date': d.startDate || '',
-        'Current Stage': d.currentStage || 'Interested',
-        'Status': d.status || '',
-        'Doc Completion %': docProgress(d.documents),
-        'Delay Days': calculateDealerTimeline(d).delayDays,
-        'Delay Level': calculateDealerTimeline(d).level
-      }));
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(showroomData), 'Showrooms');
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dealerData), 'Dealers');
-      XLSX.writeFile(wb, `AIS_Report_${new Date().toISOString().slice(0,10)}.xlsx`);
-      showToast('Report exported successfully', 'success');
-    } catch(e) {
-      console.error('Export failed', e);
-      showToast('Export failed', 'error');
-    }
-  };
-  
-  window.generatePDF = async () => {
-    try {
-      const element = document.getElementById('mainContent');
-      const canvas = await html2canvas(element, { scale: 2 });
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jspdf.jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-      const imgProps = pdf.getImageProperties(imgData);
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`AIS_Dashboard_${new Date().toISOString().slice(0,10)}.pdf`);
-      showToast('PDF generated successfully', 'success');
-    } catch(e) {
-      console.error('PDF generation failed', e);
-      showToast('PDF generation failed', 'error');
-    }
-  };
-  
-  window.backupData = () => {
-    try {
-      const backup = { showrooms: state.showrooms, dealers: state.dealers, exportedAt: new Date().toISOString() };
-      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `ais_backup_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-      showToast('Backup downloaded successfully', 'success');
-    } catch(e) {
-      console.error('Backup failed', e);
-      showToast('Backup failed', 'error');
-    }
-  };
-  
-  window.logout = async () => {
-    try {
-      await signOut(auth);
-      showToast('Logged out successfully', 'success');
-    } catch (error) {
-      console.error('Logout failed', error);
-      showToast(parseFirebaseError(error, 'Failed to log out. Please try again.'), 'error');
-    }
-  };
-
-  function cleanupRealtimeListeners() {
-    realtimeUnsubscribers.forEach(unsubscribe => unsubscribe());
-    realtimeUnsubscribers = [];
-  }
-
-  function initRealtime() {
-    cleanupRealtimeListeners();
-    isLoading = true;
-    renderDashboard();
-    const showroomsUnsub = onSnapshot(collection(db, "showrooms"), (snap) => {
-      state.showrooms = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      const rmSelect = document.getElementById('filterRM');
-      if (rmSelect) {
-        const rms = [...new Set(state.showrooms.map(s => s.rm).filter(Boolean))];
-        rmSelect.innerHTML = '<option value="all">All RMs</option>' + rms.map(rm => `<option value="${rm}">${rm}</option>`).join('');
-      }
-      isLoading = false;
-      if (currentView === 'dashboard') renderDashboard();
-      else if (currentView === 'analytics') renderAnalytics();
-    }, (error) => {
-      console.error('Showrooms listener failed', error);
-      showToast(parseFirebaseError(error, 'Unable to load showrooms right now.'), 'error');
-      isLoading = false;
-    });
-
-    const dealersUnsub = onSnapshot(collection(db, "dealerOnboarding"), (snap) => {
-      state.dealers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      const rmSelect = document.getElementById('dealerFilterRM');
-      if (rmSelect) {
-        const rms = [...new Set(state.dealers.map(d => d.rm).filter(Boolean))];
-        rmSelect.innerHTML = '<option value="all">All RMs</option>' + rms.map(rm => `<option value="${rm}">${rm}</option>`).join('');
-      }
-      if (currentView === 'dashboard') renderDashboard();
-      else if (currentView === 'analytics') renderAnalytics();
-      else if (currentView === 'dealer') renderDealerView();
-    }, (error) => {
-      console.error('Dealers listener failed', error);
-      showToast(parseFirebaseError(error, 'Unable to load dealer data right now.'), 'error');
-    });
-
-    realtimeUnsubscribers = [showroomsUnsub, dealersUnsub];
-  }
-
-  async function loadUserRole(uid) {
-    try {
-      const snap = await getDoc(doc(db, "users", uid));
-      if (!snap.exists()) throw new Error('missing-user-role');
-      const role = snap.data()?.role;
-      if (role !== 'admin' && role !== 'viewer') throw new Error('invalid-user-role');
-      userRole = role;
-      return role;
-    } catch (error) {
-      console.error('Load user role failed', error);
-      throw error;
-    }
-  }
-
-  function setLoginError(message) {
-    const errorEl = document.getElementById('loginError');
-    errorEl.textContent = message;
-    errorEl.style.display = 'block';
-    setTimeout(() => { errorEl.style.display = 'none'; }, 3500);
-  }
-
-  window.handleLogin = async () => {
-    const email = document.getElementById('loginUsername').value.trim();
-    const password = document.getElementById('loginPassword').value;
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      document.getElementById('loginPassword').value = '';
-    } catch (error) {
-      console.error('Login failed', error);
-      setLoginError(parseFirebaseError(error, 'Login failed. Please verify your credentials.'));
-    }
-  };
-
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-      cleanupRealtimeListeners();
-      currentUserId = null;
-      userRole = null;
-      state = { showrooms: [], dealers: [] };
-      toggleAuthenticatedUI();
-      return;
-    }
-
-    currentUserId = user.uid;
-    try {
-      await loadUserRole(user.uid);
-      toggleAuthenticatedUI();
-      initRealtime();
-      showDashboard();
-    } catch (error) {
-      showToast('Unable to load your access role. Contact your administrator.', 'error');
-      try {
-        await signOut(auth);
-      } catch (logoutError) {
-        console.error('Forced sign-out failed', logoutError);
-      }
+    // Still try to show local logs
+    const localLogs = JSON.parse(localStorage.getItem("kpi_audit_local") || "[]");
+    if (localLogs.length > 0) {
+      allAuditLogs = localLogs;
+      renderAuditTable();
     }
   });
+}
+
+function renderAuditTable() {
+  const kpiFilter  = document.getElementById("auditKpiFilter")?.value  || "all";
+  const userFilter = document.getElementById("auditUserFilter")?.value || "all";
+  const dateFilter = document.getElementById("auditDateFilter")?.value || "";
+  const tbody      = document.getElementById("auditTableBody");
+  if (!tbody) return;
+
+  let logs = [...allAuditLogs];
+  if (kpiFilter  !== "all") logs = logs.filter(l => l.kpiId === kpiFilter);
+  if (userFilter !== "all") logs = logs.filter(l => (l.updatedBy || "") === userFilter);
+  if (dateFilter)           logs = logs.filter(l => (l.timestamp || "").startsWith(dateFilter));
+
+  if (!logs.length) {
+    tbody.innerHTML = `<tr><td colspan="6" class="empty-audit"><i class="fas fa-inbox"></i> No audit records found</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = logs.slice(0, 150).map(log => `
+    <tr>
+      <td style="font-weight:600;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(log.kpiName||log.kpiId)}">${esc(log.kpiName || log.kpiId)}</td>
+      <td>${esc(log.fieldChanged || "—")}</td>
+      <td style="font-family:monospace">${esc(log.oldValue)}</td>
+      <td style="font-family:monospace;font-weight:600;color:#1f6392">${esc(log.newValue)}</td>
+      <td>${esc(log.updatedBy || "Unknown")}</td>
+      <td style="white-space:nowrap;color:#8faabb">${log.timestamp ? new Date(log.timestamp).toLocaleString("en-IN") : "—"}</td>
+    </tr>`).join("");
+}
+
+function populateAuditUserFilter() {
+  const sel  = document.getElementById("auditUserFilter");
+  if (!sel) return;
+  const curr = sel.value;
+  const users = [...new Set(allAuditLogs.map(l => l.updatedBy).filter(Boolean))].sort();
+  sel.innerHTML = `<option value="all">All Users</option>` +
+    users.map(u => `<option value="${esc(u)}" ${u === curr ? "selected" : ""}>${esc(u)}</option>`).join("");
+}
+
+/* ═══════════════════════════════
+   FIREBASE WRITE OPS (FIXED)
+═══════════════════════════════ */
+async function updateKpiMonthly(kpiId, monthIndex, value) {
+  if (!isAdmin) {
+    showToast("Viewer mode: Cannot edit", "error");
+    return;
+  }
+  
+  const currentCalendarMonth = getCurrentCalendarMonth();
+  const currentFinancialMonth = getFinancialMonth();
+  
+  // Past months lock logic: Cannot edit months before current calendar month
+  if (monthIndex < currentFinancialMonth) {
+    showToast("Past months are locked", "error");
+    return;
+  }
+  
+  const num = parseFloat(value);
+  if (isNaN(num) || num < 0) { 
+    showToast("Invalid value", "error"); 
+    return; 
+  }
+  
+  const kpi = kpiData.find(k => k.id === kpiId);
+  if (!kpi) return;
+  
+  const oldValue = kpi.monthlyActuals?.[monthIndex] ?? 0;
+  const monthlyActuals = { ...(kpi.monthlyActuals || buildEmptyMonthlyActuals()), [monthIndex]: num };
+  
+  try {
+    await updateDoc(doc(db, "kpis", kpiId), { 
+      monthlyActuals, 
+      lastUpdated: serverTimestamp(), 
+      updatedBy: currentUserEmail || currentUserId 
+    });
+    await logAudit(kpiId, kpi.name, `monthly_${FY_MONTHS[monthIndex]}`, oldValue, num);
+    showToast(`${kpi.name} — ${FY_MONTHS[monthIndex]} updated`, "success");
+    // Refresh charts after update
+    setTimeout(() => renderCharts(), 100);
+  } catch (e) { 
+    showToast("Save failed: " + e.message, "error"); 
+  }
+}
+
+async function updateYearlyPlan(kpiId, value) {
+  if (!isAdmin) {
+    showToast("Viewer mode: Cannot edit", "error");
+    return;
+  }
+  
+  const num = parseFloat(value);
+  if (isNaN(num) || num <= 0) { 
+    showToast("Invalid plan value", "error"); 
+    return; 
+  }
+  
+  const kpi = kpiData.find(k => k.id === kpiId);
+  if (!kpi) return;
+  
+  const oldValue = kpi.yearlyPlan;
+  try {
+    await updateDoc(doc(db, "kpis", kpiId), { 
+      yearlyPlan: num, 
+      lastUpdated: serverTimestamp(), 
+      updatedBy: currentUserEmail || currentUserId 
+    });
+    await logAudit(kpiId, kpi.name, "yearly_plan", oldValue, num);
+    showToast(`${kpi.name} — yearly plan updated`, "success");
+    // Refresh charts after update
+    setTimeout(() => renderCharts(), 100);
+  } catch (e) { 
+    showToast("Save failed: " + e.message, "error"); 
+  }
+}
+
+/* ═══════════════════════════════
+   RENDER: KPI CARDS
+═══════════════════════════════ */
+function renderKpiCards() {
+  const container = document.getElementById("kpiCardsContainer");
+  if (!container) return;
+  const enriched  = getEnrichedKpis();
+  container.innerHTML = "";
+
+  enriched.forEach(kpi => {
+    const m  = kpi.metrics;
+    const fc = m.forecastPct >= 90 ? "forecast-good" : m.forecastPct >= 70 ? "forecast-warning" : "forecast-bad";
+    const sc = `status-${m.status}`;
+    const fc2 = `fill-${m.status}`;
+
+    const card = document.createElement("div");
+    card.className = "kpi-card";
+    card.setAttribute("data-id", kpi.id);
+    card.addEventListener("click", (e) => {
+      if (e.target.tagName !== "INPUT") openKpiDetailModal(kpi.id);
+    });
+
+    card.innerHTML = `
+      <div class="card-header">
+        <span class="kpi-name">${esc(kpi.name)}</span>
+        <span class="status-badge ${sc}">${m.status.toUpperCase()}</span>
+      </div>
+      <div class="kpi-dual-section">
+        <div class="kpi-block">
+          <div class="block-label">📅 YEARLY</div>
+          <div class="block-value">${pct(m.yearlyPct)}</div>
+          <div class="block-sub">${fmt(kpi.yearlyPlan)} plan → ${fmt(m.yearlyActual)} actual</div>
+        </div>
+        <div class="kpi-block">
+          <div class="block-label">📆 ${FY_MONTHS[currentMonth]}</div>
+          <div class="block-value">${pct(m.monthlyPct)}</div>
+          <div class="block-sub">${fmt(m.monthlyPlan)} plan → ${fmt(m.monthlyActual)} actual</div>
+        </div>
+      </div>
+      <div class="progress-section">
+        <div class="progress-meta"><span>Yearly Progress</span><span>${pct(m.yearlyPct)}</span></div>
+        <div class="progress-bar-bg"><div class="progress-fill ${fc2}" style="width:${Math.min(m.yearlyPct,100)}%;"></div></div>
+        <div class="progress-meta"><span>${FY_MONTHS[currentMonth]} Progress</span><span>${pct(m.monthlyPct)}</span></div>
+        <div class="progress-bar-bg"><div class="progress-fill ${fc2}" style="width:${Math.min(m.monthlyPct,100)}%;"></div></div>
+      </div>
+      <div class="card-footer-row">
+        <span class="gap-text"><i class="fas fa-arrows-up-down"></i> Gap: ${fmt(m.gap)}</span>
+        <span class="forecast-badge ${fc}">Forecast: ${fmt(m.forecastYearly)} (${pct(m.forecastPct)})</span>
+      </div>`;
+    container.appendChild(card);
+  });
+}
+
+/* ═══════════════════════════════
+   RENDER: TABLE
+═══════════════════════════════ */
+function renderTable() {
+  const finMonth = getFinancialMonth();
+  const monthLabel = document.getElementById("tableMonthLabel");
+  if (monthLabel) monthLabel.textContent = `(${FY_MONTHS[currentMonth]})`;
+  
+  let enriched = getEnrichedKpis();
+  if (currentKpiFilter !== "all") enriched = enriched.filter(k => k.id === currentKpiFilter);
+  if (currentSort === "achievement") enriched.sort((a,b) => b.metrics.yearlyPct - a.metrics.yearlyPct);
+  else if (currentSort === "gap")   enriched.sort((a,b) => Math.abs(b.metrics.gap) - Math.abs(a.metrics.gap));
+
+  const tbody = document.getElementById("kpiTableBody");
+  if (!tbody) return;
+  tbody.innerHTML = "";
+
+  enriched.forEach(kpi => {
+    const m   = kpi.metrics;
+    const sc  = `status-${m.status}`;
+    const isPastMonth = currentMonth < finMonth;
+
+    const row = tbody.insertRow();
+    row.innerHTML = `
+      <td style="font-weight:600;max-width:200px">${esc(kpi.name)}</td>
+      <td>
+        <input type="number" min="0" step="1" class="editable-input yearly-plan-input"
+          data-id="${kpi.id}" value="${fmt(kpi.yearlyPlan)}"
+          ${!isAdmin ? "disabled" : ""}>
+      </td>
+      <td style="font-weight:600;font-family:monospace">${fmt(m.yearlyActual)}</td>
+      <td><span class="status-chip ${sc}" style="padding:4px 10px;border-radius:20px;font-size:0.72rem;">${pct(m.yearlyPct)}</span></td>
+      <td style="font-family:monospace">${fmt(m.monthlyPlan)}</td>
+      <td>
+        <input type="number" min="0" step="1" class="editable-input monthly-actual-input"
+          data-id="${kpi.id}" data-month="${currentMonth}" value="${fmt(m.monthlyActual)}"
+          ${!isAdmin || isPastMonth ? "disabled" : ""}
+          ${isPastMonth ? 'title="Past month locked"' : ""}>
+        ${isPastMonth ? '<i class="fas fa-lock locked-icon"></i>' : ""}
+      </td>
+      <td>${pct(m.monthlyPct)}</td>
+      <td style="font-family:monospace">${m.forecastYearly > 0 ? fmt(m.forecastYearly) + " (" + pct(m.forecastPct) + ")" : "—"}</td>
+      <td><span class="status-chip ${sc}" style="padding:4px 10px;border-radius:20px;font-size:0.72rem;">${m.status.toUpperCase()}</span></td>
+    `;
+  });
+
+  document.querySelectorAll(".yearly-plan-input").forEach(inp => {
+    inp.removeEventListener("change", yearlyChangeHandler);
+    inp.addEventListener("change", yearlyChangeHandler);
+  });
+  
+  document.querySelectorAll(".monthly-actual-input:not([disabled])").forEach(inp => {
+    inp.removeEventListener("change", monthlyChangeHandler);
+    inp.addEventListener("change", monthlyChangeHandler);
+  });
+}
+
+function yearlyChangeHandler(e) {
+  updateYearlyPlan(e.target.dataset.id, e.target.value);
+}
+
+function monthlyChangeHandler(e) {
+  updateKpiMonthly(e.target.dataset.id, parseInt(e.target.dataset.month), e.target.value);
+}
+
+/* ═══════════════════════════════
+   RENDER: SUMMARY BAR
+═══════════════════════════════ */
+function renderSummaryBar() {
+  const enriched = getEnrichedKpis();
+  if (!enriched.length) return;
+  const avgAch  = enriched.reduce((a,k) => a + k.metrics.yearlyPct, 0) / enriched.length;
+  const avgGap  = enriched.reduce((a,k) => a + k.metrics.gap, 0) / enriched.length;
+  const avgFcst = enriched.reduce((a,k) => a + k.metrics.forecastPct, 0) / enriched.length;
+  const green   = enriched.filter(k => k.metrics.status === "green").length;
+  const amber   = enriched.filter(k => k.metrics.status === "amber").length;
+  const red     = enriched.filter(k => k.metrics.status === "red").length;
+
+  const overallEl = document.getElementById("overallScore");
+  const avgGapEl = document.getElementById("avgGap");
+  const forecastEl = document.getElementById("forecastRatio");
+  const healthEl = document.getElementById("healthIndicators");
+  
+  if (overallEl) overallEl.textContent = pct(avgAch);
+  if (avgGapEl) avgGapEl.textContent = fmt(avgGap);
+  if (forecastEl) forecastEl.textContent = pct(avgFcst);
+  if (healthEl) {
+    healthEl.innerHTML = `
+      <span class="health-badge health-green">🟢 Green: ${green}</span>
+      <span class="health-badge health-amber">🟡 Amber: ${amber}</span>
+      <span class="health-badge health-red">🔴 Red: ${red}</span>`;
+  }
+}
+
+/* ═══════════════════════════════
+   RENDER: CHARTS (FIXED)
+═══════════════════════════════ */
+function renderCharts() {
+  const enriched = getEnrichedKpis();
+  const labels   = enriched.map(k => k.name.length > 18 ? k.name.slice(0,16) + "…" : k.name);
+  Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
+  Chart.defaults.color = "#5b6e8c";
+
+  const ctxBar = document.getElementById("barPlanActualChart")?.getContext("2d");
+  if (ctxBar) {
+    if (barChart) barChart.destroy();
+    barChart = new Chart(ctxBar, {
+      type:"bar",
+      data:{ labels, datasets:[
+        { label:"Yearly Plan",   data:enriched.map(k=>k.yearlyPlan),          backgroundColor:"#c5d9ec", borderRadius:6 },
+        { label:"Yearly Actual", data:enriched.map(k=>k.metrics.yearlyActual), backgroundColor:"#1f6392", borderRadius:6 }
+      ]},
+      options:{ responsive:true, maintainAspectRatio:true, plugins:{ legend:{ position:"top" }}, scales:{ y:{ grid:{ color:"#eef3fa" }}, x:{ grid:{ display:false }}}}
+    });
+  }
+
+  const ctxH = document.getElementById("horizontalAchievementChart")?.getContext("2d");
+  if (ctxH) {
+    if (horizChart) horizChart.destroy();
+    horizChart = new Chart(ctxH, {
+      type:"bar",
+      data:{ labels, datasets:[{ label:"Achievement %", data:enriched.map(k=>parseFloat(fmt(k.metrics.yearlyPct,1))),
+        backgroundColor:enriched.map(k => k.metrics.status === "green" ? "#2b9e5c" : k.metrics.status === "amber" ? "#e68a2e" : "#dc5a3c"),
+        borderRadius:6 }]},
+      options:{ indexAxis:"y", responsive:true, maintainAspectRatio:true, plugins:{ legend:{ display:false }}, scales:{ x:{ max:110, grid:{ color:"#eef3fa" }}, y:{ grid:{ display:false }}}}
+    });
+  }
+}
+
+/* ═══════════════════════════════
+   MODAL: KPI DETAIL (FIXED)
+═══════════════════════════════ */
+function openKpiDetailModal(kpiId) {
+  const kpi = kpiData.find(k => k.id === kpiId);
+  if (!kpi) return;
+  currentModalKpiId = kpiId;
+  const finMonth = getFinancialMonth();
+  const monthlyActuals = kpi.monthlyActuals || buildEmptyMonthlyActuals();
+  const monthlyPlan    = kpi.yearlyPlan / 12;
+  const isPercentKpi = (kpi.unit === "%") || (kpi.id === "cft_feedback_adherence");
+
+  const modalTitle = document.getElementById("modalKpiName");
+  if (modalTitle) modalTitle.textContent = kpi.name + " — Monthly Breakdown";
+
+  const monthSel = document.getElementById("monthSelectorContainer");
+  if (monthSel) {
+    monthSel.innerHTML = FY_MONTHS.map((m, idx) => {
+      let cls = "month-btn";
+      if (idx < finMonth) cls += " past";
+      if (idx > finMonth) cls += " future";
+      if (idx === currentMonth) cls += " active";
+      return `<button class="${cls}" data-month="${idx}" ${idx > finMonth ? "disabled" : ""}>${m}</button>`;
+    }).join("");
+    
+    document.querySelectorAll(".month-btn").forEach(btn => {
+      btn.removeEventListener("click", monthBtnHandler);
+      btn.addEventListener("click", monthBtnHandler);
+    });
+  }
+  
+  function monthBtnHandler(e) {
+    const idx = parseInt(e.target.dataset.month);
+    const finMonthLocal = getFinancialMonth();
+    if (idx > finMonthLocal) return;
+    currentMonth = idx;
+    document.querySelectorAll(".month-btn").forEach(b => b.classList.remove("active"));
+    e.target.classList.add("active");
+    openKpiDetailModal(kpiId);
+    renderKpiCards(); 
+    renderTable(); 
+    renderSummaryBar();
+    const monthSelect = document.getElementById("monthSelect");
+    if (monthSelect) monthSelect.value = idx;
+  }
+
+  const histContainer = document.getElementById("modalHistoryContainer");
+  if (histContainer) {
+    histContainer.innerHTML = `
+      <table class="month-table">
+        <thead><tr><th>Month</th><th>Monthly Plan</th><th>Actual</th><th>Achievement %</th><th>Status</th></tr></thead>
+        <tbody>${FY_MONTHS.map((mn, idx) => {
+          const actual  = monthlyActuals[idx] ?? 0;
+          const achPct  = monthlyPlan > 0 ? Math.min((actual / monthlyPlan) * 100, 100) : 0;
+          const locked  = idx < finMonth;
+          const future  = idx > finMonth;
+          const stColor = achPct >= 90 ? "#0d6e3e" : achPct >= 60 ? "#b45f06" : "#bc3f2c";
+          return `<tr ${idx === currentMonth ? 'style="background:#f0f6ff;"' : ""}>
+            <td style="font-weight:600">${mn} ${idx === currentMonth ? "●" : ""}</td>
+            <td style="font-family:monospace">${fmt(monthlyPlan)}</td>
+            <td><input type="number" min="0" step="1" class="monthly-edit-input editable-input"
+              data-month="${idx}" value="${fmt(actual)}" style="width:90px;"
+              ${(!isAdmin || locked || future) ? "disabled" : ""}
+              ${locked ? 'title="Past month locked"' : future ? 'title="Future month"' : ""}></td>
+            <td style="font-family:monospace;color:${stColor};font-weight:600">${pct(achPct)}</td>
+            <td>${locked ? '<i class="fas fa-lock" style="color:#8faabb;font-size:0.75rem;"></i>' : future ? '<i class="fas fa-clock" style="color:#c5d9ec;font-size:0.75rem;"></i>' : ""}</td>
+           </tr>`;
+        }).join("")}</tbody>
+       </table>`;
+  }
+
+  document.querySelectorAll(".monthly-edit-input:not([disabled])").forEach(inp => {
+    inp.removeEventListener("change", monthlyEditHandler);
+    inp.addEventListener("change", monthlyEditHandler);
+  });
+  
+  async function monthlyEditHandler(e) {
+    await updateKpiMonthly(kpiId, parseInt(e.target.dataset.month), e.target.value);
+    setTimeout(() => openKpiDetailModal(kpiId), 600);
+  }
+
+  const ctx = document.getElementById("trendChartCanvas")?.getContext("2d");
+  if (ctx) {
+    if (trendChartInstance) trendChartInstance.destroy();
+    trendChartInstance = new Chart(ctx, {
+      type:"line",
+      data:{
+        labels: FY_MONTHS,
+        datasets:[
+          { label:"Actual", data:FY_MONTHS.map((_,i) => monthlyActuals[i] ?? 0), borderColor:"#1f6392", backgroundColor:"rgba(31,99,146,0.08)", fill:true, tension:0.3, pointRadius:4 },
+          { label:"Plan (Monthly Avg)", data:FY_MONTHS.map(() => parseFloat(fmt(monthlyPlan,1))), borderColor:"#e68a2e", borderDash:[6,4], pointRadius:0 }
+        ]
+      },
+      options:{ responsive:true, maintainAspectRatio:true, plugins:{ legend:{ position:"top" }}, scales:{ y:{ beginAtZero:true, grid:{ color:"#eef3fa" }}, x:{ grid:{ display:false }}}}
+    });
+  }
+
+  const modal = document.getElementById("kpiModal");
+  if (modal) modal.classList.add("active");
+}
+
+/* ═══════════════════════════════
+   FILTER DROPDOWNS
+═══════════════════════════════ */
+function populateMonthSelect() {
+  const sel = document.getElementById("monthSelect");
+  if (!sel) return;
+  const finMonth = getFinancialMonth();
+  sel.innerHTML = FY_MONTHS.map((m, idx) =>
+    `<option value="${idx}" ${idx === currentMonth ? "selected" : ""} ${idx > finMonth ? "disabled" : ""}>${m}${idx > finMonth ? " (future)" : ""}</option>`
+  ).join("");
+  
+  sel.removeEventListener("change", monthSelectHandler);
+  sel.addEventListener("change", monthSelectHandler);
+}
+
+function monthSelectHandler(e) {
+  const val = parseInt(e.target.value);
+  const finMonth = getFinancialMonth();
+  if (val > finMonth) { 
+    e.target.value = currentMonth; 
+    return; 
+  }
+  currentMonth = val;
+  renderKpiCards(); 
+  renderTable(); 
+  renderSummaryBar(); 
+  renderCharts();
+}
+
+function populateKpiFilter() {
+  const sel  = document.getElementById("kpiSelectFilter");
+  if (!sel) return;
+  const curr = sel.value;
+  sel.innerHTML = `<option value="all">All KPIs</option>` +
+    kpiData.map(k => `<option value="${k.id}" ${k.id === curr ? "selected" : ""}>${esc(k.name)}</option>`).join("");
+  
+  sel.removeEventListener("change", kpiFilterHandler);
+  sel.addEventListener("change", kpiFilterHandler);
+  
+  const auditSel = document.getElementById("auditKpiFilter");
+  if (auditSel) {
+    const ac = auditSel.value;
+    auditSel.innerHTML = `<option value="all">All KPIs</option>` +
+      kpiData.map(k => `<option value="${k.id}" ${k.id === ac ? "selected" : ""}>${esc(k.name)}</option>`).join("");
+  }
+}
+
+function kpiFilterHandler(e) {
+  currentKpiFilter = e.target.value; 
+  renderTable();
+}
+
+function sortSelectHandler(e) {
+  currentSort = e.target.value; 
+  renderTable();
+}
+
+/* ═══════════════════════════════
+   FULL RENDER
+═══════════════════════════════ */
+function renderAll() {
+  renderKpiCards();
+  renderTable();
+  renderSummaryBar();
+  renderCharts();
+  populateKpiFilter();
+}
+
+/* ═══════════════════════════════
+   FIREBASE REALTIME LISTENER
+═══════════════════════════════ */
+function initKpiListener() {
+  if (realtimeUnsub) realtimeUnsub();
+  realtimeUnsub = onSnapshot(collection(db, "kpis"), async (snapshot) => {
+    const fetched = [];
+    snapshot.forEach(d => fetched.push({ id: d.id, ...d.data() }));
+
+    for (const def of KPI_DEFINITIONS) {
+      const existing = fetched.find(f => f.id === def.id);
+      if (!existing) {
+        const newDoc = {
+          id: def.id, 
+          name: def.name, 
+          yearlyPlan: def.yearlyPlan,
+          unit: def.unit,
+          monthlyActuals: buildEmptyMonthlyActuals(),
+          lastUpdated: serverTimestamp()
+        };
+        try { 
+          await setDoc(doc(db, "kpis", def.id), newDoc); 
+        } catch (e) { 
+          console.warn(e); 
+        }
+        fetched.push({ ...newDoc });
+      } else {
+        // Ensure unit is set
+        if (!existing.unit && def.unit) {
+          existing.unit = def.unit;
+          try { 
+            await updateDoc(doc(db, "kpis", def.id), { unit: def.unit }); 
+          } catch(e) {}
+        }
+        // Ensure monthlyActuals has all 12 months initialized to 0
+        const m = existing.monthlyActuals || {};
+        let dirty = false;
+        for (let i = 0; i < 12; i++) {
+          if (m[i] === undefined || m[i] === null) { 
+            m[i] = 0; 
+            dirty = true; 
+          }
+        }
+        if (dirty) {
+          try { 
+            await updateDoc(doc(db, "kpis", def.id), { monthlyActuals: m }); 
+          } catch(e){}
+          existing.monthlyActuals = m;
+        }
+      }
+    }
+
+    const defOrder = KPI_DEFINITIONS.map(d => d.id);
+    kpiData = fetched.sort((a,b) => defOrder.indexOf(a.id) - defOrder.indexOf(b.id));
+    renderAll();
+  }, err => {
+    showToast("Sync error: " + err.message, "error");
+  });
+}
+
+/* ═══════════════════════════════
+   EXPORT
+═══════════════════════════════ */
+function exportToExcel() {
+  const enriched = getEnrichedKpis();
+  const header = ["KPI", "Yearly Plan", "Yearly Actual", "Yearly %", "Monthly Plan", `${FY_MONTHS[currentMonth]} Actual`, "Monthly %", "Forecast (FY)", "Forecast %", "Status"];
+  const rows = enriched.map(k => [
+    k.name, k.yearlyPlan, fmt(k.metrics.yearlyActual), pct(k.metrics.yearlyPct),
+    fmt(k.metrics.monthlyPlan), fmt(k.metrics.monthlyActual), pct(k.metrics.monthlyPct),
+    fmt(k.metrics.forecastYearly), pct(k.metrics.forecastPct), k.metrics.status.toUpperCase()
+  ]);
+
+  const monthlySheet = [["KPI", ...FY_MONTHS]];
+  kpiData.forEach(k => {
+    const m = k.monthlyActuals || buildEmptyMonthlyActuals();
+    monthlySheet.push([k.name, ...FY_MONTHS.map((_,i) => fmt(m[i]))]);
+  });
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([header, ...rows]), "KPI Summary");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(monthlySheet), "Monthly Actuals");
+  XLSX.writeFile(wb, `KPI_${getFYLabel().replace(/\s/g,"_")}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  showToast("Excel exported", "success");
+}
+
+/* ═══════════════════════════════
+   AUTH
+═══════════════════════════════ */
+async function handleLogin() {
+  const email = document.getElementById("loginEmail").value.trim();
+  const pwd   = document.getElementById("loginPassword").value;
+  const errEl = document.getElementById("loginError");
+  if (errEl) errEl.style.display = "none";
+  if (!email || !pwd) { 
+    if (errEl) { errEl.textContent = "Please enter your credentials."; errEl.style.display = "block"; }
+    return; 
+  }
+  try {
+    await signInWithEmailAndPassword(auth, email, pwd);
+  } catch (e) {
+    if (errEl) {
+      errEl.textContent = parseFirebaseError(e, "Login failed. Please check your credentials.");
+      errEl.style.display = "block";
+    }
+  }
+}
+
+async function handleLogout() {
+  try { await signOut(auth); showToast("Logged out"); }
+  catch (e) { showToast("Logout failed", "error"); }
+}
+
+onAuthStateChanged(auth, async user => {
+  if (user) {
+    currentUserId    = user.uid;
+    currentUserEmail = user.email;
+
+    let roleData = "viewer";
+    try {
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      roleData = userDoc.exists() ? (userDoc.data()?.role || "viewer") : "viewer";
+    } catch(e) { roleData = "viewer"; }
+
+    currentUserRole = roleData;
+    isAdmin = roleData === "admin";
+
+    const emailDisplay = document.getElementById("userEmailDisplay");
+    const avatarEl = document.getElementById("userAvatar");
+    const roleBadge = document.getElementById("roleBadge");
+    const loginScreen = document.getElementById("loginScreen");
+    const mainApp = document.getElementById("mainApp");
+    const notice = document.getElementById("readonlyNotice");
+    const fyLabel = document.getElementById("fyLabel");
+    
+    if (emailDisplay) emailDisplay.textContent = user.email;
+    if (avatarEl) avatarEl.textContent = user.email.substring(0,2).toUpperCase();
+    if (roleBadge) roleBadge.textContent = roleData.toUpperCase();
+    if (loginScreen) loginScreen.style.display = "none";
+    if (mainApp) mainApp.style.display = "block";
+    if (notice && !isAdmin) notice.classList.add("visible");
+    if (notice && isAdmin) notice.classList.remove("visible");
+    if (fyLabel) fyLabel.textContent = getFYLabel();
+    
+    populateMonthSelect();
+    initKpiListener();
+    initAuditListener();
+    
+    const sortSelect = document.getElementById("sortTableSelect");
+    if (sortSelect) {
+      sortSelect.removeEventListener("change", sortSelectHandler);
+      sortSelect.addEventListener("change", sortSelectHandler);
+    }
+  } else {
+    if (realtimeUnsub) realtimeUnsub();
+    if (auditUnsub)   auditUnsub();
+    currentUserId = null; 
+    currentUserEmail = null; 
+    currentUserRole = "viewer"; 
+    isAdmin = false; 
+    kpiData = [];
+    
+    const loginScreen = document.getElementById("loginScreen");
+    const mainApp = document.getElementById("mainApp");
+    const notice = document.getElementById("readonlyNotice");
+    
+    if (loginScreen) loginScreen.style.display = "flex";
+    if (mainApp) mainApp.style.display = "none";
+    if (notice) notice.classList.remove("visible");
+  }
+});
+
+/* ═══════════════════════════════
+   EVENT LISTENERS
+═══════════════════════════════ */
+const loginBtn = document.getElementById("doLoginBtn");
+if (loginBtn) loginBtn.addEventListener("click", handleLogin);
+
+const loginPassword = document.getElementById("loginPassword");
+if (loginPassword) {
+  loginPassword.addEventListener("keydown", e => { 
+    if (e.key === "Enter") handleLogin(); 
+  });
+}
+
+const logoutBtn = document.getElementById("logoutMainBtn");
+if (logoutBtn) logoutBtn.addEventListener("click", handleLogout);
+
+const exportBtn = document.getElementById("exportExcelBtn");
+if (exportBtn) exportBtn.addEventListener("click", exportToExcel);
+
+const showAuditBtn = document.getElementById("showAuditBtn");
+if (showAuditBtn) {
+  showAuditBtn.addEventListener("click", () => {
+    const auditPanel = document.getElementById("auditPanel");
+    if (auditPanel) auditPanel.scrollIntoView({ behavior:"smooth" });
+  });
+}
+
+const closeModalBtn = document.getElementById("closeModalBtn");
+if (closeModalBtn) {
+  closeModalBtn.addEventListener("click", () => {
+    const modal = document.getElementById("kpiModal");
+    if (modal) modal.classList.remove("active");
+  });
+}
+
+const kpiModal = document.getElementById("kpiModal");
+if (kpiModal) {
+  kpiModal.addEventListener("click", e => {
+    if (e.target === kpiModal) kpiModal.classList.remove("active");
+  });
+}
+
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") {
+    const modal = document.getElementById("kpiModal");
+    if (modal) modal.classList.remove("active");
+  }
+});
+
+const auditKpiFilter = document.getElementById("auditKpiFilter");
+if (auditKpiFilter) auditKpiFilter.addEventListener("change", () => renderAuditTable());
+
+const auditUserFilter = document.getElementById("auditUserFilter");
+if (auditUserFilter) auditUserFilter.addEventListener("change", () => renderAuditTable());
+
+const auditDateFilter = document.getElementById("auditDateFilter");
+if (auditDateFilter) auditDateFilter.addEventListener("change", () => renderAuditTable());
+
 </script>
 </body>
 </html>
