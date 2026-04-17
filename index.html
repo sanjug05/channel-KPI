@@ -28,7 +28,8 @@
     .role-badge{background:#2c7cb6;padding:4px 12px;border-radius:20px;font-size:0.7rem;font-weight:700;}
 
     .header-section{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;margin-bottom:28px;gap:20px;}
-    .title-area h1{font-size:1.9rem;font-weight:700;background:linear-gradient(135deg,#1a3c5e,#0f2b44);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-0.3px;}
+    .title-area{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+    .title-area h1{font-size:1.9rem;font-weight:700;background:linear-gradient(135deg,#1a3c5e,#0f2b44);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-0.3px;display:flex;align-items:center;gap:12px;}
     .title-area p{color:#5b6e8c;font-size:0.9rem;margin-top:6px;}
     .action-buttons{display:flex;gap:14px;flex-wrap:wrap;}
     .btn{padding:10px 18px;border-radius:12px;font-weight:600;font-size:0.8rem;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all 0.2s ease;background:white;box-shadow:0 1px 2px rgba(0,0,0,0.05);}
@@ -36,17 +37,21 @@
     .btn-primary:hover{background:#0e4a70;transform:translateY(-1px);}
     .btn-outline{background:white;border:1px solid #cfdfed;color:#2c4c6e;}
     .btn-outline:hover{background:#eef3fc;border-color:#9bb7d0;}
+    .btn-success{background:#2b9e5c;color:white;}
+    .btn-success:hover{background:#1e7a45;transform:translateY(-1px);}
 
     .filters-panel{background:white;border-radius:24px;padding:16px 24px;margin-bottom:28px;display:flex;flex-wrap:wrap;align-items:center;gap:24px;box-shadow:0 4px 12px rgba(0,0,0,0.03);border:1px solid #e6edf4;}
     .filter-group{display:flex;align-items:center;gap:12px;background:#f8fafd;padding:5px 16px;border-radius:40px;}
     .filter-group label{font-weight:600;font-size:0.75rem;color:#2c4c6e;}
-    select,input[type="date"]{background:transparent;border:none;padding:8px 0;font-weight:500;font-size:0.85rem;outline:none;color:#0a2b44;}
+    select,input[type="date"],input[type="text"]{background:transparent;border:none;padding:8px 0;font-weight:500;font-size:0.85rem;outline:none;color:#0a2b44;}
+    .filter-group input[type="text"]{min-width:160px;}
 
     .fy-label{font-size:0.72rem;font-weight:700;color:#1f6392;background:#eef3fc;padding:6px 16px;border-radius:20px;}
 
     .kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:22px;margin-bottom:40px;}
-    .kpi-card{background:white;border-radius:28px;padding:20px;box-shadow:0 8px 20px rgba(0,0,0,0.02),0 2px 6px rgba(0,0,0,0.05);transition:all 0.2s;border:1px solid #eef3fa;cursor:pointer;}
+    .kpi-card{background:white;border-radius:28px;padding:20px;box-shadow:0 8px 20px rgba(0,0,0,0.02),0 2px 6px rgba(0,0,0,0.05);transition:all 0.2s;border:1px solid #eef3fa;cursor:pointer;position:relative;}
     .kpi-card:hover{transform:translateY(-3px);box-shadow:0 20px 30px -12px rgba(0,0,0,0.1);border-color:#cddfef;}
+    .top-performer-badge{position:absolute;top:-8px;right:16px;background:linear-gradient(135deg,#f5b042,#e68a2e);color:white;font-size:0.65rem;font-weight:700;padding:4px 12px;border-radius:30px;box-shadow:0 2px 6px rgba(0,0,0,0.1);}
     .card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
     .kpi-name{font-weight:700;font-size:0.95rem;background:#eef3fc;padding:4px 12px;border-radius:30px;color:#1e4a76;}
     .status-badge{font-size:0.7rem;font-weight:700;padding:5px 12px;border-radius:40px;}
@@ -66,18 +71,23 @@
 
     .progress-section{margin-top:10px;}
     .progress-meta{display:flex;justify-content:space-between;font-size:0.68rem;color:#8faabb;margin-bottom:4px;}
-    .progress-bar-bg{background:#e2e9f2;border-radius:40px;height:7px;overflow:hidden;margin:4px 0;}
+    .progress-bar-bg{background:#e2e9f2;border-radius:40px;height:7px;overflow:hidden;margin:4px 0;position:relative;}
     .progress-fill{height:100%;border-radius:40px;transition:width 0.6s ease;}
     .fill-green{background:linear-gradient(90deg,#2b9e5c,#34c977);}
     .fill-amber{background:linear-gradient(90deg,#e68a2e,#f5a74b);}
     .fill-red{background:linear-gradient(90deg,#dc5a3c,#f07a62);}
+    .progress-tooltip{position:absolute;right:0;top:-20px;background:#1e293b;color:white;font-size:0.65rem;padding:2px 8px;border-radius:12px;white-space:nowrap;opacity:0;transition:opacity 0.2s;pointer-events:none;}
+    .progress-bar-bg:hover .progress-tooltip{opacity:1;}
 
     .card-footer-row{display:flex;justify-content:space-between;align-items:center;margin-top:12px;flex-wrap:wrap;gap:8px;}
     .gap-text{font-size:0.72rem;color:#5b6e8c;}
 
     .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:36px;}
     .chart-card{background:white;border-radius:24px;padding:22px 24px;box-shadow:0 4px 12px rgba(0,0,0,0.04);border:1px solid #e6edf4;}
-    .chart-card h4{font-size:0.9rem;font-weight:700;color:#1a3c5e;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+    .chart-card h4{font-size:0.9rem;font-weight:700;color:#1a3c5e;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+    .chart-btn-group{display:flex;gap:8px;}
+    .chart-btn{background:#f0f2f5;border:none;padding:5px 12px;border-radius:20px;font-size:0.7rem;font-weight:600;cursor:pointer;transition:background 0.2s;}
+    .chart-btn:hover{background:#e2e9f2;}
 
     .table-wrapper{background:white;border-radius:24px;padding:6px 0 0 0;border:1px solid #e9f0f5;overflow-x:auto;margin-bottom:36px;}
     .data-table{width:100%;border-collapse:collapse;font-size:0.84rem;}
@@ -139,6 +149,7 @@
     .readonly-notice.visible{display:flex;}
 
     .footer-note{text-align:center;font-size:0.76rem;color:#8faabb;padding:16px 0 0;border-top:1px solid #e6edf4;margin-top:8px;}
+    .footer-note strong{color:#1f6392;}
 
     @media(max-width:900px){.charts-row{grid-template-columns:1fr;}.kpi-grid{grid-template-columns:1fr;}}
     @media(max-width:600px){body{padding:16px 12px;}.summary-bar{flex-direction:column;}.kpi-dual-section{flex-direction:column;}}
@@ -181,7 +192,9 @@
 
   <div class="header-section">
     <div class="title-area">
-      <h1><i class="fas fa-chart-column" style="color:#1f6392;"></i> KPI Control Tower <span style="font-size:0.75rem;background:#eef3fc;padding:4px 12px;border-radius:40px;">Enterprise Edition</span></h1>
+      <h1><i class="fas fa-chart-column" style="color:#1f6392;"></i> KPI Control Tower 
+        <img src="https://www.aiswindows.com/assets/images/ais-windows-logo.svg" alt="AIS Windows" height="32" style="vertical-align:middle;">
+      </h1>
       <p>Financial Year Apr–Mar · Monthly Tracking · Forecast Engine · Real-time Audit Trail</p>
     </div>
     <div class="action-buttons">
@@ -211,6 +224,11 @@
         <option value="gap">Gap (High → Low)</option>
       </select>
     </div>
+    <!-- 🆕 NEW: Search Bar -->
+    <div class="filter-group filter-search">
+      <label><i class="fas fa-search"></i> Search</label>
+      <input type="text" id="kpiSearchInput" placeholder="Search by KPI name...">
+    </div>
     <span class="fy-label" id="fyLabel">FY —</span>
     <div class="filter-group"><span style="font-size:0.7rem;color:#3b7c9e;"><i class="fas fa-circle" style="color:#2b9e5c;font-size:0.5rem;"></i> Real-time Sync Active</span></div>
   </div>
@@ -219,11 +237,21 @@
 
   <div class="charts-row">
     <div class="chart-card">
-      <h4><i class="fas fa-chart-bar" style="color:#1f6392;"></i> Yearly Plan vs Actual</h4>
+      <h4>
+        <span><i class="fas fa-chart-bar" style="color:#1f6392;"></i> Yearly Plan vs Actual</span>
+        <div class="chart-btn-group">
+          <button class="chart-btn" id="downloadBarChartBtn"><i class="fas fa-download"></i> PNG</button>
+        </div>
+      </h4>
       <canvas id="barPlanActualChart"></canvas>
     </div>
     <div class="chart-card">
-      <h4><i class="fas fa-percent" style="color:#2b9e5c;"></i> Yearly Achievement %</h4>
+      <h4>
+        <span><i class="fas fa-percent" style="color:#2b9e5c;"></i> Yearly Achievement %</span>
+        <div class="chart-btn-group">
+          <button class="chart-btn" id="downloadAchievementChartBtn"><i class="fas fa-download"></i> PNG</button>
+        </div>
+      </h4>
       <canvas id="horizontalAchievementChart"></canvas>
     </div>
   </div>
@@ -264,7 +292,8 @@
     </div>
   </div>
 
-  <div class="footer-note"><i class="fas fa-lock"></i> Enterprise KPI Control Tower · Financial Year Apr–Mar · Real-time Sync · Full Audit Trail</div>
+  <!-- 🔥 UPDATED: Footer with "Powered with ❤️ by Sanju G" -->
+  <div class="footer-note"><i class="fas fa-lock"></i> Enterprise KPI Control Tower · Financial Year Apr–Mar · Real-time Sync · Full Audit Trail · Powered with ❤️ by <strong>Sanju G</strong></div>
 </div>
 </div>
 
@@ -284,7 +313,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, doc, onSnapshot, updateDoc, getDoc, serverTimestamp, setDoc, addDoc, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, doc, onSnapshot, updateDoc, getDoc, serverTimestamp, setDoc, addDoc, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
@@ -323,13 +352,32 @@ function getFYLabel() {
 }
 
 /* ═══════════════════════════════
-   KPI DEFINITIONS
+   🆕 NEW: Progress bar color helper
+═══════════════════════════════ */
+function getProgressColor(pct) {
+  // 0-60% → RED, 60-90% → AMBER, 90-120% → GREEN
+  if (pct < 60) return "red";
+  if (pct < 90) return "amber";
+  return "green";
+}
+
+/* ═══════════════════════════════
+   🔥 UPDATED: KPI DEFINITIONS
+   - Added: Showroom Addition, Partner Addition, CAD Completion, CAD TAT
+   - Removed: partner_survey_score
 ═══════════════════════════════ */
 const KPI_DEFINITIONS = [
   { id:"showroom_audit_count",    name:"Showroom Audit Count",          yearlyPlan:504,  unit:"count"  },
-  { id:"showroom_audit_score",    name:"Showroom Audit Score (A & A+)", yearlyPlan:336,  unit:"count"  },
+  // 🆕 NEW: Showroom Addition
+  { id:"showroom_addition",        name:"Showroom Addition",             yearlyPlan:120,  unit:"count"  },
+  // 🆕 NEW: Partner Addition
+  { id:"partner_addition",         name:"Partner Addition",              yearlyPlan:80,   unit:"count"  },
+  // 🆕 NEW: CAD Completion
+  { id:"cad_completion",           name:"CAD Completion",                yearlyPlan:240,  unit:"count"  },
+  // 🆕 NEW: CAD TAT (Turnaround Time - days, lower is better)
+  { id:"cad_tat",                  name:"CAD TAT (Days)",                yearlyPlan:0,    unit:"days", isTat:true, idealDays:4 },
   { id:"partner_survey_count",    name:"Partner Survey Count",          yearlyPlan:420,  unit:"count"  },
-  { id:"partner_survey_score",    name:"Partner Survey Score (A & A+)", yearlyPlan:288,  unit:"count"  },
+  // ❌ REMOVED: partner_survey_score (Partner Survey Score A & A+)
   { id:"rr_total",                name:"R&R (Rewards People)",          yearlyPlan:600,  unit:"people" },
   { id:"first_time_calls",        name:"First Time Calls",              yearlyPlan:2160, unit:"calls"  },
   { id:"shortlisted",             name:"Shortlisted",                   yearlyPlan:780,  unit:"count"  },
@@ -355,6 +403,7 @@ let currentUserRole = "viewer";
 let barChart, horizChart, trendChartInstance;
 let currentSort       = "default";
 let currentKpiFilter  = "all";
+let currentSearchTerm = "";  // 🆕 NEW: search state
 let currentMonth      = getFinancialMonth();
 let currentModalKpiId = null;
 let realtimeUnsub     = null;
@@ -401,25 +450,23 @@ function parseFirebaseError(err, fallback) {
 }
 
 /* ═══════════════════════════════
-   CALCULATION ENGINE (FIXED)
+   CALCULATION ENGINE (UPDATED for CAD TAT)
 ═══════════════════════════════ */
 function calculateMetrics(kpi) {
   const monthlyActuals = kpi.monthlyActuals || buildEmptyMonthlyActuals();
   const isPercentKpi = (kpi.unit === "%") || (kpi.id === "cft_feedback_adherence");
+  const isTatKpi = kpi.isTat === true;  // 🆕 NEW: CAD TAT handling
   
-  // Monthly plan: For % KPIs, plan is yearlyPlan/12 (e.g., 100/12 = 8.33)
-  // For regular KPIs, also yearlyPlan/12
+  // Monthly plan
   const monthlyPlan = kpi.yearlyPlan / 12;
   
   // Get current month actual
   const monthlyActual = parseFloat(monthlyActuals[currentMonth] || 0);
   
-  // Calculate yearly actual (ONLY up to current month, NOT all 12 months)
   let yearlyActual = 0;
   let monthsWithData = 0;
   
   if (isPercentKpi) {
-    // For % KPIs: Yearly actual = average of months up to current month
     let sum = 0;
     for (let i = 0; i <= currentMonth; i++) {
       const val = parseFloat(monthlyActuals[i] || 0);
@@ -427,17 +474,49 @@ function calculateMetrics(kpi) {
       if (val > 0 || i === 0) monthsWithData++;
     }
     yearlyActual = monthsWithData > 0 ? sum / monthsWithData : 0;
+  } else if (isTatKpi) {
+    // For TAT KPIs: yearly actual = average of months up to current month
+    let sum = 0;
+    let count = 0;
+    for (let i = 0; i <= currentMonth; i++) {
+      const val = parseFloat(monthlyActuals[i] || 0);
+      if (val > 0) {
+        sum += val;
+        count++;
+      }
+    }
+    yearlyActual = count > 0 ? sum / count : 0;
   } else {
-    // For regular KPIs: Sum of months up to current month only
     for (let i = 0; i <= currentMonth; i++) {
       yearlyActual += parseFloat(monthlyActuals[i] || 0);
     }
   }
   
-  // Calculate percentages
-  const monthlyPct = monthlyPlan > 0 ? Math.min((monthlyActual / monthlyPlan) * 100, 100) : 0;
-  const yearlyPct = kpi.yearlyPlan > 0 ? Math.min((yearlyActual / kpi.yearlyPlan) * 100, 100) : 0;
-  const gap = kpi.yearlyPlan - yearlyActual;
+  // Calculate percentages (for TAT, lower is better)
+  let monthlyPct, yearlyPct, gap;
+  if (isTatKpi) {
+    // For TAT: % achievement is inverse (lower delay = higher %)
+    const idealDays = kpi.idealDays || 4;
+    if (monthlyActual === 0) {
+      monthlyPct = 0;
+    } else if (monthlyActual <= idealDays) {
+      monthlyPct = 100;
+    } else {
+      monthlyPct = Math.max(0, Math.min(100, 100 - ((monthlyActual - idealDays) / idealDays) * 100));
+    }
+    if (yearlyActual === 0) {
+      yearlyPct = 0;
+    } else if (yearlyActual <= idealDays) {
+      yearlyPct = 100;
+    } else {
+      yearlyPct = Math.max(0, Math.min(100, 100 - ((yearlyActual - idealDays) / idealDays) * 100));
+    }
+    gap = yearlyActual - idealDays;
+  } else {
+    monthlyPct = monthlyPlan > 0 ? Math.min((monthlyActual / monthlyPlan) * 100, 100) : 0;
+    yearlyPct = kpi.yearlyPlan > 0 ? Math.min((yearlyActual / kpi.yearlyPlan) * 100, 100) : 0;
+    gap = kpi.yearlyPlan - yearlyActual;
+  }
   
   // Forecast calculation
   const elapsedMonths = currentMonth + 1;
@@ -445,11 +524,12 @@ function calculateMetrics(kpi) {
   let forecastPct = 0;
   
   if (isPercentKpi) {
-    // For % KPIs, forecast stays at current average
+    forecastYearly = yearlyActual;
+    forecastPct = yearlyPct;
+  } else if (isTatKpi) {
     forecastYearly = yearlyActual;
     forecastPct = yearlyPct;
   } else {
-    // Annualized run-rate forecast
     if (elapsedMonths > 0 && yearlyActual > 0) {
       forecastYearly = (yearlyActual / elapsedMonths) * 12;
       forecastPct = (forecastYearly / kpi.yearlyPlan) * 100;
@@ -459,10 +539,18 @@ function calculateMetrics(kpi) {
     }
   }
   
-  // Status determination
+  // Status determination (for TAT, lower is better)
   let status = "red";
-  if (yearlyPct >= 90) status = "green";
-  else if (yearlyPct >= 60) status = "amber";
+  if (isTatKpi) {
+    const idealDays = kpi.idealDays || 4;
+    if (yearlyActual <= idealDays) status = "green";
+    else if (yearlyActual <= idealDays * 2) status = "amber";
+    else status = "red";
+  } else {
+    if (yearlyPct >= 90) status = "green";
+    else if (yearlyPct >= 60) status = "amber";
+    else status = "red";
+  }
   
   return { 
     monthlyPlan, 
@@ -477,12 +565,18 @@ function calculateMetrics(kpi) {
   };
 }
 
+// 🆕 NEW: Filtered KPIs by search term
 function getEnrichedKpis() {
-  return kpiData.map(k => ({ ...k, metrics: calculateMetrics(k) }));
+  let filtered = kpiData.map(k => ({ ...k, metrics: calculateMetrics(k) }));
+  if (currentSearchTerm) {
+    const term = currentSearchTerm.toLowerCase();
+    filtered = filtered.filter(k => k.name.toLowerCase().includes(term));
+  }
+  return filtered;
 }
 
 /* ═══════════════════════════════
-   AUDIT (FIXED)
+   AUDIT
 ═══════════════════════════════ */
 async function logAudit(kpiId, kpiName, fieldChanged, oldValue, newValue) {
   if (!currentUserId) return;
@@ -508,7 +602,6 @@ async function logAudit(kpiId, kpiName, fieldChanged, oldValue, newValue) {
     console.warn("Audit write failed (Firebase). Falling back to localStorage:", e);
   }
 
-  // Local fallback
   try {
     const key = "kpi_audit_local";
     const existing = JSON.parse(localStorage.getItem(key) || "[]");
@@ -545,7 +638,6 @@ function initAuditListener() {
     if (tbody) {
       tbody.innerHTML = `<tr><td colspan="6" class="empty-audit"><i class="fas fa-exclamation-triangle" style="color:#dc5a3c;"></i> Error loading audit logs. Using local cache.</td></tr>`;
     }
-    // Still try to show local logs
     const localLogs = JSON.parse(localStorage.getItem("kpi_audit_local") || "[]");
     if (localLogs.length > 0) {
       allAuditLogs = localLogs;
@@ -592,7 +684,7 @@ function populateAuditUserFilter() {
 }
 
 /* ═══════════════════════════════
-   FIREBASE WRITE OPS (FIXED)
+   FIREBASE WRITE OPS
 ═══════════════════════════════ */
 async function updateKpiMonthly(kpiId, monthIndex, value) {
   if (!isAdmin) {
@@ -600,10 +692,8 @@ async function updateKpiMonthly(kpiId, monthIndex, value) {
     return;
   }
   
-  const currentCalendarMonth = getCurrentCalendarMonth();
   const currentFinancialMonth = getFinancialMonth();
   
-  // Past months lock logic: Cannot edit months before current calendar month
   if (monthIndex < currentFinancialMonth) {
     showToast("Past months are locked", "error");
     return;
@@ -629,7 +719,6 @@ async function updateKpiMonthly(kpiId, monthIndex, value) {
     });
     await logAudit(kpiId, kpi.name, `monthly_${FY_MONTHS[monthIndex]}`, oldValue, num);
     showToast(`${kpi.name} — ${FY_MONTHS[monthIndex]} updated`, "success");
-    // Refresh charts after update
     setTimeout(() => renderCharts(), 100);
   } catch (e) { 
     showToast("Save failed: " + e.message, "error"); 
@@ -660,7 +749,6 @@ async function updateYearlyPlan(kpiId, value) {
     });
     await logAudit(kpiId, kpi.name, "yearly_plan", oldValue, num);
     showToast(`${kpi.name} — yearly plan updated`, "success");
-    // Refresh charts after update
     setTimeout(() => renderCharts(), 100);
   } catch (e) { 
     showToast("Save failed: " + e.message, "error"); 
@@ -668,28 +756,38 @@ async function updateYearlyPlan(kpiId, value) {
 }
 
 /* ═══════════════════════════════
-   RENDER: KPI CARDS
+   RENDER: KPI CARDS (UPDATED with progress color and top performer badge)
 ═══════════════════════════════ */
 function renderKpiCards() {
   const container = document.getElementById("kpiCardsContainer");
   if (!container) return;
   const enriched  = getEnrichedKpis();
+  
+  // 🆕 NEW: Find top performing KPI (highest yearly %)
+  const topPerformer = enriched.length ? enriched.reduce((max, k) => k.metrics.yearlyPct > max.metrics.yearlyPct ? k : max, enriched[0]) : null;
+  
   container.innerHTML = "";
 
   enriched.forEach(kpi => {
     const m  = kpi.metrics;
     const fc = m.forecastPct >= 90 ? "forecast-good" : m.forecastPct >= 70 ? "forecast-warning" : "forecast-bad";
     const sc = `status-${m.status}`;
-    const fc2 = `fill-${m.status}`;
+    // 🆕 NEW: Dynamic progress color based on %
+    const yearlyColor = getProgressColor(m.yearlyPct);
+    const monthlyColor = getProgressColor(m.monthlyPct);
+    const fillYearlyClass = `fill-${yearlyColor}`;
+    const fillMonthlyClass = `fill-${monthlyColor}`;
+    const isTopPerformer = topPerformer && kpi.id === topPerformer.id;
 
     const card = document.createElement("div");
     card.className = "kpi-card";
     card.setAttribute("data-id", kpi.id);
     card.addEventListener("click", (e) => {
-      if (e.target.tagName !== "INPUT") openKpiDetailModal(kpi.id);
+      if (e.target.tagName !== "INPUT" && e.target.tagName !== "BUTTON") openKpiDetailModal(kpi.id);
     });
 
     card.innerHTML = `
+      ${isTopPerformer ? '<div class="top-performer-badge"><i class="fas fa-trophy"></i> Top Performer</div>' : ''}
       <div class="card-header">
         <span class="kpi-name">${esc(kpi.name)}</span>
         <span class="status-badge ${sc}">${m.status.toUpperCase()}</span>
@@ -708,9 +806,15 @@ function renderKpiCards() {
       </div>
       <div class="progress-section">
         <div class="progress-meta"><span>Yearly Progress</span><span>${pct(m.yearlyPct)}</span></div>
-        <div class="progress-bar-bg"><div class="progress-fill ${fc2}" style="width:${Math.min(m.yearlyPct,100)}%;"></div></div>
+        <div class="progress-bar-bg">
+          <div class="progress-fill ${fillYearlyClass}" style="width:${Math.min(m.yearlyPct,100)}%;"></div>
+          <span class="progress-tooltip">${pct(m.yearlyPct)} - ${yearlyColor.toUpperCase()}</span>
+        </div>
         <div class="progress-meta"><span>${FY_MONTHS[currentMonth]} Progress</span><span>${pct(m.monthlyPct)}</span></div>
-        <div class="progress-bar-bg"><div class="progress-fill ${fc2}" style="width:${Math.min(m.monthlyPct,100)}%;"></div></div>
+        <div class="progress-bar-bg">
+          <div class="progress-fill ${fillMonthlyClass}" style="width:${Math.min(m.monthlyPct,100)}%;"></div>
+          <span class="progress-tooltip">${pct(m.monthlyPct)} - ${monthlyColor.toUpperCase()}</span>
+        </div>
       </div>
       <div class="card-footer-row">
         <span class="gap-text"><i class="fas fa-arrows-up-down"></i> Gap: ${fmt(m.gap)}</span>
@@ -721,14 +825,14 @@ function renderKpiCards() {
 }
 
 /* ═══════════════════════════════
-   RENDER: TABLE
+   RENDER: TABLE (with search filter)
 ═══════════════════════════════ */
 function renderTable() {
   const finMonth = getFinancialMonth();
   const monthLabel = document.getElementById("tableMonthLabel");
   if (monthLabel) monthLabel.textContent = `(${FY_MONTHS[currentMonth]})`;
   
-  let enriched = getEnrichedKpis();
+  let enriched = getEnrichedKpis();  // Already filtered by search
   if (currentKpiFilter !== "all") enriched = enriched.filter(k => k.id === currentKpiFilter);
   if (currentSort === "achievement") enriched.sort((a,b) => b.metrics.yearlyPct - a.metrics.yearlyPct);
   else if (currentSort === "gap")   enriched.sort((a,b) => Math.abs(b.metrics.gap) - Math.abs(a.metrics.gap));
@@ -815,7 +919,7 @@ function renderSummaryBar() {
 }
 
 /* ═══════════════════════════════
-   RENDER: CHARTS (FIXED)
+   RENDER: CHARTS (with download functionality)
 ═══════════════════════════════ */
 function renderCharts() {
   const enriched = getEnrichedKpis();
@@ -849,8 +953,22 @@ function renderCharts() {
   }
 }
 
+// 🆕 NEW: Download chart as PNG
+function downloadChart(chartId, filename) {
+  const canvas = document.querySelector(`#${chartId}`);
+  if (!canvas) {
+    showToast("Chart not found", "error");
+    return;
+  }
+  const link = document.createElement("a");
+  link.download = `${filename}_${new Date().toISOString().slice(0,19)}.png`;
+  link.href = canvas.toDataURL("image/png");
+  link.click();
+  showToast(`Downloaded ${filename}`, "success");
+}
+
 /* ═══════════════════════════════
-   MODAL: KPI DETAIL (FIXED)
+   MODAL: KPI DETAIL
 ═══════════════════════════════ */
 function openKpiDetailModal(kpiId) {
   const kpi = kpiData.find(k => k.id === kpiId);
@@ -860,6 +978,7 @@ function openKpiDetailModal(kpiId) {
   const monthlyActuals = kpi.monthlyActuals || buildEmptyMonthlyActuals();
   const monthlyPlan    = kpi.yearlyPlan / 12;
   const isPercentKpi = (kpi.unit === "%") || (kpi.id === "cft_feedback_adherence");
+  const isTatKpi = kpi.isTat === true;
 
   const modalTitle = document.getElementById("modalKpiName");
   if (modalTitle) modalTitle.textContent = kpi.name + " — Monthly Breakdown";
@@ -902,7 +1021,15 @@ function openKpiDetailModal(kpiId) {
         <thead><tr><th>Month</th><th>Monthly Plan</th><th>Actual</th><th>Achievement %</th><th>Status</th></tr></thead>
         <tbody>${FY_MONTHS.map((mn, idx) => {
           const actual  = monthlyActuals[idx] ?? 0;
-          const achPct  = monthlyPlan > 0 ? Math.min((actual / monthlyPlan) * 100, 100) : 0;
+          let achPct;
+          if (isTatKpi) {
+            const idealDays = kpi.idealDays || 4;
+            if (actual === 0) achPct = 0;
+            else if (actual <= idealDays) achPct = 100;
+            else achPct = Math.max(0, Math.min(100, 100 - ((actual - idealDays) / idealDays) * 100));
+          } else {
+            achPct = monthlyPlan > 0 ? Math.min((actual / monthlyPlan) * 100, 100) : 0;
+          }
           const locked  = idx < finMonth;
           const future  = idx > finMonth;
           const stColor = achPct >= 90 ? "#0d6e3e" : achPct >= 60 ? "#b45f06" : "#bc3f2c";
@@ -1007,6 +1134,15 @@ function sortSelectHandler(e) {
   renderTable();
 }
 
+// 🆕 NEW: Search handler
+function searchInputHandler(e) {
+  currentSearchTerm = e.target.value;
+  renderKpiCards();
+  renderTable();
+  renderSummaryBar();
+  renderCharts();
+}
+
 /* ═══════════════════════════════
    FULL RENDER
 ═══════════════════════════════ */
@@ -1038,6 +1174,8 @@ function initKpiListener() {
           monthlyActuals: buildEmptyMonthlyActuals(),
           lastUpdated: serverTimestamp()
         };
+        if (def.isTat) newDoc.isTat = true;
+        if (def.idealDays) newDoc.idealDays = def.idealDays;
         try { 
           await setDoc(doc(db, "kpis", def.id), newDoc); 
         } catch (e) { 
@@ -1045,14 +1183,12 @@ function initKpiListener() {
         }
         fetched.push({ ...newDoc });
       } else {
-        // Ensure unit is set
         if (!existing.unit && def.unit) {
           existing.unit = def.unit;
           try { 
             await updateDoc(doc(db, "kpis", def.id), { unit: def.unit }); 
           } catch(e) {}
         }
-        // Ensure monthlyActuals has all 12 months initialized to 0
         const m = existing.monthlyActuals || {};
         let dirty = false;
         for (let i = 0; i < 12; i++) {
@@ -1170,6 +1306,13 @@ onAuthStateChanged(auth, async user => {
       sortSelect.removeEventListener("change", sortSelectHandler);
       sortSelect.addEventListener("change", sortSelectHandler);
     }
+    
+    // 🆕 NEW: Search input listener
+    const searchInput = document.getElementById("kpiSearchInput");
+    if (searchInput) {
+      searchInput.removeEventListener("input", searchInputHandler);
+      searchInput.addEventListener("input", searchInputHandler);
+    }
   } else {
     if (realtimeUnsub) realtimeUnsub();
     if (auditUnsub)   auditUnsub();
@@ -1214,6 +1357,16 @@ if (showAuditBtn) {
     const auditPanel = document.getElementById("auditPanel");
     if (auditPanel) auditPanel.scrollIntoView({ behavior:"smooth" });
   });
+}
+
+// 🆕 NEW: Chart download buttons
+const downloadBarBtn = document.getElementById("downloadBarChartBtn");
+if (downloadBarBtn) {
+  downloadBarBtn.addEventListener("click", () => downloadChart("barPlanActualChart", "Plan_vs_Actual"));
+}
+const downloadAchievementBtn = document.getElementById("downloadAchievementChartBtn");
+if (downloadAchievementBtn) {
+  downloadAchievementBtn.addEventListener("click", () => downloadChart("horizontalAchievementChart", "Achievement_Chart"));
 }
 
 const closeModalBtn = document.getElementById("closeModalBtn");
