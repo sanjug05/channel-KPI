@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    /* ========== COMPLETE CSS (SAME AS YOUR ORIGINAL - KEPT INTACT) ========== */
     *{margin:0;padding:0;box-sizing:border-box;}
     body{background:#f0f2f8;font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;padding:32px 28px;color:#0a1e2f;}
     .dashboard-container{max-width:1600px;margin:0 auto;}
@@ -169,6 +170,18 @@
     .empty-audit{padding:32px;text-align:center;color:#8faabb;font-size:0.84rem;}
     .readonly-notice{background:#fff8e6;border:1px solid #fde68a;border-radius:14px;padding:10px 18px;font-size:0.8rem;color:#92650a;margin-bottom:20px;display:none;align-items:center;gap:8px;}
     .readonly-notice.visible{display:flex;}
+
+    /* Dirty Form Indicator */
+    .modal-dirty-indicator {
+      position: absolute;
+      top: 12px;
+      right: 60px;
+      width: 8px;
+      height: 8px;
+      background: #f59e0b;
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
 
     .footer-note{text-align:center;font-size:0.76rem;color:#8faabb;padding:16px 0 0;border-top:1px solid #e6edf4;margin-top:8px;}
     .footer-note strong{color:#1f6392;}
@@ -365,8 +378,8 @@ const firebaseConfig = {
   appId: "1:175667492150:web:cb124eb267b4689e6a2f97"
 };
 
-const app  = initializeApp(firebaseConfig);
-const db   = getFirestore(app);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 const auth = getAuth(app);
 
 /* ═══════════════════════════════
@@ -382,7 +395,7 @@ function getFinancialMonth() {
 function getFYLabel() {
   const now = new Date();
   const cal = now.getMonth();
-  const yr  = now.getFullYear();
+  const yr = now.getFullYear();
   const startYr = cal >= 3 ? yr : yr - 1;
   return `FY ${startYr}–${String(startYr + 1).slice(2)}`;
 }
@@ -438,6 +451,94 @@ let auditUnsub = null;
 let commentsUnsub = null;
 let isAdmin = false;
 let pinnedKpis = JSON.parse(localStorage.getItem("pinnedKpis") || "[]");
+
+/* ═══════════════════════════════
+   PERSISTENT FILTERS (NEW)
+═══════════════════════════════ */
+function saveFilterState() {
+  const filterState = {
+    month: currentMonth,
+    kpiFilter: currentKpiFilter,
+    sortBy: currentSort,
+    searchTerm: currentSearchTerm
+  };
+  localStorage.setItem("kpi_filters", JSON.stringify(filterState));
+}
+
+function loadFilterState() {
+  const saved = localStorage.getItem("kpi_filters");
+  if (!saved) return;
+  try {
+    const state = JSON.parse(saved);
+    currentMonth = state.month;
+    currentKpiFilter = state.kpiFilter;
+    currentSort = state.sortBy;
+    currentSearchTerm = state.searchTerm || "";
+    
+    // Apply to UI elements
+    const monthSelect = document.getElementById("monthSelect");
+    if (monthSelect) monthSelect.value = currentMonth;
+    
+    const kpiFilter = document.getElementById("kpiSelectFilter");
+    if (kpiFilter) kpiFilter.value = currentKpiFilter;
+    
+    const sortSelect = document.getElementById("sortTableSelect");
+    if (sortSelect) sortSelect.value = currentSort;
+    
+    const searchInput = document.getElementById("kpiSearchInput");
+    if (searchInput) searchInput.value = currentSearchTerm;
+  } catch(e) {}
+}
+
+/* ═══════════════════════════════
+   DIRTY FORM TRACKING (NEW)
+═══════════════════════════════ */
+let isModalDirty = false;
+let originalModalValues = new Map();
+
+function trackModalChanges() {
+  isModalDirty = false;
+  originalModalValues.clear();
+  
+  document.querySelectorAll('.monthly-edit-input:not([disabled])').forEach(input => {
+    const month = input.dataset.month;
+    originalModalValues.set(month, input.value);
+    input.addEventListener('input', () => {
+      const wasDirty = isModalDirty;
+      isModalDirty = input.value !== originalModalValues.get(month);
+      
+      if (isModalDirty && !wasDirty) {
+        const modal = document.getElementById("kpiModal");
+        let indicator = modal?.querySelector('.modal-dirty-indicator');
+        if (!indicator && modal) {
+          indicator = document.createElement('div');
+          indicator.className = 'modal-dirty-indicator';
+          modal.querySelector('.modal-header')?.appendChild(indicator);
+        }
+      } else if (!isModalDirty && wasDirty) {
+        const indicator = modal?.querySelector('.modal-dirty-indicator');
+        if (indicator) indicator.remove();
+      }
+    });
+  });
+}
+
+function resetModalDirtyState() {
+  isModalDirty = false;
+  const indicator = document.getElementById("kpiModal")?.querySelector('.modal-dirty-indicator');
+  if (indicator) indicator.remove();
+}
+
+function closeModalWithCheck() {
+  if (isModalDirty) {
+    if (confirm('You have unsaved changes. Close anyway?')) {
+      resetModalDirtyState();
+      document.getElementById("kpiModal")?.classList.remove("active");
+    }
+  } else {
+    document.getElementById("kpiModal")?.classList.remove("active");
+  }
+}
 
 /* ═══════════════════════════════
    HELPERS
@@ -561,7 +662,6 @@ function getEnrichedKpis() {
     const term = currentSearchTerm.toLowerCase();
     filtered = filtered.filter(k => k.name.toLowerCase().includes(term));
   }
-  // Sort pinned KPIs first
   filtered.sort((a, b) => {
     const aPinned = pinnedKpis.includes(a.id);
     const bPinned = pinnedKpis.includes(b.id);
@@ -674,7 +774,7 @@ function renderCommentsInModal() {
 }
 
 /* ═══════════════════════════════
-   FIREBASE WRITE OPS
+   OPTIMISTIC FIREBASE WRITE OPS (UPDATED)
 ═══════════════════════════════ */
 async function updateKpiMonthly(kpiId, monthIndex, value) {
   if (!isAdmin) { showToast("Viewer mode: Cannot edit", "error"); return; }
@@ -685,7 +785,6 @@ async function updateKpiMonthly(kpiId, monthIndex, value) {
   const kpi = kpiData.find(k => k.id === kpiId);
   if (!kpi) return;
   
-  // Data validation: warn if exceeding 150% of plan
   const monthlyPlan = kpi.yearlyPlan / 12;
   const maxAllowed = monthlyPlan * 1.5;
   if (num > maxAllowed && monthlyPlan > 0) {
@@ -693,13 +792,28 @@ async function updateKpiMonthly(kpiId, monthIndex, value) {
   }
   
   const oldValue = kpi.monthlyActuals?.[monthIndex] ?? 0;
-  const monthlyActuals = { ...(kpi.monthlyActuals || buildEmptyMonthlyActuals()), [monthIndex]: num };
+  const oldMonthlyActuals = { ...(kpi.monthlyActuals || buildEmptyMonthlyActuals()) };
+  
+  // OPTIMISTIC UPDATE
+  kpi.monthlyActuals = { ...oldMonthlyActuals, [monthIndex]: num };
+  renderTable();
+  renderKpiCards();
+  renderSummaryBar();
+  renderCharts();
+  
   try {
-    await updateDoc(doc(db, "kpis", kpiId), { monthlyActuals, lastUpdated: serverTimestamp(), updatedBy: currentUserEmail || currentUserId });
+    await updateDoc(doc(db, "kpis", kpiId), { monthlyActuals: kpi.monthlyActuals, lastUpdated: serverTimestamp(), updatedBy: currentUserEmail || currentUserId });
     await logAudit(kpiId, kpi.name, `monthly_${FY_MONTHS[monthIndex]}`, oldValue, num);
     showToast(`${kpi.name} — ${FY_MONTHS[monthIndex]} updated`, "success");
-    setTimeout(() => renderCharts(), 100);
-  } catch (e) { showToast("Save failed: " + e.message, "error"); }
+  } catch (e) {
+    // ROLLBACK on error
+    kpi.monthlyActuals = oldMonthlyActuals;
+    renderTable();
+    renderKpiCards();
+    renderSummaryBar();
+    renderCharts();
+    showToast("Update failed: " + e.message, "error");
+  }
 }
 
 async function updateYearlyPlan(kpiId, value) {
@@ -709,12 +823,27 @@ async function updateYearlyPlan(kpiId, value) {
   const kpi = kpiData.find(k => k.id === kpiId);
   if (!kpi) return;
   const oldValue = kpi.yearlyPlan;
+  
+  // OPTIMISTIC UPDATE
+  kpi.yearlyPlan = num;
+  renderTable();
+  renderKpiCards();
+  renderSummaryBar();
+  renderCharts();
+  
   try {
     await updateDoc(doc(db, "kpis", kpiId), { yearlyPlan: num, lastUpdated: serverTimestamp(), updatedBy: currentUserEmail || currentUserId });
     await logAudit(kpiId, kpi.name, "yearly_plan", oldValue, num);
     showToast(`${kpi.name} — yearly plan updated`, "success");
-    setTimeout(() => renderCharts(), 100);
-  } catch (e) { showToast("Save failed: " + e.message, "error"); }
+  } catch (e) {
+    // ROLLBACK
+    kpi.yearlyPlan = oldValue;
+    renderTable();
+    renderKpiCards();
+    renderSummaryBar();
+    renderCharts();
+    showToast("Update failed: " + e.message, "error");
+  }
 }
 
 /* ═══════════════════════════════
@@ -763,7 +892,7 @@ function renderKpiCards() {
         <span class="gap-text"><i class="fas fa-arrows-up-down"></i> Gap: ${fmt(m.gap)}</span>
         <span class="forecast-badge ${fc}">Forecast: ${fmt(m.forecastYearly)} (${pct(m.forecastPct)})</span>
       </div>
-`;
+    `;
     container.appendChild(card);
   });
   document.querySelectorAll(".pin-btn").forEach(btn => {
@@ -854,24 +983,48 @@ function downloadChart(chartId, filename) {
   showToast(`Downloaded ${filename}`, "success");
 }
 
+/* ═══════════════════════════════
+   FIXED MULTI-PAGE PDF EXPORT (UPDATED)
+═══════════════════════════════ */
 async function exportToPDF() {
   const { jsPDF } = window.jspdf;
   showToast("Generating PDF...", "info");
   const element = document.querySelector(".dashboard-container");
   try {
-    const canvas = await html2canvas(element, { scale: 2, useCORS: true, logging: false });
+    const canvas = await html2canvas(element, { 
+      scale: 2, 
+      useCORS: true, 
+      logging: false,
+      windowWidth: element.scrollWidth
+    });
     const imgData = canvas.toDataURL("image/png");
-    const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-    const imgWidth = 280;
+    const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4', compress: true });
+    const imgWidth = 280; // A4 landscape width in mm
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+    let heightLeft = imgHeight;
+    let position = 0;
+    let pageNum = 1;
+    
+    pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+    heightLeft -= (pdf.internal.pageSize.getHeight() - 20);
+    
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+      heightLeft -= (pdf.internal.pageSize.getHeight() - 20);
+      pageNum++;
+    }
+    
     pdf.save(`KPI_Report_${getFYLabel()}_${new Date().toISOString().slice(0,10)}.pdf`);
-    showToast("PDF exported", "success");
-  } catch(e) { showToast("PDF generation failed", "error"); }
+    showToast(`PDF exported (${pageNum} pages)`, "success");
+  } catch(e) { 
+    showToast("PDF generation failed: " + e.message, "error"); 
+  }
 }
 
 /* ═══════════════════════════════
-   MODAL FUNCTIONS
+   MODAL FUNCTIONS (UPDATED with Dirty Check)
 ═══════════════════════════════ */
 function openKpiDetailModal(kpiId) {
   const kpi = kpiData.find(k => k.id === kpiId);
@@ -886,7 +1039,21 @@ function openKpiDetailModal(kpiId) {
   const monthSel = document.getElementById("monthSelectorContainer");
   if (monthSel) {
     monthSel.innerHTML = FY_MONTHS.map((m, idx) => `<button class="month-btn ${idx < finMonth ? 'past' : ''} ${idx > finMonth ? 'future' : ''} ${idx === currentMonth ? 'active' : ''}" data-month="${idx}" ${idx > finMonth ? "disabled" : ""}>${m}</button>`).join("");
-    document.querySelectorAll(".month-btn").forEach(btn => btn.addEventListener("click", (e) => { const idx = parseInt(e.target.dataset.month); if (idx > finMonth) return; currentMonth = idx; document.querySelectorAll(".month-btn").forEach(b => b.classList.remove("active")); e.target.classList.add("active"); openKpiDetailModal(kpiId); renderKpiCards(); renderTable(); renderSummaryBar(); const monthSelect = document.getElementById("monthSelect"); if (monthSelect) monthSelect.value = idx; }));
+    document.querySelectorAll(".month-btn").forEach(btn => btn.addEventListener("click", (e) => { 
+      const idx = parseInt(e.target.dataset.month); 
+      if (idx > finMonth) return; 
+      if (isModalDirty && !confirm("You have unsaved changes. Change month anyway?")) return;
+      currentMonth = idx; 
+      document.querySelectorAll(".month-btn").forEach(b => b.classList.remove("active")); 
+      e.target.classList.add("active"); 
+      openKpiDetailModal(kpiId); 
+      renderKpiCards(); 
+      renderTable(); 
+      renderSummaryBar(); 
+      const monthSelect = document.getElementById("monthSelect"); 
+      if (monthSelect) monthSelect.value = idx;
+      saveFilterState();
+    }));
   }
   const histContainer = document.getElementById("modalHistoryContainer");
   if (histContainer) {
@@ -898,10 +1065,15 @@ function openKpiDetailModal(kpiId) {
       const locked = idx < finMonth;
       const future = idx > finMonth;
       const stColor = achPct >= 90 ? "#0d6e3e" : achPct >= 60 ? "#b45f06" : "#bc3f2c";
-      return `<tr ${idx === currentMonth ? 'style="background:#f0f6ff;"' : ""}><td style="font-weight:600">${mn} ${idx === currentMonth ? "●" : ""}</td><td style="font-family:monospace">${fmt(monthlyPlan)}</td><td><input type="number" min="0" step="1" class="monthly-edit-input editable-input" data-month="${idx}" value="${fmt(actual)}" style="width:90px;" ${(!isAdmin || locked || future) ? "disabled" : ""} ${locked ? 'title="Past month locked"' : future ? 'title="Future month"' : ""}></td><td style="font-family:monospace;color:${stColor};font-weight:600">${pct(achPct)}</td><td>${locked ? '<i class="fas fa-lock" style="color:#8faabb;"></i>' : future ? '<i class="fas fa-clock" style="color:#c5d9ec;"></i>' : ""}</td></tr>`;
+      return `<tr ${idx === currentMonth ? 'style="background:#f0f6ff;"' : ""}><td style="font-weight:600">${mn} ${idx === currentMonth ? "●" : ""}</td><td style="font-family:monospace">${fmt(monthlyPlan)}</td>
+      <td><input type="number" min="0" step="1" class="monthly-edit-input editable-input" data-month="${idx}" value="${fmt(actual)}" style="width:90px;" ${(!isAdmin || locked || future) ? "disabled" : ""} ${locked ? 'title="Past month locked"' : future ? 'title="Future month"' : ""}></td>
+      <td style="font-family:monospace;color:${stColor};font-weight:600">${pct(achPct)}</td>
+      <td>${locked ? '<i class="fas fa-lock" style="color:#8faabb;"></i>' : future ? '<i class="fas fa-clock" style="color:#c5d9ec;"></i>' : ""}</td>
+    </tr>`;
     }).join("")}</tbody></table>`;
   }
   document.querySelectorAll(".monthly-edit-input:not([disabled])").forEach(inp => inp.addEventListener("change", (e) => updateKpiMonthly(kpiId, parseInt(e.target.dataset.month), e.target.value)));
+  trackModalChanges();
   const ctx = document.getElementById("trendChartCanvas")?.getContext("2d");
   if (ctx) {
     if (trendChartInstance) trendChartInstance.destroy();
@@ -926,7 +1098,17 @@ function populateMonthSelect() {
   if (!sel) return;
   const finMonth = getFinancialMonth();
   sel.innerHTML = FY_MONTHS.map((m, idx) => `<option value="${idx}" ${idx === currentMonth ? "selected" : ""} ${idx > finMonth ? "disabled" : ""}>${m}${idx > finMonth ? " (future)" : ""}</option>`).join("");
-  sel.addEventListener("change", (e) => { const val = parseInt(e.target.value); const finMonthLocal = getFinancialMonth(); if (val > finMonthLocal) { e.target.value = currentMonth; return; } currentMonth = val; renderKpiCards(); renderTable(); renderSummaryBar(); renderCharts(); });
+  sel.addEventListener("change", (e) => { 
+    const val = parseInt(e.target.value); 
+    const finMonthLocal = getFinancialMonth(); 
+    if (val > finMonthLocal) { e.target.value = currentMonth; return; } 
+    currentMonth = val; 
+    renderKpiCards(); 
+    renderTable(); 
+    renderSummaryBar(); 
+    renderCharts(); 
+    saveFilterState();
+  });
 }
 
 function populateKpiFilter() {
@@ -934,7 +1116,7 @@ function populateKpiFilter() {
   if (!sel) return;
   const curr = sel.value;
   sel.innerHTML = `<option value="all">All KPIs</option>` + kpiData.map(k => `<option value="${k.id}" ${k.id === curr ? "selected" : ""}>${esc(k.name)}</option>`).join("");
-  sel.addEventListener("change", (e) => { currentKpiFilter = e.target.value; renderTable(); });
+  sel.addEventListener("change", (e) => { currentKpiFilter = e.target.value; renderTable(); saveFilterState(); });
   const auditSel = document.getElementById("auditKpiFilter");
   if (auditSel) { const ac = auditSel.value; auditSel.innerHTML = `<option value="all">All KPIs</option>` + kpiData.map(k => `<option value="${k.id}" ${k.id === ac ? "selected" : ""}>${esc(k.name)}</option>`).join(""); }
 }
@@ -1012,14 +1194,15 @@ onAuthStateChanged(auth, async user => {
     const notice = document.getElementById("readonlyNotice");
     if (notice) { if (!isAdmin) notice.classList.add("visible"); else notice.classList.remove("visible"); }
     document.getElementById("fyLabel").textContent = getFYLabel();
+    loadFilterState();
     populateMonthSelect();
     initKpiListener();
     initAuditListener();
     initCommentsListener();
     const sortSelect = document.getElementById("sortTableSelect");
-    if (sortSelect) sortSelect.addEventListener("change", (e) => { currentSort = e.target.value; renderTable(); });
+    if (sortSelect) sortSelect.addEventListener("change", (e) => { currentSort = e.target.value; renderTable(); saveFilterState(); });
     const searchInput = document.getElementById("kpiSearchInput");
-    if (searchInput) searchInput.addEventListener("input", (e) => { currentSearchTerm = e.target.value; renderKpiCards(); renderTable(); renderSummaryBar(); renderCharts(); });
+    if (searchInput) searchInput.addEventListener("input", (e) => { currentSearchTerm = e.target.value; renderKpiCards(); renderTable(); renderSummaryBar(); renderCharts(); saveFilterState(); });
   } else {
     if (realtimeUnsub) realtimeUnsub();
     if (auditUnsub) auditUnsub();
@@ -1041,14 +1224,14 @@ document.getElementById("exportPdfBtn")?.addEventListener("click", exportToPDF);
 document.getElementById("showAuditBtn")?.addEventListener("click", () => { document.getElementById("auditPanel")?.scrollIntoView({ behavior:"smooth" }); });
 document.getElementById("downloadBarChartBtn")?.addEventListener("click", () => downloadChart("barPlanActualChart", "Plan_vs_Actual"));
 document.getElementById("downloadAchievementChartBtn")?.addEventListener("click", () => downloadChart("horizontalAchievementChart", "Achievement_Chart"));
-document.getElementById("closeModalBtn")?.addEventListener("click", () => { document.getElementById("kpiModal")?.classList.remove("active"); });
+document.getElementById("closeModalBtn")?.addEventListener("click", () => closeModalWithCheck());
 document.getElementById("closeCommentModal")?.addEventListener("click", () => { document.getElementById("commentModal")?.classList.remove("active"); });
 document.getElementById("cancelCommentBtn")?.addEventListener("click", () => { document.getElementById("commentModal")?.classList.remove("active"); });
 document.getElementById("saveCommentBtn")?.addEventListener("click", () => { if (currentModalKpiId && currentCommentMonth !== undefined) addComment(currentModalKpiId, currentCommentMonth, document.getElementById("commentText").value); });
 document.getElementById("addCommentBtn")?.addEventListener("click", () => { openCommentModal(); });
-document.getElementById("kpiModal")?.addEventListener("click", e => { if(e.target === e.currentTarget) e.currentTarget.classList.remove("active"); });
+document.getElementById("kpiModal")?.addEventListener("click", e => { if(e.target === e.currentTarget) closeModalWithCheck(); });
 document.getElementById("commentModal")?.addEventListener("click", e => { if(e.target === e.currentTarget) e.currentTarget.classList.remove("active"); });
-document.addEventListener("keydown", e => { if(e.key === "Escape") { document.getElementById("kpiModal")?.classList.remove("active"); document.getElementById("commentModal")?.classList.remove("active"); } });
+document.addEventListener("keydown", e => { if(e.key === "Escape") { closeModalWithCheck(); document.getElementById("commentModal")?.classList.remove("active"); } });
 document.getElementById("auditKpiFilter")?.addEventListener("change", () => renderAuditTable());
 document.getElementById("auditUserFilter")?.addEventListener("change", () => renderAuditTable());
 document.getElementById("auditDateFilter")?.addEventListener("change", () => renderAuditTable());
