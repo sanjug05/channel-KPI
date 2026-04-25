@@ -3,22 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>KPI Control Tower | Enterprise Edition v6.2</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <title>KPI Control Tower | Enterprise Edition v6.4</title>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root{--bg:#f0f2f8;--surface:#ffffff;--border:#e6edf4;--text:#0a1e2f;--text2:#5b6e8c;--text3:#8faabb;--blue:#0D5E3A;--blue-light:#D4EDDA;--green:#2b9e5c;--green-light:#e0f6e9;--amber:#e68a2e;--amber-light:#fff0db;--red:#dc5a3c;--red-light:#ffe6e3;--navy:#0D5E3A;--navy-dark:#0a4e30;--cat-sales:#3B82F6;--cat-ops:#8B5CF6;--cat-quality:#10B981;--cat-finance:#F97316;--sidebar-bg:#0a4e30;--sidebar-width:260px}
-    [data-theme="dark"]{--bg:#0F172A;--surface:#1E293B;--border:#334155;--text:#F1F5F9;--text2:#CBD5E1;--text3:#94A3B8;--blue:#34D399;--blue-light:#064E3B;--green:#34D399;--green-light:#064E3B;--amber:#FBBF24;--amber-light:#451A03;--red:#F87171;--red-light:#450A0A;--sidebar-bg:#0A1F14}
+    :root{--bg:#f0f2f8;--surface:#ffffff;--border:#e6edf4;--text:#0a1e2f;--text2:#5b6e8c;--text3:#8faabb;--blue:#0D5E3A;--blue-light:#D4EDDA;--green:#2b9e5c;--green-light:#e0f6e9;--amber:#e68a2e;--amber-light:#fff0db;--red:#dc5a3c;--red-light:#ffe6e3;--navy:#0D5E3A;--navy-dark:#0a4e30;--cat-sales:#3B82F6;--cat-ops:#8B5CF6;--cat-quality:#10B981;--cat-finance:#F97316;--sidebar-bg:#0a4e30;--sidebar-width:260px;--filter-group-bg:#f6fdf8}
+    [data-theme="dark"]{--bg:#0F172A;--surface:#1E293B;--border:#334155;--text:#F1F5F9;--text2:#CBD5E1;--text3:#94A3B8;--blue:#34D399;--blue-light:#064E3B;--green:#34D399;--green-light:#064E3B;--amber:#FBBF24;--amber-light:#451A03;--red:#F87171;--red-light:#450A0A;--sidebar-bg:#0A1F14;--filter-group-bg:#1e293b}
     *{margin:0;padding:0;box-sizing:border-box}
     html{scroll-behavior:smooth}
     body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;overflow-x:hidden}
     ::-webkit-scrollbar{width:6px;height:6px}
     .shell{display:flex;min-height:100vh}
-    .sidebar{width:var(--sidebar-width);background:var(--sidebar-bg);display:flex;flex-direction:column;position:fixed;inset-block:0;left:0;z-index:200;overflow:hidden}
+    .sidebar{width:var(--sidebar-width);background:var(--sidebar-bg);display:flex;flex-direction:column;position:fixed;inset-block:0;left:0;z-index:200;overflow:hidden;transition:transform 0.3s ease}
     .sidebar-header{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,0.08);flex-shrink:0}
     .sidebar-logo{display:flex;flex-direction:column;gap:6px}
     .sidebar-logo img{height:26px;width:auto;filter:brightness(0) invert(1);opacity:0.9}
@@ -43,6 +40,8 @@
     .main-wrapper{margin-left:var(--sidebar-width);flex:1;display:flex;flex-direction:column;min-height:100vh}
     .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
     .topbar-left{display:flex;align-items:center;gap:14px}
+    .hamburger-btn{display:none;background:none;border:none;font-size:1.3rem;color:var(--text2);cursor:pointer;padding:6px 10px;border-radius:8px;margin-right:4px}
+    .hamburger-btn:hover{background:var(--bg)}
     .page-title{font-weight:700;font-size:1.1rem;color:var(--text)}
     .page-breadcrumb{font-size:0.72rem;color:var(--text3);display:flex;align-items:center;gap:6px}
     .topbar-right{display:flex;align-items:center;gap:10px}
@@ -72,7 +71,9 @@
     .slide-panel-close{background:none;border:none;font-size:1.2rem;color:var(--text3);cursor:pointer;padding:4px 8px;border-radius:6px}
     .slide-panel-close:hover{background:var(--bg);color:var(--text)}
     .slide-panel-body{flex:1;overflow-y:auto;padding:16px}
-    .slide-panel-footer{padding:12px 16px;border-top:1px solid var(--border);flex-shrink:0;display:flex;gap:8px}
+    .slide-panel-footer{padding:12px 16px;border-top:1px solid var(--border);flex-shrink:0;display:flex;flex-direction:column;gap:6px}
+    .chat-input-row{display:flex;gap:8px;align-items:center}
+    .chat-char-counter{font-size:0.62rem;color:var(--text3);text-align:right}
     .slide-panel-footer input{flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:20px;font-size:0.8rem;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);outline:none}
     .slide-panel-footer input:focus{border-color:var(--blue)}
     .slide-panel-footer button{padding:10px 18px;background:var(--blue);color:white;border:none;border-radius:20px;font-weight:600;cursor:pointer;font-size:0.78rem}
@@ -146,7 +147,7 @@
     .smart-action-strip.warning{background:var(--amber-light);color:#92400E}
     .smart-action-strip.ok{background:var(--green-light);color:#065F46}
     .filters-panel{background:var(--surface);border-radius:18px;padding:12px 20px;margin-bottom:20px;display:flex;flex-wrap:wrap;align-items:center;gap:14px;box-shadow:0 2px 8px rgba(0,0,0,0.02);border:1px solid var(--border)}
-    .filter-group{display:flex;align-items:center;gap:8px;background:#f6fdf8;padding:4px 14px;border-radius:30px}
+    .filter-group{display:flex;align-items:center;gap:8px;background:var(--filter-group-bg);padding:4px 14px;border-radius:30px}
     .filter-group label{font-weight:600;font-size:0.7rem;color:var(--text2)}
     select,input[type="text"]{background:transparent;border:none;padding:6px 0;font-weight:500;font-size:0.82rem;outline:none;color:var(--text)}
     .fy-label{font-size:0.68rem;font-weight:700;color:var(--blue);background:var(--blue-light);padding:4px 14px;border-radius:16px}
@@ -269,113 +270,211 @@
     .kpi-update-header{margin-bottom:20px}
     .kpi-update-header h2{font-size:1.2rem;font-weight:700;color:var(--navy);margin-bottom:4px}
     .kpi-update-header p{font-size:0.78rem;color:var(--text3)}
+    .loading-overlay{display:flex;align-items:center;justify-content:center;padding:40px;color:var(--text3);font-size:0.85rem;gap:10px}
+    .loading-overlay i{animation:spin 1.2s linear infinite}
+    @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+    .kpi-skeleton{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:18px}
+    .skeleton-card{background:var(--surface);border-radius:24px;padding:18px;border:1px solid var(--border);height:200px;position:relative;overflow:hidden}
+    .skeleton-card::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent);animation:shimmer 1.4s infinite}
+    @keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:199}
+    .sidebar-overlay.active{display:block}
     @media(max-width:1024px){:root{--sidebar-width:64px}.sidebar-appname,.sidebar-tagline,.nav-section-label,.nav-item span,.sidebar-alert,.user-info{display:none}.nav-item{justify-content:center;padding:10px}.sidebar-user{justify-content:center}}
-    @media(max-width:768px){.main-wrapper{margin-left:0}.sidebar{transform:translateX(-100%)}.charts-row{grid-template-columns:1fr}.exec-brief-body{grid-template-columns:1fr}.page-content{padding:14px}}
+    @media(max-width:768px){
+      .main-wrapper{margin-left:0}
+      .sidebar{transform:translateX(-100%);width:260px!important}
+      .sidebar.mobile-open{transform:translateX(0)}
+      .sidebar.mobile-open .sidebar-appname,.sidebar.mobile-open .sidebar-tagline,.sidebar.mobile-open .nav-section-label,.sidebar.mobile-open .nav-item span,.sidebar.mobile-open .sidebar-alert,.sidebar.mobile-open .user-info{display:block}
+      .sidebar.mobile-open .nav-item{justify-content:flex-start;padding:10px 12px}
+      .sidebar.mobile-open .sidebar-user{justify-content:flex-start}
+      .hamburger-btn{display:flex!important;align-items:center}
+      .charts-row{grid-template-columns:1fr}
+      .exec-brief-body{grid-template-columns:1fr}
+      .page-content{padding:14px}
+    }
   </style>
 </head>
 <body>
-<div id="loginScreen" class="login-screen"><div class="login-card"><h2><i class="fas fa-chart-line" style="color:#0D5E3A;"></i> KPI Control Tower</h2><div class="login-sub" style="color:rgba(255,255,255,0.5);font-size:0.78rem;margin-bottom:24px;">Enterprise Edition · Financial Year Apr–Mar</div><div class="login-field" style="margin-bottom:14px;"><label style="display:block;font-size:0.7rem;font-weight:600;color:rgba(255,255,255,0.6);text-transform:uppercase;margin-bottom:6px;">Email Address</label><input type="email" id="loginEmail" placeholder="your@email.com" autocomplete="username"></div><div class="login-field" style="margin-bottom:14px;"><label style="display:block;font-size:0.7rem;font-weight:600;color:rgba(255,255,255,0.6);text-transform:uppercase;margin-bottom:6px;">Password</label><input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password"></div><button class="btn-login" id="doLoginBtn">Sign In →</button><div id="loginError" style="color:#ff9e8f;margin-top:12px;display:none;text-align:center;font-size:0.78rem;padding:8px;background:rgba(220,90,60,0.12);border-radius:8px;"></div></div></div>
-<div id="mainApp"><div class="shell">
-<aside class="sidebar" id="sidebar">
-  <div class="sidebar-header"><div class="sidebar-logo"><img src="https://www.aiswindows.com/assets/images/ais-windows-logo.svg" alt="AIS"><div class="sidebar-appname">KPI Tower</div><div class="sidebar-tagline">Enterprise Edition</div></div></div>
-  <div class="sidebar-alert" id="sidebarAlert"><strong>⚠ Critical KPIs</strong><span id="sidebarAlertText"></span></div>
-  <nav class="sidebar-nav">
-    <div class="nav-section-label">Dashboard</div>
-    <button class="nav-item active" data-view="dashboardView"><i class="fas fa-th-large" style="width:18px;text-align:center;"></i><span>KPI Overview</span><span class="nav-badge" id="navBadgeRed">0</span></button>
-    <button class="nav-item" data-view="kpiUpdateView"><i class="fas fa-pen-to-square" style="width:18px;text-align:center;"></i><span>KPI Update</span></button>
-    <div class="nav-section-label">Intelligence</div>
-    <button class="nav-item" data-view="analyticsView"><i class="fas fa-chart-bar" style="width:18px;text-align:center;"></i><span>Analytics</span></button>
-    <div class="nav-section-label">Collaboration</div>
-    <button class="nav-item" id="openChatBtn"><i class="fas fa-comments" style="width:18px;text-align:center;"></i><span>Team Chat</span><span class="nav-badge" id="navBadgeChat">0</span></button>
-    <button class="nav-item" id="openSuggestBtn"><i class="fas fa-lightbulb" style="width:18px;text-align:center;"></i><span>Suggestions</span><span class="nav-badge" id="navBadgeSuggest">0</span></button>
-    <div class="nav-section-label">Tools</div>
-    <button class="nav-item" id="exportExcelSidebarBtn"><i class="fas fa-file-excel" style="width:18px;text-align:center;"></i><span>Export Excel</span></button>
-    <button class="nav-item" id="exportPdfSidebarBtn"><i class="fas fa-file-pdf" style="width:18px;text-align:center;"></i><span>PDF Report</span></button>
-    <button class="nav-item" id="backupDataBtn"><i class="fas fa-database" style="width:18px;text-align:center;"></i><span>Backup Data</span></button>
-    <div class="nav-section-label">Governance</div>
-    <button class="nav-item" data-view="auditView"><i class="fas fa-history" style="width:18px;text-align:center;"></i><span>Audit Trail</span></button>
-  </nav>
-  <div class="sidebar-footer"><div class="sidebar-user"><div class="user-avatar" id="sidebarAvatar">U</div><div class="user-info"><div class="user-name" id="sidebarUserName">User</div><div class="user-role" id="sidebarUserRole">Viewer</div></div><button class="btn-logout" id="logoutMainBtn" title="Logout"><i class="fas fa-sign-out-alt"></i></button></div></div>
-</aside>
-<div class="main-wrapper">
-<header class="topbar">
-  <div class="topbar-left"><div class="page-title" id="pageTitle">KPI Overview</div><div class="page-breadcrumb"><span>KPI Control Tower</span><i class="fas fa-chevron-right" style="font-size:0.5rem;"></i><span id="pageBreadcrumb">Dashboard</span></div></div>
-  <div class="topbar-right">
-    <div class="notif-bell-wrap" id="notifBellWrap"><button class="notif-bell-btn" id="notifBellBtn"><i class="fas fa-bell"></i><span class="notif-bell-count" id="notifBellCount">0</span></button><div class="notif-dropdown" id="notifDropdown"><div class="notif-header"><h4>Notifications</h4><div class="notif-header-actions"><button id="markAllReadBtn">Mark All Read</button><button id="clearAllNotifsBtn">Clear All</button></div></div><div id="notifList"><div class="notif-empty">No notifications</div></div></div></div>
-    <div class="theme-picker-wrap" id="themePickerWrap"><button class="theme-picker-btn" id="themePickerBtn"><span class="theme-dot" id="themeDot" style="background:#0D5E3A;"></span><i class="fas fa-chevron-down" style="font-size:0.6rem;"></i></button><div class="theme-dropdown" id="themeDropdown"><h4>Theme Color</h4><div class="theme-color-grid" id="themeColorGrid"></div></div></div>
-    <div class="role-chip admin" id="roleBadgeTop">VIEWER</div>
+<div id="loginScreen" class="login-screen">
+  <div class="login-card">
+    <h2><i class="fas fa-chart-line" style="color:#0D5E3A;"></i> KPI Control Tower</h2>
+    <div class="login-sub" style="color:rgba(255,255,255,0.5);font-size:0.78rem;margin-bottom:24px;">Enterprise Edition · Financial Year Apr–Mar</div>
+    <div class="login-field" style="margin-bottom:14px;"><label for="loginEmail" style="display:block;font-size:0.7rem;font-weight:600;color:rgba(255,255,255,0.6);text-transform:uppercase;margin-bottom:6px;">Email Address</label><input type="email" id="loginEmail" placeholder="your@email.com" autocomplete="username"></div>
+    <div class="login-field" style="margin-bottom:14px;"><label for="loginPassword" style="display:block;font-size:0.7rem;font-weight:600;color:rgba(255,255,255,0.6);text-transform:uppercase;margin-bottom:6px;">Password</label><input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password"></div>
+    <button class="btn-login" id="doLoginBtn">Sign In →</button>
+    <div id="loginError" style="color:#ff9e8f;margin-top:12px;display:none;text-align:center;font-size:0.78rem;padding:8px;background:rgba(220,90,60,0.12);border-radius:8px;"></div>
   </div>
-</header>
-<main class="page-content" id="mainContent">
+</div>
 
-<!-- DASHBOARD VIEW -->
-<div class="view-container active" id="dashboardView">
-  <div class="summary-bar"><div class="summary-stats"><div class="summary-stat"><span class="summary-label">Overall Achievement</span><span class="summary-value" id="overallScore">—</span></div><div class="summary-stat"><span class="summary-label">Avg Yearly Gap</span><span class="summary-value" id="avgGap">—</span></div><div class="summary-stat"><span class="summary-label">Forecast vs Plan</span><span class="summary-value" id="forecastRatio">—</span></div></div><div class="health-indicators" id="healthIndicators"><span class="health-badge health-green">🟢 0</span><span class="health-badge health-amber">🟡 0</span><span class="health-badge health-red">🔴 0</span></div></div>
-  <div class="anomaly-banner" id="anomalyBanner"><i class="fas fa-exclamation-triangle"></i><div id="anomalyText">Anomaly detected</div><button id="dismissAnomalyBtn" style="margin-left:auto;background:none;border:none;cursor:pointer;font-size:1rem;opacity:0.5;">&times;</button></div>
-  <div id="readonlyNotice" class="readonly-notice"><i class="fas fa-lock"></i> You are in <strong>Viewer mode</strong>. All inputs are read-only.</div>
-  <div class="exec-brief-panel" id="execBriefPanel"><div class="exec-brief-header" id="execBriefToggle"><div style="display:flex;align-items:center;gap:10px;"><i class="fas fa-robot"></i><div><div class="exec-brief-title">AI+ Executive Brief</div><div class="exec-brief-subtitle">Auto-generated insights</div></div></div><div class="exec-brief-actions"><button id="refreshBriefBtn"><i class="fas fa-sync-alt"></i> Refresh</button><button id="collapseBriefBtn"><i class="fas fa-chevron-up"></i></button></div></div><div class="exec-brief-body" id="execBriefBody"><div class="exec-brief-col green"><div class="exec-brief-col-title" style="color:#065F46;"><i class="fas fa-check-circle"></i> What's Going Well</div><div id="briefPositive"></div></div><div class="exec-brief-col amber"><div class="exec-brief-col-title" style="color:#92400E;"><i class="fas fa-exclamation-triangle"></i> Needs Attention</div><div id="briefConcerns"></div></div><div class="exec-brief-col blue"><div class="exec-brief-col-title" style="color:#1E40AF;"><i class="fas fa-lightbulb"></i> Recommended Actions</div><div id="briefActions"></div></div></div><div class="exec-brief-footer" id="briefFooter" style="font-size:0.6rem;color:var(--text3);text-align:right;padding:6px 16px 8px;border-top:1px solid var(--border);">Last updated: just now</div></div>
-  <div style="margin-bottom:20px;"><div style="font-weight:700;font-size:0.9rem;color:var(--navy);margin-bottom:10px;">⚠️ Top Bottleneck Contributors</div><div class="bottleneck-cards" id="bottleneckContributors"></div></div>
-  <div class="filters-panel">
-    <div class="filter-group"><label><i class="fas fa-calendar-alt"></i> Month</label><select id="monthSelect"></select></div>
-    <div class="filter-group"><label><i class="fas fa-chart-simple"></i> KPI</label><select id="kpiSelectFilter"><option value="all">All KPIs</option></select></div>
-    <div class="filter-group"><label><i class="fas fa-sort-amount-down"></i> Sort</label><select id="sortTableSelect"><option value="default">Default</option><option value="achievement">% ↓</option><option value="gap">Gap ↓</option></select></div>
-    <div class="filter-group filter-search"><label><i class="fas fa-search"></i></label><input type="text" id="kpiSearchInput" placeholder="Search..."></div>
-    <button class="topbar-btn" id="groupByCategoryBtn" style="font-size:0.68rem;"><i class="fas fa-layer-group"></i> Group by Category</button>
-    <span class="fy-label" id="fyLabel">FY —</span>
-    <div class="sync-status" id="syncStatus"><i class="fas fa-circle" style="color:#2b9e5c;font-size:0.45rem;"></i> Live</div>
+<div id="mainApp">
+  <div class="shell">
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
+      <div class="sidebar-header"><div class="sidebar-logo"><img src="https://www.aiswindows.com/assets/images/ais-windows-logo.svg" alt="AIS"><div class="sidebar-appname">KPI Tower</div><div class="sidebar-tagline">Enterprise Edition</div></div></div>
+      <div class="sidebar-alert" id="sidebarAlert"><strong>⚠ Critical KPIs</strong><span id="sidebarAlertText"></span></div>
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Dashboard</div>
+        <button class="nav-item active" data-view="dashboardView" aria-label="KPI Overview"><i class="fas fa-th-large" style="width:18px;text-align:center;"></i><span>KPI Overview</span><span class="nav-badge" id="navBadgeRed">0</span></button>
+        <button class="nav-item" data-view="kpiUpdateView" aria-label="KPI Update"><i class="fas fa-pen-to-square" style="width:18px;text-align:center;"></i><span>KPI Update</span></button>
+        <div class="nav-section-label">Intelligence</div>
+        <button class="nav-item" data-view="analyticsView" aria-label="Analytics"><i class="fas fa-chart-bar" style="width:18px;text-align:center;"></i><span>Analytics</span></button>
+        <div class="nav-section-label">Collaboration</div>
+        <button class="nav-item" id="openChatBtn" aria-label="Team Chat"><i class="fas fa-comments" style="width:18px;text-align:center;"></i><span>Team Chat</span><span class="nav-badge" id="navBadgeChat">0</span></button>
+        <button class="nav-item" id="openSuggestBtn" aria-label="Suggestions"><i class="fas fa-lightbulb" style="width:18px;text-align:center;"></i><span>Suggestions</span><span class="nav-badge" id="navBadgeSuggest">0</span></button>
+        <div class="nav-section-label">Tools</div>
+        <button class="nav-item" id="exportExcelSidebarBtn" aria-label="Export to Excel"><i class="fas fa-file-excel" style="width:18px;text-align:center;"></i><span>Export Excel</span></button>
+        <button class="nav-item" id="exportPdfSidebarBtn" aria-label="Export PDF Report"><i class="fas fa-file-pdf" style="width:18px;text-align:center;"></i><span>PDF Report</span></button>
+        <button class="nav-item" id="backupDataBtn" aria-label="Backup Data"><i class="fas fa-database" style="width:18px;text-align:center;"></i><span>Backup Data</span></button>
+        <div class="nav-section-label">Governance</div>
+        <button class="nav-item" data-view="auditView" aria-label="Audit Trail"><i class="fas fa-history" style="width:18px;text-align:center;"></i><span>Audit Trail</span></button>
+      </nav>
+      <div class="sidebar-footer"><div class="sidebar-user"><div class="user-avatar" id="sidebarAvatar">U</div><div class="user-info"><div class="user-name" id="sidebarUserName">User</div><div class="user-role" id="sidebarUserRole">Viewer</div></div><button class="btn-logout" id="logoutMainBtn" title="Logout" aria-label="Logout"><i class="fas fa-sign-out-alt"></i></button></div></div>
+    </aside>
+
+    <div class="main-wrapper">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle sidebar menu"><i class="fas fa-bars"></i></button>
+          <div class="page-title" id="pageTitle">KPI Overview</div>
+          <div class="page-breadcrumb"><span>KPI Control Tower</span><i class="fas fa-chevron-right" style="font-size:0.5rem;"></i><span id="pageBreadcrumb">Dashboard</span></div>
+        </div>
+        <div class="topbar-right">
+          <div class="notif-bell-wrap" id="notifBellWrap" aria-live="polite">
+            <button class="notif-bell-btn" id="notifBellBtn" aria-label="Notifications"><i class="fas fa-bell"></i><span class="notif-bell-count" id="notifBellCount">0</span></button>
+            <div class="notif-dropdown" id="notifDropdown"><div class="notif-header"><h4>Notifications</h4><div class="notif-header-actions"><button id="markAllReadBtn">Mark All Read</button><button id="clearAllNotifsBtn">Clear All</button></div></div><div id="notifList"><div class="notif-empty">No notifications</div></div></div>
+          </div>
+          <div class="theme-picker-wrap" id="themePickerWrap">
+            <button class="theme-picker-btn" id="themePickerBtn" aria-label="Change theme color"><span class="theme-dot" id="themeDot" style="background:#0D5E3A;"></span><i class="fas fa-chevron-down" style="font-size:0.6rem;"></i></button>
+            <div class="theme-dropdown" id="themeDropdown"><h4>Theme Color</h4><div class="theme-color-grid" id="themeColorGrid"></div></div>
+          </div>
+          <div class="role-chip admin" id="roleBadgeTop">VIEWER</div>
+        </div>
+      </header>
+      <main class="page-content" id="mainContent">
+        <div class="view-container active" id="dashboardView">
+          <div class="summary-bar"><div class="summary-stats"><div class="summary-stat"><span class="summary-label">Overall Achievement</span><span class="summary-value" id="overallScore">—</span></div><div class="summary-stat"><span class="summary-label">Avg Yearly Gap</span><span class="summary-value" id="avgGap">—</span></div><div class="summary-stat"><span class="summary-label">Forecast vs Plan</span><span class="summary-value" id="forecastRatio">—</span></div></div><div class="health-indicators" id="healthIndicators"><span class="health-badge health-green">🟢 0</span><span class="health-badge health-amber">🟡 0</span><span class="health-badge health-red">🔴 0</span></div></div>
+          <div class="anomaly-banner" id="anomalyBanner"><i class="fas fa-exclamation-triangle"></i><div id="anomalyText">Anomaly detected</div><button id="dismissAnomalyBtn" style="margin-left:auto;background:none;border:none;cursor:pointer;font-size:1rem;opacity:0.5;">&times;</button></div>
+          <div id="readonlyNotice" class="readonly-notice"><i class="fas fa-lock"></i> You are in <strong>Viewer mode</strong>. All inputs are read-only.</div>
+          <div class="exec-brief-panel" id="execBriefPanel"><div class="exec-brief-header" id="execBriefToggle"><div style="display:flex;align-items:center;gap:10px;"><i class="fas fa-robot"></i><div><div class="exec-brief-title">AI+ Executive Brief</div><div class="exec-brief-subtitle">Auto-generated insights</div></div></div><div class="exec-brief-actions"><button id="refreshBriefBtn"><i class="fas fa-sync-alt"></i> Refresh</button><button id="collapseBriefBtn"><i class="fas fa-chevron-up"></i></button></div></div><div class="exec-brief-body" id="execBriefBody"><div class="exec-brief-col green"><div class="exec-brief-col-title" style="color:#065F46;"><i class="fas fa-check-circle"></i> What's Going Well</div><div id="briefPositive"></div></div><div class="exec-brief-col amber"><div class="exec-brief-col-title" style="color:#92400E;"><i class="fas fa-exclamation-triangle"></i> Needs Attention</div><div id="briefConcerns"></div></div><div class="exec-brief-col blue"><div class="exec-brief-col-title" style="color:#1E40AF;"><i class="fas fa-lightbulb"></i> Recommended Actions</div><div id="briefActions"></div></div></div><div class="exec-brief-footer" id="briefFooter" style="font-size:0.6rem;color:var(--text3);text-align:right;padding:6px 16px 8px;border-top:1px solid var(--border);">Last updated: just now</div></div>
+          <div style="margin-bottom:20px;"><div style="font-weight:700;font-size:0.9rem;color:var(--navy);margin-bottom:10px;">⚠️ Top Bottleneck Contributors</div><div class="bottleneck-cards" id="bottleneckContributors"></div></div>
+          <div class="filters-panel">
+            <div class="filter-group"><label for="monthSelect"><i class="fas fa-calendar-alt"></i> Month</label><select id="monthSelect" aria-label="Select month"></select></div>
+            <div class="filter-group"><label for="kpiSelectFilter"><i class="fas fa-chart-simple"></i> KPI</label><select id="kpiSelectFilter" aria-label="Filter by KPI"><option value="all">All KPIs</option></select></div>
+            <div class="filter-group"><label for="sortTableSelect"><i class="fas fa-sort-amount-down"></i> Sort</label><select id="sortTableSelect" aria-label="Sort table"><option value="default">Default</option><option value="achievement">% ↓</option><option value="gap">Gap ↓</option></select></div>
+            <div class="filter-group filter-search"><label for="kpiSearchInput"><i class="fas fa-search"></i></label><input type="text" id="kpiSearchInput" placeholder="Search..." aria-label="Search KPIs"></div>
+            <button class="topbar-btn" id="groupByCategoryBtn" style="font-size:0.68rem;"><i class="fas fa-layer-group"></i> Group by Category</button>
+            <span class="fy-label" id="fyLabel">FY —</span>
+            <div class="sync-status" id="syncStatus"><i class="fas fa-circle" style="color:#2b9e5c;font-size:0.45rem;"></i> Live</div>
+          </div>
+          <div class="kpi-grid" id="kpiCardsContainer">
+            <div class="kpi-skeleton" id="kpiLoadingSkeleton">
+              <div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div>
+            </div>
+          </div>
+          <div class="table-wrapper"><table class="data-table" id="kpiTable"><thead><tr><th>KPI</th><th>Yearly Plan</th><th>Yearly Actual</th><th>Yearly %</th><th>Monthly Plan</th><th>Monthly Actual <span id="tableMonthLabel"></span></th><th>Monthly %</th><th>Forecast</th><th>Status</th><th>Notes</th></tr></thead><tbody id="kpiTableBody"></tbody></table></div>
+        </div>
+        <div class="view-container" id="kpiUpdateView">
+          <div class="kpi-update-header"><h2>📝 KPI Data Update</h2><p>Enter monthly actuals and yearly plans</p></div>
+          <div id="readonlyNoticeKpi" class="readonly-notice"><i class="fas fa-lock"></i> You are in <strong>Viewer mode</strong>. All inputs are read-only.</div>
+          <div class="summary-bar"><div class="summary-stats"><div class="summary-stat"><span class="summary-label">Overall Achievement</span><span class="summary-value" id="overallScoreKpi">—</span></div><div class="summary-stat"><span class="summary-label">Avg Yearly Gap</span><span class="summary-value" id="avgGapKpi">—</span></div><div class="summary-stat"><span class="summary-label">Forecast vs Plan</span><span class="summary-value" id="forecastRatioKpi">—</span></div></div><div class="health-indicators" id="healthIndicatorsKpi"><span class="health-badge health-green">🟢 0</span><span class="health-badge health-amber">🟡 0</span><span class="health-badge health-red">🔴 0</span></div></div>
+          <div class="filters-panel">
+            <div class="filter-group"><label for="monthSelectKpi"><i class="fas fa-calendar-alt"></i> Month</label><select id="monthSelectKpi" aria-label="Select month"></select></div>
+            <div class="filter-group"><label for="kpiSelectFilterKpi"><i class="fas fa-chart-simple"></i> KPI</label><select id="kpiSelectFilterKpi" aria-label="Filter by KPI"><option value="all">All KPIs</option></select></div>
+            <div class="filter-group"><label for="sortTableSelectKpi"><i class="fas fa-sort-amount-down"></i> Sort</label><select id="sortTableSelectKpi" aria-label="Sort table"><option value="default">Default</option><option value="achievement">% ↓</option><option value="gap">Gap ↓</option></select></div>
+            <div class="filter-group filter-search"><label for="kpiSearchInputKpi"><i class="fas fa-search"></i></label><input type="text" id="kpiSearchInputKpi" placeholder="Search..." aria-label="Search KPIs"></div>
+            <span class="fy-label" id="fyLabelKpi">FY —</span>
+          </div>
+          <div class="table-wrapper"><table class="data-table" id="kpiTableKpi"><thead><tr><th>KPI</th><th>Yearly Plan</th><th>Yearly Actual</th><th>Yearly %</th><th>Monthly Plan</th><th>Monthly Actual <span id="tableMonthLabelKpi"></span></th><th>Monthly %</th><th>Forecast</th><th>Status</th><th>Notes</th></tr></thead><tbody id="kpiTableBodyKpi"></tbody></table></div>
+        </div>
+        <div class="view-container" id="analyticsView">
+          <div class="charts-row"><div class="chart-card"><h4><i class="fas fa-chart-bar" style="color:var(--blue);"></i> Yearly Plan vs Actual<div class="chart-btn-group"><button class="chart-btn" id="downloadBarChartBtn" aria-label="Download chart"><i class="fas fa-download"></i></button></div></h4><canvas id="barPlanActualChart"></canvas></div><div class="chart-card"><h4><i class="fas fa-percent" style="color:var(--green);"></i> Yearly Achievement %<div class="chart-btn-group"><button class="chart-btn" id="downloadAchievementChartBtn" aria-label="Download chart"><i class="fas fa-download"></i></button></div></h4><canvas id="horizontalAchievementChart"></canvas></div></div>
+          <div class="charts-row"><div class="chart-card"><h4><i class="fas fa-layer-group"></i> Category Gap vs Plan<div class="chart-btn-group"><button class="chart-btn" id="downloadCatGapChartBtn" aria-label="Download chart"><i class="fas fa-download"></i></button></div></h4><canvas id="catGapChart"></canvas></div><div class="chart-card"><h4><i class="fas fa-chart-pie"></i> Performance Mix<div class="chart-btn-group"><button class="chart-btn" id="downloadPerfMixChartBtn" aria-label="Download chart"><i class="fas fa-download"></i></button></div></h4><canvas id="perfMixChart"></canvas></div></div>
+          <div class="charts-row"><div class="chart-card"><h4><i class="fas fa-trophy"></i> Owner Leaderboard</h4><div class="leaderboard-list" id="ownerLeaderboard"></div></div><div class="chart-card"><h4><i class="fas fa-chart-line"></i> Portfolio Monthly Trend</h4><canvas id="trendLineChart"></canvas></div></div>
+          <div class="delay-buckets" id="delayBucketsContainer"></div>
+        </div>
+        <div class="view-container" id="auditView">
+          <div class="audit-panel" id="auditPanel">
+            <h4 style="font-size:0.85rem;font-weight:700;color:var(--navy);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;">
+              <span><i class="fas fa-history" style="color:var(--blue);"></i> Audit Trail</span>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <select id="auditKpiFilter" style="font-size:0.72rem;padding:4px 8px;border:1px solid #cbdde9;border-radius:8px;" aria-label="Filter by KPI"><option value="all">All KPIs</option></select>
+                <select id="auditUserFilter" style="font-size:0.72rem;padding:4px 8px;border:1px solid #cbdde9;border-radius:8px;" aria-label="Filter by user"><option value="all">All Users</option></select>
+                <input type="date" id="auditDateFilter" style="font-size:0.72rem;padding:4px 8px;border:1px solid #cbdde9;border-radius:8px;" aria-label="Filter by date">
+              </div>
+            </h4>
+            <div class="audit-scroll">
+              <table class="data-table activity-table" style="font-size:0.74rem;">
+                <thead><tr><th>KPI</th><th>Field</th><th>Old</th><th>New</th><th>User</th><th>Timestamp</th></tr></thead>
+                <tbody id="auditTableBody"><tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text3);">Loading…</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+      <footer class="app-footer">Enterprise KPI Control Tower · Financial Year Apr–Mar · Real-time Sync · Full Audit Trail · Powered with ❤️ by <strong>Sanju G</strong></footer>
+    </div>
   </div>
-  <div class="kpi-grid" id="kpiCardsContainer"></div>
-  <div class="table-wrapper"><table class="data-table" id="kpiTable"><thead><tr><th>KPI</th><th>Yearly Plan</th><th>Yearly Actual</th><th>Yearly %</th><th>Monthly Plan</th><th>Monthly Actual <span id="tableMonthLabel"></span></th><th>Monthly %</th><th>Forecast</th><th>Status</th><th>Notes</th></tr></thead><tbody id="kpiTableBody"></tbody></table></div>
 </div>
 
-<!-- KPI UPDATE VIEW -->
-<div class="view-container" id="kpiUpdateView">
-  <div class="kpi-update-header"><h2>📝 KPI Data Update</h2><p>Enter monthly actuals and yearly plans</p></div>
-  <div id="readonlyNoticeKpi" class="readonly-notice"><i class="fas fa-lock"></i> You are in <strong>Viewer mode</strong>. All inputs are read-only.</div>
-  <div class="summary-bar"><div class="summary-stats"><div class="summary-stat"><span class="summary-label">Overall Achievement</span><span class="summary-value" id="overallScoreKpi">—</span></div><div class="summary-stat"><span class="summary-label">Avg Yearly Gap</span><span class="summary-value" id="avgGapKpi">—</span></div><div class="summary-stat"><span class="summary-label">Forecast vs Plan</span><span class="summary-value" id="forecastRatioKpi">—</span></div></div><div class="health-indicators" id="healthIndicatorsKpi"><span class="health-badge health-green">🟢 0</span><span class="health-badge health-amber">🟡 0</span><span class="health-badge health-red">🔴 0</span></div></div>
-  <div class="filters-panel">
-    <div class="filter-group"><label><i class="fas fa-calendar-alt"></i> Month</label><select id="monthSelectKpi"></select></div>
-    <div class="filter-group"><label><i class="fas fa-chart-simple"></i> KPI</label><select id="kpiSelectFilterKpi"><option value="all">All KPIs</option></select></div>
-    <div class="filter-group"><label><i class="fas fa-sort-amount-down"></i> Sort</label><select id="sortTableSelectKpi"><option value="default">Default</option><option value="achievement">% ↓</option><option value="gap">Gap ↓</option></select></div>
-    <div class="filter-group filter-search"><label><i class="fas fa-search"></i></label><input type="text" id="kpiSearchInputKpi" placeholder="Search..."></div>
-    <span class="fy-label" id="fyLabelKpi">FY —</span>
+<div class="slide-panel" id="chatPanel" role="complementary" aria-label="Team Chat">
+  <div class="slide-panel-header"><h3><i class="fas fa-comments"></i> Team Chat</h3><button class="slide-panel-close" id="closeChatBtn" aria-label="Close chat">&times;</button></div>
+  <div class="slide-panel-body" id="chatMessages"><div style="text-align:center;color:var(--text3);padding:32px;">Loading messages…</div></div>
+  <div class="slide-panel-footer">
+    <div class="chat-input-row">
+      <input type="text" id="chatInput" placeholder="Type a message…" maxlength="500" aria-label="Chat message">
+      <button id="sendChatBtn" aria-label="Send message"><i class="fas fa-paper-plane"></i></button>
+    </div>
+    <div class="chat-char-counter" id="chatCharCounter">500 remaining</div>
   </div>
-  <div class="table-wrapper"><table class="data-table" id="kpiTableKpi"><thead><tr><th>KPI</th><th>Yearly Plan</th><th>Yearly Actual</th><th>Yearly %</th><th>Monthly Plan</th><th>Monthly Actual <span id="tableMonthLabelKpi"></span></th><th>Monthly %</th><th>Forecast</th><th>Status</th><th>Notes</th></tr></thead><tbody id="kpiTableBodyKpi"></tbody></table></div>
 </div>
 
-<!-- ANALYTICS VIEW -->
-<div class="view-container" id="analyticsView">
-  <div class="charts-row"><div class="chart-card"><h4><i class="fas fa-chart-bar" style="color:var(--blue);"></i> Yearly Plan vs Actual<div class="chart-btn-group"><button class="chart-btn" id="downloadBarChartBtn"><i class="fas fa-download"></i></button></div></h4><canvas id="barPlanActualChart"></canvas></div><div class="chart-card"><h4><i class="fas fa-percent" style="color:var(--green);"></i> Yearly Achievement %<div class="chart-btn-group"><button class="chart-btn" id="downloadAchievementChartBtn"><i class="fas fa-download"></i></button></div></h4><canvas id="horizontalAchievementChart"></canvas></div></div>
-  <div class="charts-row"><div class="chart-card"><h4><i class="fas fa-layer-group"></i> Category Gap vs Plan<div class="chart-btn-group"><button class="chart-btn" id="downloadCatGapChartBtn"><i class="fas fa-download"></i></button></div></h4><canvas id="catGapChart"></canvas></div><div class="chart-card"><h4><i class="fas fa-chart-pie"></i> Performance Mix<div class="chart-btn-group"><button class="chart-btn" id="downloadPerfMixChartBtn"><i class="fas fa-download"></i></button></div></h4><canvas id="perfMixChart"></canvas></div></div>
-  <div class="charts-row"><div class="chart-card"><h4><i class="fas fa-trophy"></i> Owner Leaderboard</h4><div class="leaderboard-list" id="ownerLeaderboard"></div></div><div class="chart-card"><h4><i class="fas fa-chart-line"></i> Portfolio Monthly Trend</h4><canvas id="trendLineChart"></canvas></div></div>
-  <div class="delay-buckets" id="delayBucketsContainer"></div>
+<div class="slide-panel" id="suggestPanel" role="complementary" aria-label="Suggestions">
+  <div class="slide-panel-header"><h3><i class="fas fa-lightbulb"></i> Suggestions</h3><button class="slide-panel-close" id="closeSuggestBtn" aria-label="Close suggestions">&times;</button></div>
+  <div class="slide-panel-body" id="suggestMessages"><div style="text-align:center;color:var(--text3);padding:32px;">Loading suggestions…</div></div>
+  <div class="slide-panel-footer">
+    <div class="chat-input-row">
+      <input type="text" id="suggestInput" placeholder="Share a suggestion…" maxlength="300" aria-label="Suggestion text">
+      <button id="sendSuggestBtn" aria-label="Send suggestion"><i class="fas fa-paper-plane"></i></button>
+    </div>
+    <div class="chat-char-counter" id="suggestCharCounter">300 remaining</div>
+  </div>
 </div>
 
-<!-- AUDIT VIEW -->
-<div class="view-container" id="auditView">
-  <div class="audit-panel" id="auditPanel"><h4 style="font-size:0.85rem;font-weight:700;color:var(--navy);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;"><span><i class="fas fa-history" style="color:var(--blue);"></i> Audit Trail</span><div style="display:flex;gap:8px;flex-wrap:wrap;"><select id="auditKpiFilter" style="font-size:0.72rem;padding:4px 8px;border:1px solid #cbdde9;border-radius:8px;"><option value="all">All KPIs</option></select><select id="auditUserFilter" style="font-size:0.72rem;padding:4px 8px;border:1px solid #cbdde9;border-radius:8px;"><option value="all">All Users</option></select><input type="date" id="auditDateFilter" style="font-size:0.72rem;padding:4px 8px;border:1px solid #cbdde9;border-radius:8px;"></div></h4><div class="audit-scroll"><table class="data-table activity-table" style="font-size:0.74rem;"><thead><tr><th>KPI</th><th>Field</th><th>Old</th><th>New</th><th>User</th><th>Timestamp</th></tr></thead><tbody id="auditTableBody"><tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text3);">Loading…</td></tr></tbody></table></div></div>
+<div id="kpiModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalKpiName">
+  <div class="modal-content">
+    <div class="modal-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;position:relative;">
+      <h3 id="modalKpiName">Monthly Breakdown</h3>
+      <button class="close-modal" id="closeModalBtn" style="background:#f0f2f5;border:none;width:28px;height:28px;border-radius:50%;cursor:pointer;" aria-label="Close modal">&times;</button>
+    </div>
+    <div class="month-selector" id="monthSelectorContainer"></div>
+    <div class="month-table-wrap" id="modalHistoryContainer"></div>
+    <canvas id="trendChartCanvas" style="max-height:220px;"></canvas>
+    <div class="comments-section" id="modalCommentsSection" style="margin-top:14px;border-top:1px solid var(--border);padding-top:14px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><strong style="font-size:0.76rem;"><i class="fas fa-comments"></i> Comments</strong><button class="chart-btn" id="addCommentBtn" style="font-size:0.68rem;" aria-label="Add comment"><i class="fas fa-plus"></i> Add</button></div>
+      <div id="commentsList"></div>
+    </div>
+  </div>
 </div>
 
-</main>
-<footer class="app-footer">Enterprise KPI Control Tower · Financial Year Apr–Mar · Real-time Sync · Full Audit Trail · Powered with ❤️ by <strong>Sanju G</strong></footer>
-</div></div></div>
+<div id="commentModal" class="modal-overlay" role="dialog" aria-modal="true" aria-label="Add Comment">
+  <div class="modal-content" style="max-width:460px;">
+    <div class="modal-header"><h3>Add Note</h3><button class="close-modal" id="closeCommentModal" aria-label="Close">&times;</button></div>
+    <textarea id="commentText" rows="3" style="width:100%;padding:10px;border-radius:10px;border:1px solid #cbdde9;font-family:inherit;" placeholder="Enter your note..." aria-label="Comment text"></textarea>
+    <div style="padding:14px 0 0;display:flex;justify-content:flex-end;gap:8px;"><button class="btn btn-outline" id="cancelCommentBtn" style="padding:6px 14px;font-size:0.72rem;">Cancel</button><button class="btn btn-primary" id="saveCommentBtn" style="padding:6px 14px;font-size:0.72rem;">Save</button></div>
+  </div>
+</div>
 
-<!-- SLIDE PANELS -->
-<div class="slide-panel" id="chatPanel"><div class="slide-panel-header"><h3><i class="fas fa-comments"></i> Team Chat</h3><button class="slide-panel-close" id="closeChatBtn">&times;</button></div><div class="slide-panel-body" id="chatMessages"><div style="text-align:center;color:var(--text3);padding:32px;">Loading messages…</div></div><div class="slide-panel-footer"><input type="text" id="chatInput" placeholder="Type a message…" maxlength="500"><button id="sendChatBtn"><i class="fas fa-paper-plane"></i></button></div></div>
-<div class="slide-panel" id="suggestPanel"><div class="slide-panel-header"><h3><i class="fas fa-lightbulb"></i> Suggestions</h3><button class="slide-panel-close" id="closeSuggestBtn">&times;</button></div><div class="slide-panel-body" id="suggestMessages"><div style="text-align:center;color:var(--text3);padding:32px;">Loading suggestions…</div></div><div class="slide-panel-footer"><input type="text" id="suggestInput" placeholder="Share a suggestion…" maxlength="300"><button id="sendSuggestBtn"><i class="fas fa-paper-plane"></i></button></div></div>
-
-<!-- MODALS -->
-<div id="kpiModal" class="modal-overlay"><div class="modal-content"><div class="modal-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;position:relative;"><h3 id="modalKpiName">Monthly Breakdown</h3><button class="close-modal" id="closeModalBtn" style="background:#f0f2f5;border:none;width:28px;height:28px;border-radius:50%;cursor:pointer;">&times;</button></div><div class="month-selector" id="monthSelectorContainer"></div><div class="month-table-wrap" id="modalHistoryContainer"></div><canvas id="trendChartCanvas" style="max-height:220px;"></canvas><div class="comments-section" id="modalCommentsSection" style="margin-top:14px;border-top:1px solid var(--border);padding-top:14px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><strong style="font-size:0.76rem;"><i class="fas fa-comments"></i> Comments</strong><button class="chart-btn" id="addCommentBtn" style="font-size:0.68rem;"><i class="fas fa-plus"></i> Add</button></div><div id="commentsList"></div></div></div></div>
-<div id="commentModal" class="modal-overlay"><div class="modal-content" style="max-width:460px;"><div class="modal-header"><h3>Add Note</h3><button class="close-modal" id="closeCommentModal">&times;</button></div><textarea id="commentText" rows="3" style="width:100%;padding:10px;border-radius:10px;border:1px solid #cbdde9;font-family:inherit;" placeholder="Enter your note..."></textarea><div style="padding:14px 0 0;display:flex;justify-content:flex-end;gap:8px;"><button class="btn btn-outline" id="cancelCommentBtn" style="padding:6px 14px;font-size:0.72rem;">Cancel</button><button class="btn btn-primary" id="saveCommentBtn" style="padding:6px 14px;font-size:0.72rem;">Save</button></div></div></div>
-<div id="toastContainer" class="toast-container"></div>
+<div id="toastContainer" class="toast-container" aria-live="assertive"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, doc, onSnapshot, updateDoc, getDoc, serverTimestamp, setDoc, addDoc, query, orderBy, limit, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, doc, onSnapshot, updateDoc, getDoc, getDocs, serverTimestamp, setDoc, addDoc, query, orderBy, limit, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = { apiKey:"AIzaSyDav3rI7fTr8KrXYxvnz5LB82CgjRq4v20", authDomain:"ais-showroom-dashboard.firebaseapp.com", projectId:"ais-showroom-dashboard", storageBucket:"ais-showroom-dashboard.firebasestorage.app", messagingSenderId:"175667492150", appId:"1:175667492150:web:cb124eb267b4689e6a2f97" };
 const app = initializeApp(firebaseConfig), db = getFirestore(app), auth = getAuth(app);
+
+['kpi_filters_v5','kpi_filters_v4','kpi_filters_v3','kpi_filters_v2','kpi_filters_v1'].forEach(k => { try { localStorage.removeItem(k); } catch(e) {} });
 
 const FY_MONTHS = ["Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec","Jan","Feb","Mar"];
 function getFinancialMonth(){const cal=new Date().getMonth();return(cal+9)%12;}
@@ -383,111 +482,288 @@ function getFYLabel(){const now=new Date(),cal=now.getMonth(),yr=now.getFullYear
 function getProgressColor(pct){if(pct<60)return"red";if(pct<90)return"amber";return"green";}
 function getDisplayName(email){if(!email)return"Unknown";const parts=email.split('@')[0].split('.');return parts.map(p=>p.charAt(0).toUpperCase()+p.slice(1)).join(' ');}
 
-const KPI_CATEGORIES = {sales:{name:"Sales KPIs",icon:"fa-chart-line",color:"var(--cat-sales)",ids:["showroom_addition","partner_addition","first_time_calls","shortlisted","cft_done"]},operations:{name:"Operations KPIs",icon:"fa-cogs",color:"var(--cat-ops)",ids:["showroom_audit_count","cad_completion"]},quality:{name:"Quality KPIs",icon:"fa-check-shield",color:"var(--cat-quality)",ids:["cad_tat","partner_survey_count","cft_feedback_adherence"]},finance:{name:"Finance KPIs",icon:"fa-coins",color:"var(--cat-finance)",ids:["rr_total","collection"]}};
-function getKpiCategory(kpiId){for(const[key,cat]of Object.entries(KPI_CATEGORIES)){if(cat.ids.includes(kpiId))return{key,...cat};}return{key:'other',name:'Other',icon:'fa-circle',color:'var(--text3)',ids:[]};}
+function normalizeTimestamp(ts) {
+ if (!ts) return null;
+ if (ts && typeof ts === 'object' && ts.seconds !== undefined) {
+   return new Date(ts.seconds * 1000 + Math.floor((ts.nanoseconds || 0) / 1e6));
+ }
+ if (ts instanceof Date) return ts;
+ if (typeof ts === 'string') {
+   const d = new Date(ts);
+   return isNaN(d.getTime()) ? null : d;
+ }
+ if (typeof ts === 'number') return new Date(ts);
+ return null;
+}
 
-const KPI_DEFINITIONS = [
-  { id:"showroom_audit_count",name:"Showroom Audit Count",yearlyPlan:504,unit:"count",owner:"Rahul Sharma",ownerEmail:"rahul@ais.com"},
-  { id:"showroom_addition",name:"Showroom Addition",yearlyPlan:120,unit:"count",owner:"Rahul Sharma",ownerEmail:"rahul@ais.com"},
-  { id:"partner_addition",name:"Partner Addition",yearlyPlan:80,unit:"count",owner:"Priya Mehta",ownerEmail:"priya@ais.com"},
-  { id:"cad_completion",name:"CAD Completion",yearlyPlan:240,unit:"count",owner:"Amit Kumar",ownerEmail:"amit@ais.com"},
-  { id:"cad_tat",name:"CAD TAT (Days)",yearlyPlan:0,unit:"days",isTat:true,idealDays:4,owner:"Amit Kumar",ownerEmail:"amit@ais.com"},
-  { id:"partner_survey_count",name:"Partner Survey Count",yearlyPlan:420,unit:"count",owner:"Priya Mehta",ownerEmail:"priya@ais.com"},
-  { id:"rr_total",name:"R&R (Rewards People)",yearlyPlan:600,unit:"people",owner:"Sanju G",ownerEmail:"sanju@ais.com"},
-  { id:"first_time_calls",name:"Interested",yearlyPlan:2160,unit:"calls",owner:"Rajesh Singh",ownerEmail:"rajesh@ais.com"},
-  { id:"shortlisted",name:"Shortlisted",yearlyPlan:780,unit:"count",owner:"Rajesh Singh",ownerEmail:"rajesh@ais.com"},
-  { id:"cft_done",name:"CFT Done",yearlyPlan:576,unit:"count",owner:"Rajesh Singh",ownerEmail:"rajesh@ais.com"},
-  { id:"cft_feedback_adherence",name:"CFT Feedback Adherence",yearlyPlan:100,unit:"%",owner:"Sanju G",ownerEmail:"sanju@ais.com"},
-  { id:"collection",name:"Collection (CRM/CSE/Branding)",yearlyPlan:1500,unit:"lakhs",owner:"Sanju G",ownerEmail:"sanju@ais.com"}
-];
-function buildEmptyMonthlyActuals(){const m={};for(let i=0;i<12;i++)m[i]=0;return m;}
+function formatTimestamp(ts) {
+ const d = normalizeTimestamp(ts);
+ if (!d) return '—';
+ return d.toLocaleString('en-IN');
+}
+
+const DEFAULT_KPI_CATEGORIES = {
+ sales:{name:"Sales KPIs",icon:"fa-chart-line",color:"#3B82F6",ids:["showroom_addition","partner_addition","first_time_calls","shortlisted","cft_done"]},
+ operations:{name:"Operations KPIs",icon:"fa-cogs",color:"#8B5CF6",ids:["showroom_audit_count","cad_completion"]},
+ quality:{name:"Quality KPIs",icon:"fa-check-shield",color:"#10B981",ids:["cad_tat","partner_survey_count","cft_feedback_adherence"]},
+ finance:{name:"Finance KPIs",icon:"fa-coins",color:"#F97316",ids:["rr_total","collection"]}
+};
+
+// ─── FIX A ────────────────────────────────────────────────────────────────────
+// Repopulates each category's `ids` array from the current kpiData.
+// Called from BOTH the category listener AND the KPI listener so there is
+// never a race-condition where one fires before the other has run.
+function repopulateCategoryIds() {
+  if (!kpiCategories || !kpiData || kpiData.length === 0) return;
+  // Reset all id arrays first
+  Object.values(kpiCategories).forEach(cat => { cat.ids = []; });
+  // Rebuild from live kpiData
+  kpiData.forEach(kpi => {
+    const key = kpi.category;
+    if (key && kpiCategories[key]) {
+      if (!kpiCategories[key].ids.includes(kpi.id)) {
+        kpiCategories[key].ids.push(kpi.id);
+      }
+    }
+  });
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 let kpiData=[],allAuditLogs=[],allComments=[],currentUserId=null,currentUserEmail=null,currentUserRole="viewer";
 let barChart,horizChart,trendChartInstance,catGapChart,perfMixChart,trendLineChart;
 let currentSort="default",currentKpiFilter="all",currentSearchTerm="",currentMonth=getFinancialMonth();
 let currentModalKpiId=null,currentCommentMonth=null,realtimeUnsub=null,auditUnsub=null,commentsUnsub=null;
-let isAdmin=false,groupByCategory=false,pinnedKpis=JSON.parse(localStorage.getItem("pinnedKpis")||"[]");
+let isAdmin=false,groupByCategory=false;
+let pinnedKpis=[];
 let notifications=[],previousKpiState=[],currentView="dashboardView";
 let isModalDirty=false,originalModalValues=new Map();
 let chatMessages=[],suggestionMessages=[],chatUnread=0,suggestUnread=0,chatUnsub=null,suggestUnsub=null,activePanel=null;
+const notifiedStates = new Map();
 
-const THEME_COLORS = [
-  {name:'King Green',color:'#0D5E3A',light:'#D4EDDA',dark:'#0a4e30',sidebar:'#0a4e30'},
-  {name:'Royal Blue',color:'#1E40AF',light:'#DBEAFE',dark:'#1E3A5F',sidebar:'#0F1E47'},
-  {name:'Deep Purple',color:'#6D28D9',light:'#EDE9FE',dark:'#4C1D95',sidebar:'#2E1065'},
-  {name:'Crimson Red',color:'#BE123C',light:'#FEE2E2',dark:'#881337',sidebar:'#450A0A'},
-  {name:'Teal',color:'#0D9488',light:'#CCFBF1',dark:'#0F766E',sidebar:'#134E4A'},
-  {name:'Amber Gold',color:'#B45309',light:'#FEF3C7',dark:'#78350F',sidebar:'#451A03'},
-  {name:'Slate Grey',color:'#475569',light:'#E2E8F0',dark:'#1E293B',sidebar:'#0F172A'},
-  {name:'Midnight',color:'#1E293B',light:'#CBD5E1',dark:'#0F172A',sidebar:'#0F172A'}
+// kpiCategories starts null; gets set by initDynamicDataListeners
+let kpiCategories = null;
+
+function getPinnedKey() { return currentUserId ? `pinnedKpis_${currentUserId}` : 'pinnedKpis'; }
+function loadPinnedKpis() { pinnedKpis = JSON.parse(localStorage.getItem(getPinnedKey()) || '[]'); }
+function savePinnedKpis() { localStorage.setItem(getPinnedKey(), JSON.stringify(pinnedKpis)); }
+
+const KPI_DEFINITIONS = [
+ { id:"showroom_audit_count", name:"Showroom Audit Count", yearlyPlan:504, unit:"count", owner:"Mayank Tomar", ownerEmail:"mayank.tomar@aisglass.com", category:"operations" },
+ { id:"showroom_addition", name:"Showroom Addition", yearlyPlan:120, unit:"count", owner:"Mayank Tomar", ownerEmail:"mayank.tomar@aisglass.com", category:"sales" },
+ { id:"partner_addition", name:"Partner Addition", yearlyPlan:80, unit:"count", owner:"Krishna Verma", ownerEmail:"krishna.verma@aisglass.com", category:"sales" },
+ { id:"cad_completion", name:"CAD Completion", yearlyPlan:240, unit:"count", owner:"Nidhi Tiwari", ownerEmail:"nidhi.tiwari@aisglass.com", category:"operations" },
+ { id:"cad_tat", name:"CAD TAT (Days)", yearlyPlan:0, unit:"days", isTat:true, idealDays:4, owner:"Nidhi Tiwari", ownerEmail:"nidhi.tiwari@aisglass.com", category:"quality" },
+ { id:"partner_survey_count", name:"Partner Survey Count", yearlyPlan:420, unit:"count", owner:"Krishna Verma", ownerEmail:"krishna.verma@aisglass.com", category:"quality" },
+ { id:"rr_total", name:"R&R (Rewards People)", yearlyPlan:600, unit:"people", owner:"Sanju Gupta", ownerEmail:"sanju.gupta@aisglass.com", category:"finance" },
+ { id:"first_time_calls", name:"Interested", yearlyPlan:2160, unit:"calls", owner:"Mayank Tomar", ownerEmail:"mayank.tomar@aisglass.com", category:"sales" },
+ { id:"shortlisted", name:"Shortlisted", yearlyPlan:780, unit:"count", owner:"Mayank Tomar", ownerEmail:"mayank.tomar@aisglass.com", category:"sales" },
+ { id:"cft_done", name:"CFT Done", yearlyPlan:576, unit:"count", owner:"Mayank Tomar", ownerEmail:"mayank.tomar@aisglass.com", category:"operations" },
+ { id:"cft_feedback_adherence", name:"CFT Feedback Adherence", yearlyPlan:100, unit:"%", owner:"Sanju Gupta", ownerEmail:"sanju.gupta@aisglass.com", category:"quality" },
+ { id:"collection", name:"Collection (CRM/CSE/Branding)", yearlyPlan:1500, unit:"lakhs", owner:"Sanju Gupta", ownerEmail:"sanju.gupta@aisglass.com", category:"finance" }
 ];
 
-function applyThemeColor(colorObj){
-  const root=document.documentElement;
-  root.style.setProperty('--blue',colorObj.color);root.style.setProperty('--blue-light',colorObj.light);
-  root.style.setProperty('--navy',colorObj.color);root.style.setProperty('--navy-dark',colorObj.dark);
-  root.style.setProperty('--sidebar-bg',colorObj.sidebar);
-  document.getElementById('themeDot').style.background=colorObj.color;
-  localStorage.setItem('kpi_theme_color',JSON.stringify(colorObj));renderCharts();
-}
-function loadThemeColor(){const saved=localStorage.getItem('kpi_theme_color');if(saved){try{applyThemeColor(JSON.parse(saved));}catch(e){applyThemeColor(THEME_COLORS[0]);}}else{applyThemeColor(THEME_COLORS[0]);}}
-function buildThemePicker(){
-  const grid=document.getElementById('themeColorGrid'),saved=JSON.parse(localStorage.getItem('kpi_theme_color')||'{}');
-  grid.innerHTML=THEME_COLORS.map(c=>`<div class="theme-color-opt ${saved.color===c.color?'active':''}" style="background:${c.color};" data-color='${JSON.stringify(c).replace(/'/g,"&#39;")}' title="${c.name}"></div>`).join('');
-  grid.querySelectorAll('.theme-color-opt').forEach(el=>{el.addEventListener('click',()=>{applyThemeColor(JSON.parse(el.getAttribute('data-color')));buildThemePicker();});});
+function safeRender() {
+ if (!kpiData || kpiData.length === 0) return;
+ if (currentView === 'dashboardView') renderDashboard();
+ if (currentView === 'kpiUpdateView') renderKpiUpdateView();
+ if (currentView === 'analyticsView') renderAnalytics();
+ populateKpiFilter();
 }
 
-function initChatListener(){if(chatUnsub)chatUnsub();const q=query(collection(db,"team_chats"),orderBy("timestamp","asc"),limit(200));chatUnsub=onSnapshot(q,(snap)=>{chatMessages=snap.docs.map(d=>({id:d.id,...d.data()}));renderChatMessages();});}
-function renderChatMessages(){
-  const c=document.getElementById('chatMessages');if(!c)return;
-  if(!chatMessages.length){c.innerHTML='<div style="text-align:center;color:var(--text3);padding:32px;">No messages yet.</div>';return;}
-  const pinned=chatMessages.filter(m=>m.pinned),unpinned=chatMessages.filter(m=>!m.pinned);let h='';
-  if(pinned.length>0){h+=`<div class="pinned-section"><div class="pinned-section-label"><i class="fas fa-thumbtack"></i> Pinned (${pinned.length})</div>`;pinned.forEach(m=>h+=buildChatBubble(m));h+='</div>';}
-  h+=unpinned.map(m=>buildChatBubble(m)).join('');c.innerHTML=h;c.scrollTop=c.scrollHeight;
+// ─── FIX B ────────────────────────────────────────────────────────────────────
+// Category listener: reads from "categories" collection (correct).
+// When snapshot fires, rebuilds kpiCategories from admin data ONLY
+// (admin is authoritative — no DEFAULT bleed-over).
+// Falls back to DEFAULT only when the collection is empty.
+// Preserves DEFAULT icons where admin doesn't supply them (admin has no icon field).
+// After building kpiCategories, calls repopulateCategoryIds() so ids are always
+// correct regardless of whether kpiData loaded before or after this fires.
+function initDynamicDataListeners() {
+  const catQuery = query(collection(db, "categories"));
+  onSnapshot(catQuery, (snapshot) => {
+    if (!snapshot.empty) {
+      const fetchedCategories = {};
+      snapshot.forEach(d => {
+        const data = d.data();
+        const key = data.id || d.id;
+        fetchedCategories[key] = {
+          name: data.name || key,
+          // Admin backend doesn't store icons — borrow from DEFAULT when key matches
+          icon: DEFAULT_KPI_CATEGORIES[key]?.icon || "fa-circle",
+          color: data.color || DEFAULT_KPI_CATEGORIES[key]?.color || "var(--text3)",
+          ids: [] // will be filled by repopulateCategoryIds()
+        };
+      });
+      // Admin is the single source of truth — do NOT merge with DEFAULT_KPI_CATEGORIES.
+      // That merge caused removed admin categories to ghost-linger on the frontend.
+      kpiCategories = fetchedCategories;
+    } else {
+      // No admin categories exist yet — fall back to hard-coded defaults
+      kpiCategories = JSON.parse(JSON.stringify(DEFAULT_KPI_CATEGORIES));
+    }
+    // Populate ids from whatever kpiData we have right now
+    repopulateCategoryIds();
+    safeRender();
+  }, (error) => {
+    console.warn("Category listener error, using defaults:", error);
+    kpiCategories = JSON.parse(JSON.stringify(DEFAULT_KPI_CATEGORIES));
+    repopulateCategoryIds();
+    safeRender();
+  });
 }
-function buildChatBubble(m){const isSelf=m.senderEmail===currentUserEmail;return`<div class="chat-msg ${isSelf?'self':'other'} ${m.pinned?'pinned':''}"><div class="chat-msg-header"><span class="chat-msg-sender">${esc(getDisplayName(m.senderEmail))}</span><span class="chat-msg-time">${m.timestamp?new Date(m.timestamp.seconds?m.timestamp.seconds*1000:m.timestamp).toLocaleString('en-IN'):''}</span></div><div class="chat-msg-text">${esc(m.text)}</div>${isSelf||isAdmin?`<button class="chat-pin-btn ${m.pinned?'active':''}" data-id="${m.id}" data-pinned="${m.pinned}"><i class="fas fa-thumbtack"></i></button>`:''}</div>`;}
-async function sendChatMessage(){const input=document.getElementById('chatInput'),text=input.value.trim();if(!text||!currentUserId)return;input.value='';try{await addDoc(collection(db,"team_chats"),{text,senderEmail:currentUserEmail,senderName:getDisplayName(currentUserEmail),timestamp:serverTimestamp(),pinned:false});}catch(e){showToast('Failed','error');}}
-async function togglePinMessage(msgId,cp){try{await updateDoc(doc(db,"team_chats",msgId),{pinned:!cp});}catch(e){showToast('Failed','error');}}
+// ─────────────────────────────────────────────────────────────────────────────
+
+function getKpiOwner(kpiId) {
+  // Read directly from live kpiData — reflects any owner changes admin makes to kpi docs
+  const kpi = kpiData.find(k => k.id === kpiId);
+  if (kpi && kpi.owner) {
+    return { name: kpi.owner, email: kpi.ownerEmail || '' };
+  }
+  // Fallback to KPI_DEFINITIONS
+  const def = KPI_DEFINITIONS.find(d => d.id === kpiId);
+  return { name: def?.owner || "Unassigned", email: def?.ownerEmail || "" };
+}
+
+function resolveCategoryKeyFromKpi(kpi, cats){
+ const rawKey = (kpi && (kpi.categoryKey || kpi.category || kpi.categoryId)) ? String(kpi.categoryKey || kpi.category || kpi.categoryId).trim() : '';
+ if(rawKey && cats[rawKey]) return rawKey;
+ return null;
+}
+
+function getKpiCategory(kpiOrId){
+ const cats = kpiCategories || DEFAULT_KPI_CATEGORIES;
+ const kpi = (typeof kpiOrId === 'object' && kpiOrId !== null) ? kpiOrId : null;
+ const kpiId = kpi ? kpi.id : kpiOrId;
+
+ const directKey = resolveCategoryKeyFromKpi(kpi, cats);
+ if(directKey) return { key: directKey, ...cats[directKey] };
+
+ for(const [key, cat] of Object.entries(cats)){
+   if(cat.ids && cat.ids.includes(kpiId)) return { key, ...cat };
+ }
+ return { key: 'other', name: 'Other', icon: 'fa-circle', color: 'var(--text3)', ids: [] };
+}
+
+function buildEmptyMonthlyActuals(){const m={};for(let i=0;i<12;i++)m[i]=0;return m;}
+
+function initChatListener(){if(chatUnsub)chatUnsub();const q=query(collection(db,"team_chats"),orderBy("timestamp","asc"),limit(200));chatUnsub=onSnapshot(q,(snap)=>{chatMessages=snap.docs.map(d=>({id:d.id,...d.data()}));renderChatMessages();});}
+
+function renderChatMessages(){
+ const c=document.getElementById('chatMessages');if(!c)return;
+ if(!chatMessages.length){c.innerHTML='<div style="text-align:center;color:var(--text3);padding:32px;">No messages yet.</div>';return;}
+ const pinned=chatMessages.filter(m=>m.pinned),unpinned=chatMessages.filter(m=>!m.pinned);let h='';
+ if(pinned.length>0){h+=`<div class="pinned-section"><div class="pinned-section-label"><i class="fas fa-thumbtack"></i> Pinned (${pinned.length})</div>`;pinned.forEach(m=>h+=buildChatBubble(m));h+='</div>';}
+ h+=unpinned.map(m=>buildChatBubble(m)).join('');c.innerHTML=h;c.scrollTop=c.scrollHeight;
+}
+
+function buildChatBubble(m){
+ const isSelf=m.senderEmail===currentUserEmail;
+ const timeStr = formatTimestamp(m.timestamp);
+ return`<div class="chat-msg ${isSelf?'self':'other'} ${m.pinned?'pinned':''}"><div class="chat-msg-header"><span class="chat-msg-sender">${esc(getDisplayName(m.senderEmail))}</span><span class="chat-msg-time">${timeStr}</span></div><div class="chat-msg-text">${esc(m.text)}</div>${isSelf||isAdmin?`<button class="chat-pin-btn ${m.pinned?'active':''}" data-id="${m.id}" data-pinned="${m.pinned}"><i class="fas fa-thumbtack"></i></button>`:''}</div>`;
+}
+
+async function sendChatMessage(){
+ const input=document.getElementById('chatInput');
+ const text=input.value.trim();
+ if(!text||!currentUserId)return;
+ input.value='';
+ updateChatCharCounter();
+ try{
+   await addDoc(collection(db,"team_chats"),{text,senderEmail:currentUserEmail,senderName:getDisplayName(currentUserEmail),timestamp:serverTimestamp(),pinned:false});
+ }catch(e){
+   input.value=text;
+   updateChatCharCounter();
+   showToast('Failed to send message','error');
+ }
+}
+
+async function togglePinMessage(msgId, cp){
+ const pinned = cp === true || cp === 'true';
+ try{await updateDoc(doc(db,"team_chats",msgId),{pinned:!pinned});}
+ catch(e){showToast('Failed','error');}
+}
+
 function openChatPanel(){closeAllPanels();activePanel='chat';document.getElementById('chatPanel').classList.add('open');chatUnread=0;updateChatBadge();}
 function closeChatPanel(){document.getElementById('chatPanel').classList.remove('open');activePanel=null;}
 
 function initSuggestListener(){if(suggestUnsub)suggestUnsub();const q=query(collection(db,"team_suggestions"),orderBy("timestamp","asc"),limit(100));suggestUnsub=onSnapshot(q,(snap)=>{suggestionMessages=snap.docs.map(d=>({id:d.id,...d.data()}));renderSuggestMessages();});}
-function renderSuggestMessages(){const c=document.getElementById('suggestMessages');if(!c)return;if(!suggestionMessages.length){c.innerHTML='<div style="text-align:center;color:var(--text3);padding:32px;">No suggestions yet.</div>';return;}c.innerHTML=suggestionMessages.map(s=>`<div class="suggestion-item"><div class="suggestion-item-header"><span class="suggestion-item-sender">${esc(getDisplayName(s.senderEmail))}</span><span class="suggestion-item-time">${s.timestamp?new Date(s.timestamp.seconds?s.timestamp.seconds*1000:s.timestamp).toLocaleString('en-IN'):''}</span></div><div>${esc(s.text)}</div></div>`).join('');c.scrollTop=c.scrollHeight;}
-async function sendSuggestion(){const input=document.getElementById('suggestInput'),text=input.value.trim();if(!text||!currentUserId)return;input.value='';try{await addDoc(collection(db,"team_suggestions"),{text,senderEmail:currentUserEmail,senderName:getDisplayName(currentUserEmail),timestamp:serverTimestamp()});}catch(e){showToast('Failed','error');}}
+
+function renderSuggestMessages(){
+ const c=document.getElementById('suggestMessages');if(!c)return;
+ if(!suggestionMessages.length){c.innerHTML='<div style="text-align:center;color:var(--text3);padding:32px;">No suggestions yet.</div>';return;}
+ c.innerHTML=suggestionMessages.map(s=>`<div class="suggestion-item"><div class="suggestion-item-header"><span class="suggestion-item-sender">${esc(getDisplayName(s.senderEmail))}</span><span class="suggestion-item-time">${formatTimestamp(s.timestamp)}</span></div><div>${esc(s.text)}</div></div>`).join('');
+ c.scrollTop=c.scrollHeight;
+}
+
+async function sendSuggestion(){
+ const input=document.getElementById('suggestInput');
+ const text=input.value.trim();
+ if(!text||!currentUserId)return;
+ input.value='';
+ updateSuggestCharCounter();
+ try{
+   await addDoc(collection(db,"team_suggestions"),{text,senderEmail:currentUserEmail,senderName:getDisplayName(currentUserEmail),timestamp:serverTimestamp()});
+ }catch(e){
+   input.value=text;
+   updateSuggestCharCounter();
+   showToast('Failed to send suggestion','error');
+ }
+}
+
 function openSuggestPanel(){closeAllPanels();activePanel='suggest';document.getElementById('suggestPanel').classList.add('open');suggestUnread=0;updateSuggestBadge();}
 function closeSuggestPanel(){document.getElementById('suggestPanel').classList.remove('open');activePanel=null;}
 function closeAllPanels(){document.getElementById('chatPanel').classList.remove('open');document.getElementById('suggestPanel').classList.remove('open');activePanel=null;}
 function updateChatBadge(){const b=document.getElementById('navBadgeChat');b.textContent=chatUnread;b.style.display=chatUnread>0?'inline':'none';}
 function updateSuggestBadge(){const b=document.getElementById('navBadgeSuggest');b.textContent=suggestUnread;b.style.display=suggestUnread>0?'inline':'none';}
 
+function updateChatCharCounter(){
+ const input=document.getElementById('chatInput');
+ const counter=document.getElementById('chatCharCounter');
+ if(input&&counter){const rem=500-input.value.length;counter.textContent=`${rem} remaining`;counter.style.color=rem<50?'var(--red)':'var(--text3)';}
+}
+function updateSuggestCharCounter(){
+ const input=document.getElementById('suggestInput');
+ const counter=document.getElementById('suggestCharCounter');
+ if(input&&counter){const rem=300-input.value.length;counter.textContent=`${rem} remaining`;counter.style.color=rem<30?'var(--red)':'var(--text3)';}
+}
+
 function esc(s){if(s==null)return"";return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[m]);}
 function fmt(n,d=0){const num=parseFloat(n);if(isNaN(num))return"0";return num.toFixed(d).replace(/\.0+$/,"");}
 function pct(n){return fmt(n)+"%";}
 function showToast(msg,type="info"){const c=document.getElementById("toastContainer"),t=document.createElement("div");t.className="toast";t.style.borderLeft=`4px solid ${type==='success'?'#2b9e5c':type==='error'?'#dc5a3c':'#1f6392'}`;t.innerHTML=`<i class="fas fa-${type==='success'?'check-circle':type==='error'?'exclamation-triangle':'info-circle'}"></i> ${msg}`;c.appendChild(t);setTimeout(()=>t.remove(),3400);}
-function parseFirebaseError(e,f){const m={"auth/invalid-credential":"Invalid email or password.","auth/user-not-found":"Invalid email or password.","auth/wrong-password":"Invalid email or password.","auth/invalid-email":"Please enter a valid email address.","auth/too-many-requests":"Too many failed attempts. Try again in a few minutes.","auth/network-request-failed":"Network error. Check your internet connection and retry.","auth/unauthorized-domain":"This domain is not authorized in Firebase Authentication settings.","auth/operation-not-allowed":"Email/password sign-in is not enabled in Firebase Authentication.","auth/invalid-api-key":"Firebase API key is invalid for this project.","permission-denied":"Access denied."};return m[e?.code]||`${f}${e?.code?` (${e.code})`:""}`;}
+function parseFirebaseError(e,f){const m={"auth/invalid-credential":"Invalid email or password.","permission-denied":"Access denied."};return m[e?.code]||f;}
 
 function switchView(viewId){
-  document.querySelectorAll('.view-container').forEach(v=>v.classList.remove('active'));const view=document.getElementById(viewId);if(view)view.classList.add('active');
-  currentView=viewId;setActiveNav(viewId);
-  const titles={dashboardView:'KPI Overview',kpiUpdateView:'KPI Update',analyticsView:'Analytics',auditView:'Audit Trail'};
-  const breadcrumbs={dashboardView:'Dashboard',kpiUpdateView:'Data Entry',analyticsView:'Analytics',auditView:'Audit'};
-  document.getElementById('pageTitle').textContent=titles[viewId]||'KPI Overview';document.getElementById('pageBreadcrumb').textContent=breadcrumbs[viewId]||'Dashboard';
-  saveFilterState();
-  if(viewId==='dashboardView')renderDashboard();else if(viewId==='kpiUpdateView')renderKpiUpdateView();else if(viewId==='analyticsView')renderAnalytics();else if(viewId==='auditView')renderAuditTable();
+ document.querySelectorAll('.view-container').forEach(v=>v.classList.remove('active'));const view=document.getElementById(viewId);if(view)view.classList.add('active');
+ currentView=viewId;setActiveNav(viewId);
+ const titles={dashboardView:'KPI Overview',kpiUpdateView:'KPI Update',analyticsView:'Analytics',auditView:'Audit Trail'};
+ const breadcrumbs={dashboardView:'Dashboard',kpiUpdateView:'Data Entry',analyticsView:'Analytics',auditView:'Audit'};
+ const titleText = titles[viewId] || 'KPI Overview';
+ document.getElementById('pageTitle').textContent = titleText;
+ document.getElementById('pageBreadcrumb').textContent = breadcrumbs[viewId] || 'Dashboard';
+ document.title = `${titleText} | KPI Control Tower`;
+ saveFilterState();
+ if(viewId==='dashboardView')renderDashboard();else if(viewId==='kpiUpdateView')renderKpiUpdateView();else if(viewId==='analyticsView')renderAnalytics();else if(viewId==='auditView')renderAuditTable();
+ closeMobileSidebar();
 }
+
 function setActiveNav(viewId){document.querySelectorAll('.nav-item[data-view]').forEach(n=>n.classList.remove('active'));const nav=document.querySelector(`.nav-item[data-view="${viewId}"]`);if(nav)nav.classList.add('active');}
 
+function openMobileSidebar(){document.getElementById('sidebar').classList.add('mobile-open');document.getElementById('sidebarOverlay').classList.add('active');}
+function closeMobileSidebar(){document.getElementById('sidebar').classList.remove('mobile-open');document.getElementById('sidebarOverlay').classList.remove('active');}
+function toggleMobileSidebar(){const s=document.getElementById('sidebar');if(s.classList.contains('mobile-open'))closeMobileSidebar();else openMobileSidebar();}
+
 function renderKpiUpdateView(){
-  const enriched=getEnrichedKpis();if(enriched.length){const a=enriched.reduce((s,k)=>s+k.metrics.yearlyPct,0)/enriched.length;const g=enriched.reduce((s,k)=>s+k.metrics.gap,0)/enriched.length;const f=enriched.reduce((s,k)=>s+k.metrics.forecastPct,0)/enriched.length;const gr=enriched.filter(k=>k.metrics.status==="green").length,am=enriched.filter(k=>k.metrics.status==="amber").length,rd=enriched.filter(k=>k.metrics.status==="red").length;document.getElementById("overallScoreKpi").textContent=pct(a);document.getElementById("avgGapKpi").textContent=fmt(g);document.getElementById("forecastRatioKpi").textContent=pct(f);document.getElementById("healthIndicatorsKpi").innerHTML=`<span class="health-badge health-green">🟢 ${gr}</span><span class="health-badge health-amber">🟡 ${am}</span><span class="health-badge health-red">🔴 ${rd}</span>`;}
-  const fm=getFinancialMonth(),ml=document.getElementById("tableMonthLabelKpi");if(ml)ml.textContent=`(${FY_MONTHS[currentMonth]})`;
-  let e2=getEnrichedKpis();if(currentKpiFilter!=="all")e2=e2.filter(k=>k.id===currentKpiFilter);if(currentSort==="achievement")e2.sort((a,b)=>b.metrics.yearlyPct-a.metrics.yearlyPct);else if(currentSort==="gap")e2.sort((a,b)=>Math.abs(b.metrics.gap)-Math.abs(a.metrics.gap));
-  const tbody=document.getElementById("kpiTableBodyKpi");if(!tbody)return;tbody.innerHTML="";
-  e2.forEach(kpi=>{const m=kpi.metrics,sc=`status-${m.status}`,ipm=currentMonth<fm,mac=m.monthlyPct<50?'alert-cell':(m.monthlyPct<75?'warning-cell':''),cfm=allComments.find(c=>c.kpiId===kpi.id&&c.month===currentMonth),row=tbody.insertRow();row.innerHTML=`<td style="font-weight:600;">${esc(kpi.name)}</td><td><input type="number" class="editable-input yearly-plan-input" data-id="${kpi.id}" value="${fmt(kpi.yearlyPlan)}" ${!isAdmin?"disabled":""}></td><td style="font-weight:600;font-family:monospace">${fmt(m.yearlyActual)}</td><td><span class="status-chip ${sc}" style="padding:3px 8px;border-radius:16px;font-size:0.7rem;">${pct(m.yearlyPct)}</span></td><td style="font-family:monospace">${fmt(m.monthlyPlan)}</td><td><input type="number" class="editable-input monthly-actual-input" data-id="${kpi.id}" data-month="${currentMonth}" value="${fmt(m.monthlyActual)}" ${!isAdmin||ipm?"disabled":""}>${ipm?'<i class="fas fa-lock locked-icon"></i>':''}</td><td class="${mac}" style="font-weight:600;">${pct(m.monthlyPct)}</td><td style="font-family:monospace">${m.forecastYearly>0?fmt(m.forecastYearly)+" ("+pct(m.forecastPct)+")":"—"}</td><td><span class="status-chip ${sc}" style="padding:3px 8px;border-radius:16px;font-size:0.7rem;">${m.status.toUpperCase()}</span></td><td class="comment-cell ${cfm?'has-comment':''}" data-id="${kpi.id}" data-month="${currentMonth}"><i class="fas fa-comment"></i> ${cfm?'View':'Add'}</td>`;});
-  document.querySelectorAll("#kpiTableBodyKpi .yearly-plan-input").forEach(inp=>inp.addEventListener("change",(e)=>updateYearlyPlan(e.target.dataset.id,e.target.value)));
-  document.querySelectorAll("#kpiTableBodyKpi .monthly-actual-input:not([disabled])").forEach(inp=>inp.addEventListener("change",(e)=>updateKpiMonthly(e.target.dataset.id,parseInt(e.target.dataset.month),e.target.value)));
-  document.querySelectorAll("#kpiTableBodyKpi .comment-cell").forEach(cell=>{cell.addEventListener("click",()=>{currentModalKpiId=cell.dataset.id;currentCommentMonth=parseInt(cell.dataset.month);openCommentModal();});});
-  const rn=document.getElementById("readonlyNoticeKpi");if(rn){if(!isAdmin)rn.classList.add("visible");else rn.classList.remove("visible");}
-  document.getElementById("fyLabelKpi").textContent=getFYLabel();
+ const enriched=getEnrichedKpis();if(enriched.length){const a=enriched.reduce((s,k)=>s+k.metrics.yearlyPct,0)/enriched.length;const g=enriched.reduce((s,k)=>s+k.metrics.gap,0)/enriched.length;const f=enriched.reduce((s,k)=>s+k.metrics.forecastPct,0)/enriched.length;const gr=enriched.filter(k=>k.metrics.status==="green").length,am=enriched.filter(k=>k.metrics.status==="amber").length,rd=enriched.filter(k=>k.metrics.status==="red").length;document.getElementById("overallScoreKpi").textContent=pct(a);document.getElementById("avgGapKpi").textContent=fmt(g);document.getElementById("forecastRatioKpi").textContent=pct(f);document.getElementById("healthIndicatorsKpi").innerHTML=`<span class="health-badge health-green">🟢 ${gr}</span><span class="health-badge health-amber">🟡 ${am}</span><span class="health-badge health-red">🔴 ${rd}</span>`;}
+ const fm=getFinancialMonth(),ml=document.getElementById("tableMonthLabelKpi");if(ml)ml.textContent=`(${FY_MONTHS[currentMonth]})`;
+ let e2=getEnrichedKpis();if(currentKpiFilter!=="all")e2=e2.filter(k=>k.id===currentKpiFilter);if(currentSort==="achievement")e2.sort((a,b)=>b.metrics.yearlyPct-a.metrics.yearlyPct);else if(currentSort==="gap")e2.sort((a,b)=>Math.abs(b.metrics.gap)-Math.abs(a.metrics.gap));
+ const tbody=document.getElementById("kpiTableBodyKpi");if(!tbody)return;tbody.innerHTML="";
+ e2.forEach(kpi=>{const m=kpi.metrics,sc=`status-${m.status}`,ipm=currentMonth<fm&&fm>0,mac=m.monthlyPct<50?'alert-cell':(m.monthlyPct<75?'warning-cell':''),cfm=allComments.find(c=>c.kpiId===kpi.id&&c.month===currentMonth),row=tbody.insertRow();row.innerHTML=`<td style="font-weight:600;">${esc(kpi.name)}</td><td><input type="number" class="editable-input yearly-plan-input" data-id="${kpi.id}" value="${fmt(kpi.yearlyPlan)}" ${!isAdmin?"disabled":""}></td><td style="font-weight:600;font-family:monospace">${fmt(m.yearlyActual)}</td><td><span class="status-chip ${sc}" style="padding:3px 8px;border-radius:16px;font-size:0.7rem;">${pct(m.yearlyPct)}</span></td><td style="font-family:monospace">${fmt(m.monthlyPlan)}</td><td><input type="number" class="editable-input monthly-actual-input" data-id="${kpi.id}" data-month="${currentMonth}" value="${fmt(m.monthlyActual)}" ${!isAdmin||ipm?"disabled":""}>${ipm?'<i class="fas fa-lock locked-icon"></i>':''}</td><td class="${mac}" style="font-weight:600;">${pct(m.monthlyPct)}</td><td style="font-family:monospace">${m.forecastYearly>0?fmt(m.forecastYearly)+" ("+pct(m.forecastPct)+")":"—"}</td><td><span class="status-chip ${sc}" style="padding:3px 8px;border-radius:16px;font-size:0.7rem;">${m.status.toUpperCase()}</span></td><td class="comment-cell ${cfm?'has-comment':''}" data-id="${kpi.id}" data-month="${currentMonth}"><i class="fas fa-comment"></i> ${cfm?'View':'Add'}</td>`;});
+ document.querySelectorAll("#kpiTableBodyKpi .yearly-plan-input").forEach(inp=>inp.addEventListener("change",(e)=>updateYearlyPlan(e.target.dataset.id,e.target.value)));
+ document.querySelectorAll("#kpiTableBodyKpi .monthly-actual-input:not([disabled])").forEach(inp=>inp.addEventListener("change",(e)=>updateKpiMonthly(e.target.dataset.id,parseInt(e.target.dataset.month),e.target.value)));
+ document.querySelectorAll("#kpiTableBodyKpi .comment-cell").forEach(cell=>{cell.addEventListener("click",()=>{currentModalKpiId=cell.dataset.id;currentCommentMonth=parseInt(cell.dataset.month);openCommentModal();});});
+ const rn=document.getElementById("readonlyNoticeKpi");if(rn){if(!isAdmin)rn.classList.add("visible");else rn.classList.remove("visible");}
+ document.getElementById("fyLabelKpi").textContent=getFYLabel();
 }
 
 function addNotification(t,d,ty='info'){const n={id:Date.now()+Math.random(),title:t,desc:d,type:ty,read:false,createdAt:new Date().toISOString()};notifications.unshift(n);if(notifications.length>50)notifications=notifications.slice(0,50);renderNotifications();updateNotifBadge();}
@@ -495,15 +771,91 @@ function updateNotifBadge(){const u=notifications.filter(n=>!n.read).length,b=do
 function markAllNotificationsRead(){notifications.forEach(n=>n.read=true);renderNotifications();updateNotifBadge();}
 function clearAllNotifications(){notifications=[];renderNotifications();updateNotifBadge();}
 function renderNotifications(){const l=document.getElementById('notifList');if(!l)return;if(!notifications.length){l.innerHTML='<div class="notif-empty">No notifications</div>';return;}l.innerHTML=notifications.slice(0,30).map(n=>{const ic=n.type==='critical'?'crit':n.type==='warning'?'warn':'ok',ii=n.type==='critical'?'fa-circle-exclamation':n.type==='warning'?'fa-triangle-exclamation':'fa-circle-check';return`<div class="notif-item ${n.read?'':'unread'}"><div class="notif-item-icon ${ic}"><i class="fas ${ii}"></i></div><div><div style="font-weight:600;font-size:0.72rem;">${esc(n.title)}</div><div style="font-size:0.66rem;color:var(--text3);">${esc(n.desc)}</div><div style="font-size:0.58rem;color:var(--text3);">${new Date(n.createdAt).toLocaleString('en-IN')}</div></div></div>`;}).join('');}
-function checkAndNotify(){const enriched=getEnrichedKpis(),prevMap={};previousKpiState.forEach(k=>{prevMap[k.id]=k;});enriched.forEach(k=>{const prev=prevMap[k.id];if(!prev)return;if(k.metrics.status==='red'&&prev.metrics.status!=='red')addNotification(`🔴 ${k.name} RED zone`,`Yearly: ${pct(k.metrics.yearlyPct)}`,'critical');if(k.metrics.forecastPct<85&&prev.metrics.forecastPct>=85)addNotification(`⚠️ ${k.name} forecast risk`,`Forecast: ${pct(k.metrics.forecastPct)}`,'warning');});previousKpiState=JSON.parse(JSON.stringify(enriched));}
-function detectAnomalies(){const a=[],enriched=getEnrichedKpis();enriched.forEach(k=>{const mas=k.monthlyActuals||buildEmptyMonthlyActuals(),vals=[];for(let i=0;i<currentMonth;i++)vals.push(parseFloat(mas[i]||0));if(vals.length>=3){const mean=vals.reduce((s,v)=>s+v,0)/vals.length,variance=vals.reduce((s,v)=>s+Math.pow(v-mean,2),0)/vals.length,stdDev=Math.sqrt(variance),cv=parseFloat(mas[currentMonth]||0);if(stdDev>0&&Math.abs(cv-mean)>2*stdDev&&cv>0)a.push({kpi:k,type:'outlier',current:cv,mean:Math.round(mean)});}if(currentMonth>0){const pv=parseFloat(mas[currentMonth-1]||0),cv=parseFloat(mas[currentMonth]||0);if(pv>0&&cv>0&&(cv/pv)<0.7)a.push({kpi:k,type:'drop',current:cv,previous:pv,pctDrop:Math.round((1-cv/pv)*100)});}});return a;}
+
+function checkAndNotify(){
+ const enriched=getEnrichedKpis();
+ const prevMap={};previousKpiState.forEach(k=>{prevMap[k.id]=k;});
+ enriched.forEach(k=>{
+   const prev=prevMap[k.id];
+   if(!prev)return;
+   const stateKey=`${k.id}_${k.metrics.status}`;
+   const forecastKey=`${k.id}_forecast<85`;
+   if(k.metrics.status==='red'&&prev.metrics.status!=='red'){
+     if(!notifiedStates.has(stateKey)){
+       addNotification(`🔴 ${k.name} RED zone`,`Yearly: ${pct(k.metrics.yearlyPct)}`,'critical');
+       notifiedStates.set(stateKey, true);
+     }
+   } else if(k.metrics.status!=='red') {
+     notifiedStates.delete(`${k.id}_red`);
+   }
+   if(k.metrics.forecastPct<85&&prev.metrics.forecastPct>=85){
+     if(!notifiedStates.has(forecastKey)){
+       addNotification(`⚠️ ${k.name} forecast risk`,`Forecast: ${pct(k.metrics.forecastPct)}`,'warning');
+       notifiedStates.set(forecastKey, true);
+     }
+   } else if(k.metrics.forecastPct>=85){
+     notifiedStates.delete(forecastKey);
+   }
+ });
+ previousKpiState=JSON.parse(JSON.stringify(enriched));
+}
+
+function detectAnomalies(){
+ const a=[],enriched=getEnrichedKpis();
+ enriched.forEach(k=>{
+   const mas=k.monthlyActuals||buildEmptyMonthlyActuals(),vals=[];
+   for(let i=0;i<currentMonth;i++)vals.push(parseFloat(mas[i] ?? 0));
+   if(vals.length>=3){
+     const mean=vals.reduce((s,v)=>s+v,0)/vals.length,variance=vals.reduce((s,v)=>s+Math.pow(v-mean,2),0)/vals.length,stdDev=Math.sqrt(variance),cv=parseFloat(mas[currentMonth] ?? 0);
+     if(stdDev>0&&Math.abs(cv-mean)>2*stdDev&&cv>0)a.push({kpi:k,type:'outlier',current:cv,mean:Math.round(mean)});
+   }
+   if(currentMonth>0){
+     const pv=parseFloat(mas[currentMonth-1] ?? 0),cv=parseFloat(mas[currentMonth] ?? 0);
+     if(pv>0&&cv>0&&(cv/pv)<0.7)a.push({kpi:k,type:'drop',current:cv,previous:pv,pctDrop:Math.round((1-cv/pv)*100)});
+   }
+ });
+ return a;
+}
+
 function renderAnomalyBanner(){const a=detectAnomalies(),b=document.getElementById('anomalyBanner');if(!b)return;if(a.length>0){const an=a[0];document.getElementById('anomalyText').textContent=an.type==='outlier'?`Anomaly: ${an.kpi.name} — ${FY_MONTHS[currentMonth]} (${fmt(an.current)}) outside trend (avg ${an.mean})`:`Anomaly: ${an.kpi.name} — ${FY_MONTHS[currentMonth]} dropped ${an.pctDrop}% from prev month`;b.classList.add('show');}else{b.classList.remove('show');}}
 function generateSmartAction(kpi){const m=kpi.metrics,isTat=kpi.isTat===true;if(m.status==='red')return isTat?`CAD TAT at ${fmt(m.yearlyActual)}d (target ${kpi.idealDays||4}d). Review process.`:`Critical — forecast ${pct(m.forecastPct)}. Create recovery plan.`;if(m.forecastPct<85&&!isTat)return`High risk — forecast ${pct(m.forecastPct)}. Escalate.`;if(m.monthlyPct<50)return`Month significantly behind (${pct(m.monthlyPct)}). Action needed.`;const tips={first_time_calls:"Top of funnel — ensure lead quality.",shortlisted:"Conversion from interested needs review.",cft_done:"Check CFT-to-closure rate.",collection:"Follow up on overdue accounts."};return tips[kpi.id]||(m.status==='green'?"On track — maintain momentum.":"Progressing — continue monitoring.");}
-function generateExecutiveBrief(){const enriched=getEnrichedKpis(),gk=enriched.filter(k=>k.metrics.status==='green');const p=[];if(gk.length>0)p.push(`<div class="exec-brief-item"><strong>${gk.length}</strong> KPIs at or above plan.</div>`);const owners={};enriched.forEach(k=>{const o=k.owner||'Unassigned';if(!owners[o])owners[o]=[];owners[o].push(k.metrics.yearlyPct);});const best=Object.entries(owners).map(([o,v])=>({owner:o,avg:v.reduce((a,b)=>a+b,0)/v.length})).sort((a,b)=>b.avg-a.avg)[0];if(best)p.push(`<div class="exec-brief-item">Best: <strong>${best.owner}</strong> at ${pct(best.avg)}.</div>`);if(p.length===0)p.push('<div class="exec-brief-item">Monitoring operations.</div>');const c=[],ra=enriched.filter(k=>k.metrics.status!=='green');if(ra.length>0)c.push(`<div class="exec-brief-item"><strong>${ra.length}</strong> KPIs need attention.</div>`);const tg=enriched.reduce((s,k)=>s+Math.max(0,k.metrics.gap),0),bg=enriched.reduce((max,k)=>Math.abs(k.metrics.gap)>Math.abs(max.metrics.gap)?k:max,enriched[0]);if(bg&&tg>0)c.push(`<div class="exec-brief-item">Biggest gap: <strong>${bg.name}</strong> (${fmt(Math.abs(bg.metrics.gap))}).</div>`);if(c.length===0)c.push('<div class="exec-brief-item">No concerns.</div>');const ac=[];if(bg)ac.push(`<div class="exec-brief-item">Focus on <strong>${bg.name}</strong> — review with ${bg.owner||'owner'}.</div>`);const crit=enriched.filter(k=>k.metrics.forecastPct<75);if(crit.length>0)ac.push(`<div class="exec-brief-item">Expedite <strong>${crit.length}</strong> KPIs with forecast <75%.</div>`);if(ac.length===0)ac.push('<div class="exec-brief-item">No immediate actions.</div>');document.getElementById('briefPositive').innerHTML=p.join('');document.getElementById('briefConcerns').innerHTML=c.join('');document.getElementById('briefActions').innerHTML=ac.join('');document.getElementById('briefFooter').textContent=`Updated: ${new Date().toLocaleString('en-IN')}`;}
-function renderTopBottleneckContributors(){const enriched=getEnrichedKpis(),tg=enriched.reduce((s,k)=>s+Math.max(0,k.metrics.gap),0);if(tg===0){document.getElementById('bottleneckContributors').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:16px;color:var(--text3);">All KPIs on track — no bottlenecks.</div>';return;}const ranked=enriched.map(k=>({...k,contribution:Math.max(0,k.metrics.gap)/tg*100})).sort((a,b)=>b.contribution-a.contribution).slice(0,3),mc=ranked[0]?.contribution||1;document.getElementById('bottleneckContributors').innerHTML=ranked.map((k,i)=>`<div class="bottleneck-card"><div class="bottleneck-rank r${i+1}" style="background:${i===0?'var(--red)':i===1?'var(--amber)':'#64748B'}">${i+1}</div><div style="flex:1;"><div class="bottleneck-name" style="font-weight:700;font-size:0.78rem;">${esc(k.name)}</div><div class="bottleneck-detail" style="font-size:0.68rem;color:var(--text3);">Gap: ${fmt(Math.abs(k.metrics.gap))} · ${pct(Math.round(k.contribution))} of total</div><div class="bottleneck-bar" style="height:5px;background:#e2e9f2;border-radius:10px;margin-top:6px;overflow:hidden;"><div class="bottleneck-bar-fill" style="width:${Math.round(k.contribution/mc*100)}%;height:100%;border-radius:10px;background:${i===0?'var(--red)':i===1?'var(--amber)':'#64748B'}"></div></div></div></div>`).join('');}
 
-function togglePin(kpiId){if(pinnedKpis.includes(kpiId))pinnedKpis=pinnedKpis.filter(id=>id!==kpiId);else pinnedKpis.push(kpiId);localStorage.setItem("pinnedKpis",JSON.stringify(pinnedKpis));renderKpiCards();}
+function generateExecutiveBrief(){
+ const enriched=getEnrichedKpis(),gk=enriched.filter(k=>k.metrics.status==='green');
+ const p=[];
+ if(gk.length>0)p.push(`<div class="exec-brief-item"><strong>${gk.length}</strong> KPIs at or above plan.</div>`);
+ const owners={};
+ enriched.forEach(k=>{const o=getKpiOwner(k.id).name;if(!owners[o])owners[o]=[];owners[o].push(k.metrics.yearlyPct);});
+ const best=Object.entries(owners).map(([o,v])=>({owner:o,avg:v.reduce((a,b)=>a+b,0)/v.length})).sort((a,b)=>b.avg-a.avg)[0];
+ if(best)p.push(`<div class="exec-brief-item">Best: <strong>${best.owner}</strong> at ${pct(best.avg)}.</div>`);
+ if(p.length===0)p.push('<div class="exec-brief-item">Monitoring operations.</div>');
+ const c=[],ra=enriched.filter(k=>k.metrics.status!=='green');
+ if(ra.length>0)c.push(`<div class="exec-brief-item"><strong>${ra.length}</strong> KPIs need attention.</div>`);
+ const bg=enriched.reduce((max,k)=>Math.abs(k.metrics.gap)>Math.abs(max.metrics.gap)?k:max,enriched[0]);
+ if(bg)c.push(`<div class="exec-brief-item">Biggest gap: <strong>${bg.name}</strong> (${fmt(Math.abs(bg.metrics.gap))}).</div>`);
+ if(c.length===0)c.push('<div class="exec-brief-item">No concerns.</div>');
+ const ac=[];
+ if(bg)ac.push(`<div class="exec-brief-item">Focus on <strong>${bg.name}</strong> — review with ${getKpiOwner(bg.id).name}.</div>`);
+ const crit=enriched.filter(k=>k.metrics.forecastPct<75);
+ if(crit.length>0)ac.push(`<div class="exec-brief-item">Expedite <strong>${crit.length}</strong> KPIs with forecast <75%.</div>`);
+ if(ac.length===0)ac.push('<div class="exec-brief-item">No immediate actions.</div>');
+ document.getElementById('briefPositive').innerHTML=p.join('');
+ document.getElementById('briefConcerns').innerHTML=c.join('');
+ document.getElementById('briefActions').innerHTML=ac.join('');
+ document.getElementById('briefFooter').textContent=`Updated: ${new Date().toLocaleString('en-IN')}`;
+}
+
+function renderTopBottleneckContributors(){
+ const enriched=getEnrichedKpis(),tg=enriched.reduce((s,k)=>s+Math.max(0,k.metrics.gap),0);
+ if(tg===0){document.getElementById('bottleneckContributors').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:16px;color:var(--text3);">All KPIs on track — no bottlenecks.</div>';return;}
+ const ranked=enriched.map(k=>({...k,contribution:Math.max(0,k.metrics.gap)/tg*100})).sort((a,b)=>b.contribution-a.contribution).slice(0,3),mc=ranked[0]?.contribution||1;
+ document.getElementById('bottleneckContributors').innerHTML=ranked.map((k,i)=>`<div class="bottleneck-card"><div class="bottleneck-rank r${i+1}" style="background:${i===0?'var(--red)':i===1?'var(--amber)':'#64748B'}">${i+1}</div><div style="flex:1;"><div class="bottleneck-name" style="font-weight:700;font-size:0.78rem;">${esc(k.name)}</div><div class="bottleneck-detail" style="font-size:0.68rem;color:var(--text3);">Gap: ${fmt(Math.abs(k.metrics.gap))} · ${pct(Math.round(k.contribution))} of total</div><div class="bottleneck-bar" style="height:5px;background:#e2e9f2;border-radius:10px;margin-top:6px;overflow:hidden;"><div class="bottleneck-bar-fill" style="width:${Math.round(k.contribution/mc*100)}%;height:100%;border-radius:10px;background:${i===0?'var(--red)':i===1?'var(--amber)':'#64748B'}"></div></div></div></div>`).join('');
+}
+
+function togglePin(kpiId){if(pinnedKpis.includes(kpiId))pinnedKpis=pinnedKpis.filter(id=>id!==kpiId);else pinnedKpis.push(kpiId);savePinnedKpis();renderKpiCards();}
+
 function calculateMetrics(kpi){const mas=kpi.monthlyActuals||buildEmptyMonthlyActuals(),isPct=(kpi.unit==="%")||(kpi.id==="cft_feedback_adherence"),isTat=kpi.isTat===true,mp=kpi.yearlyPlan/12,ma=parseFloat(mas[currentMonth]||0);let ya=0;if(isPct){let s=0,mwd=0;for(let i=0;i<=currentMonth;i++){const v=parseFloat(mas[i]||0);s+=Math.min(100,Math.max(0,v));if(v>0||i===0)mwd++;}ya=mwd>0?s/mwd:0;}else if(isTat){let s=0,cnt=0;for(let i=0;i<=currentMonth;i++){const v=parseFloat(mas[i]||0);if(v>0){s+=v;cnt++;}}ya=cnt>0?s/cnt:0;}else{for(let i=0;i<=currentMonth;i++)ya+=parseFloat(mas[i]||0);}let mpct,ypct,gap;if(isTat){const ideal=kpi.idealDays||4;mpct=ma===0?0:(ma<=ideal?100:Math.max(0,Math.min(100,100-((ma-ideal)/ideal)*100)));ypct=ya===0?0:(ya<=ideal?100:Math.max(0,Math.min(100,100-((ya-ideal)/ideal)*100)));gap=ya-ideal;}else{mpct=mp>0?Math.min((ma/mp)*100,100):0;ypct=kpi.yearlyPlan>0?Math.min((ya/kpi.yearlyPlan)*100,100):0;gap=kpi.yearlyPlan-ya;}const em=currentMonth+1;let fy=0,fp=0;if(isPct||isTat){fy=ya;fp=ypct;}else if(em>0&&ya>0){fy=(ya/em)*12;fp=(fy/kpi.yearlyPlan)*100;}let status="red";if(isTat){const ideal=kpi.idealDays||4;if(ya<=ideal)status="green";else if(ya<=ideal*2)status="amber";}else{if(ypct>=90)status="green";else if(ypct>=60)status="amber";}return{monthlyPlan:mp,monthlyActual:ma,monthlyPct:Math.min(mpct,100),yearlyActual:ya,yearlyPct:Math.min(ypct,100),gap,forecastYearly:fy,forecastPct:Math.min(fp,100),status};}
+
 function getEnrichedKpis(){let f=kpiData.filter(k=>k.id!=="partner_survey_score").map(k=>({...k,metrics:calculateMetrics(k)}));if(currentSearchTerm){const t=currentSearchTerm.toLowerCase();f=f.filter(k=>k.name.toLowerCase().includes(t));}f.sort((a,b)=>{if(pinnedKpis.includes(a.id)&&!pinnedKpis.includes(b.id))return-1;if(!pinnedKpis.includes(a.id)&&pinnedKpis.includes(b.id))return 1;return 0;});return f;}
 
 function saveFilterState(){const fs={month:currentMonth,kpiFilter:currentKpiFilter,sortBy:currentSort,searchTerm:currentSearchTerm,groupByCategory,currentView};localStorage.setItem("kpi_filters_v6",JSON.stringify(fs));}
@@ -511,124 +863,484 @@ function loadFilterState(){const s=localStorage.getItem("kpi_filters_v6");if(!s)
 function syncKpiUpdateFilters(){const ms2=document.getElementById("monthSelectKpi");if(ms2)ms2.value=currentMonth;}
 
 function trackModalChanges(){isModalDirty=false;originalModalValues.clear();document.querySelectorAll('.monthly-edit-input:not([disabled])').forEach(inp=>{const m=inp.dataset.month;originalModalValues.set(m,inp.value);inp.addEventListener('input',()=>{isModalDirty=inp.value!==originalModalValues.get(m);});});}
-function closeModalWithCheck(){if(isModalDirty){if(confirm('Unsaved changes. Close?')){isModalDirty=false;document.getElementById("kpiModal")?.classList.remove("active");}}else{document.getElementById("kpiModal")?.classList.remove("active");}}
+async function closeModalWithCheck(){
+  if(isModalDirty){
+    const ok = await showConfirm('You have unsaved changes. Close anyway?', 'Unsaved Changes');
+    if(!ok) return;
+    isModalDirty = false;
+  }
+  document.getElementById("kpiModal")?.classList.remove("active");
+}
 
 async function logAudit(kpiId,kpiName,fc,ov,nv){if(!currentUserId)return;const r={kpiId,kpiName,fieldChanged:fc,oldValue:String(ov),newValue:String(nv),updatedBy:currentUserEmail||currentUserId,userId:currentUserId,timestamp:new Date().toISOString()};try{await addDoc(collection(db,"kpi_audit_logs"),{...r,updatedAt:serverTimestamp()});}catch(e){const k="kpi_audit_local",ex=JSON.parse(localStorage.getItem(k)||"[]");ex.unshift(r);localStorage.setItem(k,JSON.stringify(ex.slice(0,500)));allAuditLogs=[r,...allAuditLogs].slice(0,500);renderAuditTable();populateAuditUserFilter();}}
-function initAuditListener(){if(auditUnsub)auditUnsub();const q=query(collection(db,"kpi_audit_logs"),orderBy("timestamp","desc"),limit(300));auditUnsub=onSnapshot(q,(snap)=>{const fl=snap.docs.map(d=>({id:d.id,...d.data()})),ll=JSON.parse(localStorage.getItem("kpi_audit_local")||"[]");allAuditLogs=[...ll,...fl].sort((a,b)=>(b.timestamp||"").localeCompare(a.timestamp||"")).slice(0,500);if(currentView==='auditView')renderAuditTable();populateAuditUserFilter();});}
-function renderAuditTable(){const kf=document.getElementById("auditKpiFilter")?.value||"all",uf=document.getElementById("auditUserFilter")?.value||"all",df=document.getElementById("auditDateFilter")?.value||"",tbody=document.getElementById("auditTableBody");if(!tbody)return;let logs=[...allAuditLogs];if(kf!=="all")logs=logs.filter(l=>l.kpiId===kf);if(uf!=="all")logs=logs.filter(l=>(l.updatedBy||"")===uf);if(df)logs=logs.filter(l=>(l.timestamp||"").startsWith(df));if(!logs.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text3);">No records found</td></tr>';return;}tbody.innerHTML=logs.slice(0,150).map(log=>`<tr><td style="font-weight:600;">${esc(log.kpiName||log.kpiId)}</td><td>${esc(log.fieldChanged||"—")}</td><td style="font-family:monospace">${esc(log.oldValue)}</td><td style="font-family:monospace;font-weight:600;color:var(--blue)">${esc(log.newValue)}</td><td>${esc(log.updatedBy||"Unknown")}</td><td style="white-space:nowrap;">${log.timestamp?new Date(log.timestamp).toLocaleString("en-IN"):"—"}</td></tr>`).join("");}
-function populateAuditUserFilter(){const sel=document.getElementById("auditUserFilter");if(!sel)return;const curr=sel.value;sel.innerHTML='<option value="all">All Users</option>'+[...new Set(allAuditLogs.map(l=>l.updatedBy).filter(Boolean))].sort().map(u=>`<option value="${esc(u)}" ${u===curr?"selected":""}>${esc(u)}</option>`).join("");}
-function initCommentsListener(){if(commentsUnsub)commentsUnsub();commentsUnsub=onSnapshot(collection(db,"kpi_comments"),(snap)=>{allComments=snap.docs.map(d=>({id:d.id,...d.data()}));if(currentModalKpiId&&currentCommentMonth!==undefined)renderCommentsInModal();});}
-async function addComment(kpiId,month,text){if(!text.trim()){showToast("Enter a comment","error");return;}try{await addDoc(collection(db,"kpi_comments"),{kpiId,month,text:text.trim(),userEmail:currentUserEmail||"Unknown",userId:currentUserId,timestamp:serverTimestamp()});showToast("Comment added","success");document.getElementById("commentText").value="";document.getElementById("commentModal").classList.remove("active");}catch(e){showToast("Failed","error");}}
-async function deleteComment(cid){if(!confirm("Delete?"))return;try{await deleteDoc(doc(db,"kpi_comments",cid));showToast("Deleted","success");}catch(e){showToast("Failed","error");}}
-function renderCommentsInModal(){const container=document.getElementById("commentsList");if(!container)return;const kc=allComments.filter(c=>c.kpiId===currentModalKpiId&&c.month===currentCommentMonth).sort((a,b)=>(b.timestamp?.seconds||0)-(a.timestamp?.seconds||0));if(!kc.length){container.innerHTML='<div style="text-align:center;color:var(--text3);padding:14px;">No comments yet.</div>';return;}container.innerHTML=kc.map(c=>`<div class="comment-item" style="background:#f6fdf8;border-radius:10px;padding:8px 10px;margin-bottom:6px;font-size:0.74rem;"><div class="comment-meta" style="display:flex;justify-content:space-between;font-size:0.62rem;color:var(--text3);"><strong>${esc(getDisplayName(c.userEmail))}</strong> ${c.timestamp?new Date(c.timestamp.seconds*1000).toLocaleString():"Just now"}</div><div style="color:var(--text);">${esc(c.text)}</div></div>`).join("");}
 
-async function updateKpiMonthly(kpiId,mi,value){if(!isAdmin){showToast("Viewer mode","error");return;}const cfm=getFinancialMonth();if(mi<cfm){showToast("Past months locked","error");return;}const num=parseFloat(value);if(isNaN(num)||num<0){showToast("Invalid","error");return;}const kpi=kpiData.find(k=>k.id===kpiId);if(!kpi)return;const mp=kpi.yearlyPlan/12;if(num>mp*1.5&&mp>0&&!confirm(`Value ${num} >150% of plan. Allow?`))return;const ov=kpi.monthlyActuals?.[mi]??0,oma={...(kpi.monthlyActuals||buildEmptyMonthlyActuals())};kpi.monthlyActuals={...oma,[mi]:num};renderDashboard();if(currentView==='kpiUpdateView')renderKpiUpdateView();try{await updateDoc(doc(db,"kpis",kpiId),{monthlyActuals:kpi.monthlyActuals,lastUpdated:serverTimestamp(),updatedBy:currentUserEmail||currentUserId});await logAudit(kpiId,kpi.name,`monthly_${FY_MONTHS[mi]}`,ov,num);showToast(`${kpi.name} updated`,"success");}catch(e){kpi.monthlyActuals=oma;renderDashboard();if(currentView==='kpiUpdateView')renderKpiUpdateView();showToast("Failed — rolled back","error");}}
+function initAuditListener(){
+ if(auditUnsub)auditUnsub();
+ const q=query(collection(db,"kpi_audit_logs"),orderBy("timestamp","desc"),limit(300));
+ auditUnsub=onSnapshot(q,(snap)=>{
+   const fl=snap.docs.map(d=>({id:d.id,...d.data()}));
+   const ll=JSON.parse(localStorage.getItem("kpi_audit_local")||"[]");
+   const firestoreIds = new Set(fl.map(l => l.id).filter(Boolean));
+   const filteredLocal = ll.filter(l => !l.id || !firestoreIds.has(l.id));
+   allAuditLogs=[...filteredLocal,...fl].sort((a,b)=>{
+     const ta = normalizeTimestamp(a.timestamp)?.getTime() || 0;
+     const tb = normalizeTimestamp(b.timestamp)?.getTime() || 0;
+     return tb - ta;
+   }).slice(0,500);
+   if(currentView==='auditView')renderAuditTable();
+   populateAuditUserFilter();
+ });
+}
+
+function renderAuditTable(){
+ const kf=document.getElementById("auditKpiFilter")?.value||"all";
+ const uf=document.getElementById("auditUserFilter")?.value||"all";
+ const df=document.getElementById("auditDateFilter")?.value||"";
+ const tbody=document.getElementById("auditTableBody");
+ if(!tbody)return;
+ let logs=[...allAuditLogs];
+ if(kf!=="all")logs=logs.filter(l=>l.kpiId===kf);
+ if(uf!=="all")logs=logs.filter(l=>(l.updatedBy||"")===uf);
+ if(df){
+   logs=logs.filter(l=>{
+     const d=normalizeTimestamp(l.timestamp);
+     if(!d)return false;
+     return d.toISOString().startsWith(df);
+   });
+ }
+ if(!logs.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text3);">No records found</td></tr>';return;}
+ tbody.innerHTML=logs.slice(0,150).map(log=>`<tr><td style="font-weight:600;">${esc(log.kpiName||log.kpiId)}</td><td>${esc(log.fieldChanged||"—")}</td><td style="font-family:monospace">${esc(log.oldValue)}</td><td style="font-family:monospace;font-weight:600;color:var(--blue)">${esc(log.newValue)}</td><td>${esc(log.updatedBy||"Unknown")}</td><td style="white-space:nowrap;">${formatTimestamp(log.timestamp)}</td></tr>`).join("");
+}
+
+function populateAuditUserFilter(){const sel=document.getElementById("auditUserFilter");if(!sel)return;const curr=sel.value;sel.innerHTML='<option value="all">All Users</option>'+[...new Set(allAuditLogs.map(l=>l.updatedBy).filter(Boolean))].sort().map(u=>`<option value="${esc(u)}" ${u===curr?"selected":""}>${esc(u)}</option>`).join("");}
+
+function initCommentsListener(){if(commentsUnsub)commentsUnsub();commentsUnsub=onSnapshot(collection(db,"kpi_comments"),(snap)=>{allComments=snap.docs.map(d=>({id:d.id,...d.data()}));if(currentModalKpiId&&currentCommentMonth!==undefined)renderCommentsInModal();});}
+
+async function addComment(kpiId,month,text){
+ if(!text.trim()){showToast("Enter a comment","error");return;}
+ try{
+   await addDoc(collection(db,"kpi_comments"),{kpiId,month,text:text.trim(),userEmail:currentUserEmail||"Unknown",userId:currentUserId,timestamp:serverTimestamp()});
+   showToast("Comment added","success");
+   document.getElementById("commentText").value="";
+   document.getElementById("commentModal").classList.remove("active");
+ }catch(e){showToast("Failed","error");}
+}
+async function deleteComment(cid){const ok=await showConfirm('Delete this comment permanently?','Delete Comment');if(!ok)return;try{await deleteDoc(doc(db,"kpi_comments",cid));showToast("Deleted","success");}catch(e){showToast("Failed","error");}}
+function renderCommentsInModal(){
+ const container=document.getElementById("commentsList");if(!container)return;
+ const kc=allComments.filter(c=>c.kpiId===currentModalKpiId&&c.month===currentCommentMonth).sort((a,b)=>{
+   const ta = normalizeTimestamp(a.timestamp)?.getTime() || 0;
+   const tb = normalizeTimestamp(b.timestamp)?.getTime() || 0;
+   return tb - ta;
+ });
+ if(!kc.length){container.innerHTML='<div style="text-align:center;color:var(--text3);padding:14px;">No comments yet.</div>';return;}
+ container.innerHTML=kc.map(c=>`<div class="comment-item" style="background:#f6fdf8;border-radius:10px;padding:8px 10px;margin-bottom:6px;font-size:0.74rem;"><div class="comment-meta" style="display:flex;justify-content:space-between;font-size:0.62rem;color:var(--text3);"><strong>${esc(getDisplayName(c.userEmail))}</strong> ${formatTimestamp(c.timestamp)}</div><div style="color:var(--text);">${esc(c.text)}</div></div>`).join("");
+}
+
+async function updateKpiMonthly(kpiId,mi,value){
+ if(!isAdmin){showToast("Viewer mode","error");return;}
+ const cfm=getFinancialMonth();
+ if(cfm > 0 && mi < cfm){showToast("Past months locked","error");return;}
+ const num=parseFloat(value);
+ if(isNaN(num)||num<0){showToast("Invalid","error");return;}
+ const kpi=kpiData.find(k=>k.id===kpiId);if(!kpi)return;
+ const mp=kpi.yearlyPlan/12;
+ if(num>mp*1.5&&mp>0){const ok=await showConfirm(`Value ${num} exceeds 150% of monthly plan (${fmt(mp)}). Allow?`,'High Value Warning');if(!ok)return;}
+ const ov=kpi.monthlyActuals?.[mi]??0,oma={...(kpi.monthlyActuals||buildEmptyMonthlyActuals())};
+ kpi.monthlyActuals={...oma,[mi]:num};
+ renderDashboard();if(currentView==='kpiUpdateView')renderKpiUpdateView();
+ try{
+   await updateDoc(doc(db,"kpis",kpiId),{monthlyActuals:kpi.monthlyActuals,lastUpdated:serverTimestamp(),updatedBy:currentUserEmail||currentUserId});
+   await logAudit(kpiId,kpi.name,`monthly_${FY_MONTHS[mi]}`,ov,num);
+   showToast(`${kpi.name} updated`,"success");
+ }catch(e){kpi.monthlyActuals=oma;renderDashboard();if(currentView==='kpiUpdateView')renderKpiUpdateView();showToast("Failed — rolled back","error");}
+}
+
 async function updateYearlyPlan(kpiId,value){if(!isAdmin){showToast("Viewer mode","error");return;}const num=parseFloat(value);if(isNaN(num)||num<=0){showToast("Invalid","error");return;}const kpi=kpiData.find(k=>k.id===kpiId);if(!kpi)return;const ov=kpi.yearlyPlan;kpi.yearlyPlan=num;renderDashboard();if(currentView==='kpiUpdateView')renderKpiUpdateView();try{await updateDoc(doc(db,"kpis",kpiId),{yearlyPlan:num,lastUpdated:serverTimestamp(),updatedBy:currentUserEmail||currentUserId});await logAudit(kpiId,kpi.name,"yearly_plan",ov,num);showToast(`${kpi.name} updated`,"success");}catch(e){kpi.yearlyPlan=ov;renderDashboard();if(currentView==='kpiUpdateView')renderKpiUpdateView();showToast("Failed — rolled back","error");}}
 
 function renderDashboard(){renderKpiCards();renderTable();renderSummaryBar();renderTopBottleneckContributors();renderAnomalyBanner();if(currentView==='dashboardView')generateExecutiveBrief();updateNavBadges();checkAndNotify();}
-function renderAnalytics(){renderCharts();renderDelayBuckets();renderOwnerLeaderboard();}
+async function renderAnalytics(){await renderCharts();renderDelayBuckets();renderOwnerLeaderboard();}
+
 function updateNavBadges(){const red=getEnrichedKpis().filter(k=>k.metrics.status==='red').length,nb=document.getElementById('navBadgeRed');if(nb){nb.textContent=red;nb.style.display=red>0?'inline':'none';}}
 
-function renderKpiCards(){const container=document.getElementById("kpiCardsContainer");if(!container)return;const enriched=getEnrichedKpis();if(!enriched.length){container.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text3);">No KPIs found</div>';return;}if(groupByCategory){const cats={};enriched.forEach(k=>{const cat=getKpiCategory(k.id);if(!cats[cat.key])cats[cat.key]={...cat,entities:[]};cats[cat.key].entities.push(k);});const order=['sales','operations','quality','finance'];let html='';order.forEach(key=>{const c=cats[key];if(!c){html+=`<div class="kpi-category-section"><div class="kpi-category-header" style="--cat-color:${KPI_CATEGORIES[key]?.color||'var(--text3)'};"><div><i class="fas ${KPI_CATEGORIES[key]?.icon||'fa-circle'}"></i> <strong>${KPI_CATEGORIES[key]?.name||key}</strong> <span style="font-size:0.68rem;color:var(--text3);">0 KPIs</span></div></div></div>`;return;}const aa=c.entities.length?Math.round(c.entities.reduce((s,k)=>s+k.metrics.yearlyPct,0)/c.entities.length):0;html+=`<div class="kpi-category-section"><div class="kpi-category-header" style="--cat-color:${c.color};"><div><i class="fas ${c.icon}"></i> <strong>${c.name}</strong> <span style="font-size:0.68rem;color:var(--text3);">${c.entities.length} KPIs · Avg ${pct(aa)}</span></div></div><div class="kpi-category-body">${c.entities.map(k=>buildKpiCard(k)).join('')}</div></div>`;});container.innerHTML=html;}else{const tp=enriched.reduce((max,k)=>k.metrics.yearlyPct>max.metrics.yearlyPct?k:max,enriched[0]);container.innerHTML=enriched.map(k=>buildKpiCard(k,tp)).join('');}document.querySelectorAll(".pin-btn").forEach(btn=>{btn.addEventListener("click",(e)=>{e.stopPropagation();togglePin(btn.dataset.id);});});document.querySelectorAll(".kpi-card").forEach(card=>{card.addEventListener("click",(e)=>{if(e.target.tagName!=="INPUT"&&e.target.tagName!=="BUTTON"&&!e.target.closest(".pin-btn"))openKpiDetailModal(card.dataset.id);});});}
-function buildKpiCard(kpi,tp=null){const m=kpi.metrics,fc=m.forecastPct>=90?"forecast-good":m.forecastPct>=70?"forecast-warning":"forecast-bad",sc=`status-${m.status}`,yc=getProgressColor(m.yearlyPct),mc=getProgressColor(m.monthlyPct),isP=pinnedKpis.includes(kpi.id),sa=generateSmartAction(kpi);let ac='ok',ai='fa-check-circle';if(m.status==='red'){ac='critical';ai='fa-circle-exclamation';}else if(m.status==='amber'||m.forecastPct<85){ac='warning';ai='fa-triangle-exclamation';}return`<div class="kpi-card ${isP?'pinned':''}" data-id="${kpi.id}"><button class="pin-btn ${isP?'pinned':''}" data-id="${kpi.id}"><i class="fas fa-thumbtack"></i></button>${tp&&kpi.id===tp.id?'<div class="top-performer-badge"><i class="fas fa-trophy"></i> Top</div>':''}<div class="card-header"><span class="kpi-name">${esc(kpi.name)}</span><span class="status-badge ${sc}" style="font-size:0.66rem;">${m.status.toUpperCase()}</span></div><div class="kpi-dual-section"><div class="kpi-block"><div class="block-label">📅 YEARLY</div><div class="block-value">${pct(m.yearlyPct)}</div><div class="block-sub">${fmt(kpi.yearlyPlan)}→${fmt(m.yearlyActual)}</div></div><div class="kpi-block"><div class="block-label">📆 ${FY_MONTHS[currentMonth]}</div><div class="block-value">${pct(m.monthlyPct)}</div><div class="block-sub">${fmt(m.monthlyPlan)}→${fmt(m.monthlyActual)}</div></div></div><div class="progress-section"><div class="progress-meta"><span>Yearly</span><span>${pct(m.yearlyPct)}</span></div><div class="progress-bar-bg"><div class="progress-fill fill-${yc}" style="width:${Math.min(m.yearlyPct,100)}%;"></div></div><div class="progress-meta"><span>${FY_MONTHS[currentMonth]}</span><span>${pct(m.monthlyPct)}</span></div><div class="progress-bar-bg"><div class="progress-fill fill-${mc}" style="width:${Math.min(m.monthlyPct,100)}%;"></div></div></div><div class="smart-action-strip ${ac}"><i class="fas ${ai}"></i>${sa}</div><div class="card-footer-row"><span class="gap-text">Gap: ${fmt(m.gap)}</span><span class="forecast-badge ${fc}">Fcast: ${fmt(m.forecastYearly)} (${pct(m.forecastPct)})</span></div></div>`;}
+function renderKpiCards(){
+ const container=document.getElementById("kpiCardsContainer");
+ if(!container)return;
+ const skeleton=document.getElementById('kpiLoadingSkeleton');
+ if(skeleton)skeleton.style.display='none';
 
-function renderTable(){const fm=getFinancialMonth(),ml=document.getElementById("tableMonthLabel");if(ml)ml.textContent=`(${FY_MONTHS[currentMonth]})`;let enriched=getEnrichedKpis();if(currentKpiFilter!=="all")enriched=enriched.filter(k=>k.id===currentKpiFilter);if(currentSort==="achievement")enriched.sort((a,b)=>b.metrics.yearlyPct-a.metrics.yearlyPct);else if(currentSort==="gap")enriched.sort((a,b)=>Math.abs(b.metrics.gap)-Math.abs(a.metrics.gap));const tbody=document.getElementById("kpiTableBody");if(!tbody)return;tbody.innerHTML="";enriched.forEach(kpi=>{const m=kpi.metrics,sc=`status-${m.status}`,ipm=currentMonth<fm,mac=m.monthlyPct<50?'alert-cell':(m.monthlyPct<75?'warning-cell':''),cfm=allComments.find(c=>c.kpiId===kpi.id&&c.month===currentMonth),row=tbody.insertRow();row.innerHTML=`<td style="font-weight:600;">${esc(kpi.name)}</td><td><input type="number" class="editable-input yearly-plan-input" data-id="${kpi.id}" value="${fmt(kpi.yearlyPlan)}" ${!isAdmin?"disabled":""}></td><td style="font-weight:600;font-family:monospace">${fmt(m.yearlyActual)}</td><td><span class="status-chip ${sc}" style="padding:3px 8px;border-radius:16px;font-size:0.7rem;">${pct(m.yearlyPct)}</span></td><td style="font-family:monospace">${fmt(m.monthlyPlan)}</td><td><input type="number" class="editable-input monthly-actual-input" data-id="${kpi.id}" data-month="${currentMonth}" value="${fmt(m.monthlyActual)}" ${!isAdmin||ipm?"disabled":""}>${ipm?'<i class="fas fa-lock locked-icon"></i>':''}</td><td class="${mac}" style="font-weight:600;">${pct(m.monthlyPct)}</td><td style="font-family:monospace">${m.forecastYearly>0?fmt(m.forecastYearly)+" ("+pct(m.forecastPct)+")":"—"}</td><td><span class="status-chip ${sc}" style="padding:3px 8px;border-radius:16px;font-size:0.7rem;">${m.status.toUpperCase()}</span></td><td class="comment-cell ${cfm?'has-comment':''}" data-id="${kpi.id}" data-month="${currentMonth}"><i class="fas fa-comment"></i> ${cfm?'View':'Add'}</td>`;});document.querySelectorAll(".yearly-plan-input").forEach(inp=>inp.addEventListener("change",(e)=>updateYearlyPlan(e.target.dataset.id,e.target.value)));document.querySelectorAll(".monthly-actual-input:not([disabled])").forEach(inp=>inp.addEventListener("change",(e)=>updateKpiMonthly(e.target.dataset.id,parseInt(e.target.dataset.month),e.target.value)));document.querySelectorAll(".comment-cell").forEach(cell=>{cell.addEventListener("click",()=>{currentModalKpiId=cell.dataset.id;currentCommentMonth=parseInt(cell.dataset.month);openCommentModal();});});}
+ const enriched=getEnrichedKpis();
+ if(!enriched.length){container.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text3);">No KPIs found</div>';return;}
+ if(groupByCategory){
+   const cats={};
+   enriched.forEach(k=>{
+    const cat=getKpiCategory(k);
+     if(!cats[cat.key])cats[cat.key]={...cat,entities:[]};
+     cats[cat.key].entities.push(k);
+   });
+   const order = kpiCategories ? Object.keys(kpiCategories) : ['sales','operations','quality','finance'];
+   let html='';
+   order.forEach(key=>{
+     const c=cats[key];
+     const catDef = (kpiCategories || DEFAULT_KPI_CATEGORIES)[key];
+     if(!catDef) return;
+     if(!c || c.entities.length === 0) return;
+     const aa=Math.round(c.entities.reduce((s,k)=>s+k.metrics.yearlyPct,0)/c.entities.length);
+     html+=`<div class="kpi-category-section"><div class="kpi-category-header" style="--cat-color:${catDef.color};"><div><i class="fas ${catDef.icon}"></i> <strong>${catDef.name}</strong> <span style="font-size:0.68rem;color:var(--text3);">${c.entities.length} KPIs · Avg ${pct(aa)}</span></div></div><div class="kpi-category-body">${c.entities.map(k=>buildKpiCard(k)).join('')}</div></div>`;
+   });
+   container.innerHTML=html||'<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text3);">No KPIs found</div>';
+ }else{
+   const tp=enriched.reduce((max,k)=>k.metrics.yearlyPct>max.metrics.yearlyPct?k:max,enriched[0]);
+   container.innerHTML=enriched.map(k=>buildKpiCard(k,tp)).join('');
+ }
+ document.querySelectorAll(".pin-btn").forEach(btn=>{btn.addEventListener("click",(e)=>{e.stopPropagation();togglePin(btn.dataset.id);});});
+ document.querySelectorAll(".kpi-card").forEach(card=>{card.addEventListener("click",(e)=>{if(e.target.tagName!=="INPUT"&&e.target.tagName!=="BUTTON"&&!e.target.closest(".pin-btn"))openKpiDetailModal(card.dataset.id);});});
+}
 
-function renderSummaryBar(){const enriched=getEnrichedKpis();if(!enriched.length)return;const a=enriched.reduce((s,k)=>s+k.metrics.yearlyPct,0)/enriched.length;const g=enriched.reduce((s,k)=>s+k.metrics.gap,0)/enriched.length;const f=enriched.reduce((s,k)=>s+k.metrics.forecastPct,0)/enriched.length;const gr=enriched.filter(k=>k.metrics.status==="green").length,am=enriched.filter(k=>k.metrics.status==="amber").length,rd=enriched.filter(k=>k.metrics.status==="red").length;document.getElementById("overallScore").textContent=pct(a);document.getElementById("avgGap").textContent=fmt(g);document.getElementById("forecastRatio").textContent=pct(f);document.getElementById("healthIndicators").innerHTML=`<span class="health-badge health-green">🟢 ${gr}</span><span class="health-badge health-amber">🟡 ${am}</span><span class="health-badge health-red">🔴 ${rd}</span>`;}
+function buildKpiCard(kpi,tp=null){
+ const m=kpi.metrics,fc=m.forecastPct>=90?"forecast-good":m.forecastPct>=70?"forecast-warning":"forecast-bad",sc=`status-${m.status}`,yc=getProgressColor(m.yearlyPct),mc=getProgressColor(m.monthlyPct),isP=pinnedKpis.includes(kpi.id),sa=generateSmartAction(kpi);
+ let ac='ok',ai='fa-check-circle';
+ if(m.status==='red'){ac='critical';ai='fa-circle-exclamation';}
+ else if(m.status==='amber'||m.forecastPct<85){ac='warning';ai='fa-triangle-exclamation';}
+ return`<div class="kpi-card ${isP?'pinned':''}" data-id="${kpi.id}"><button class="pin-btn ${isP?'pinned':''}" data-id="${kpi.id}" aria-label="Pin ${esc(kpi.name)}"><i class="fas fa-thumbtack"></i></button>${tp&&kpi.id===tp.id?'<div class="top-performer-badge"><i class="fas fa-trophy"></i> Top</div>':''}<div class="card-header"><span class="kpi-name">${esc(kpi.name)}</span><span class="status-badge ${sc}" style="font-size:0.66rem;">${m.status.toUpperCase()}</span></div><div class="kpi-dual-section"><div class="kpi-block"><div class="block-label">📅 YEARLY</div><div class="block-value">${pct(m.yearlyPct)}</div><div class="block-sub">${fmt(kpi.yearlyPlan)}→${fmt(m.yearlyActual)}</div></div><div class="kpi-block"><div class="block-label">📆 ${FY_MONTHS[currentMonth]}</div><div class="block-value">${pct(m.monthlyPct)}</div><div class="block-sub">${fmt(m.monthlyPlan)}→${fmt(m.monthlyActual)}</div></div></div><div class="progress-section"><div class="progress-meta"><span>Yearly</span><span>${pct(m.yearlyPct)}</span></div><div class="progress-bar-bg"><div class="progress-fill fill-${yc}" style="width:${Math.min(m.yearlyPct,100)}%;"></div></div><div class="progress-meta"><span>${FY_MONTHS[currentMonth]}</span><span>${pct(m.monthlyPct)}</span></div><div class="progress-bar-bg"><div class="progress-fill fill-${mc}" style="width:${Math.min(m.monthlyPct,100)}%;"></div></div></div><div class="smart-action-strip ${ac}"><i class="fas ${ai}"></i>${sa}</div><div class="card-footer-row"><span class="gap-text">Gap: ${fmt(m.gap)}</span><span class="forecast-badge ${fc}">Fcast: ${fmt(m.forecastYearly)} (${pct(m.forecastPct)})</span></div></div>`;
+}
+
+function renderTable(){
+ const fm=getFinancialMonth(),ml=document.getElementById("tableMonthLabel");if(ml)ml.textContent=`(${FY_MONTHS[currentMonth]})`;
+ let enriched=getEnrichedKpis();
+ if(currentKpiFilter!=="all")enriched=enriched.filter(k=>k.id===currentKpiFilter);
+ if(currentSort==="achievement")enriched.sort((a,b)=>b.metrics.yearlyPct-a.metrics.yearlyPct);
+ else if(currentSort==="gap")enriched.sort((a,b)=>Math.abs(b.metrics.gap)-Math.abs(a.metrics.gap));
+ const tbody=document.getElementById("kpiTableBody");if(!tbody)return;tbody.innerHTML="";
+ enriched.forEach(kpi=>{
+   const m=kpi.metrics,sc=`status-${m.status}`;
+   const ipm=fm>0&&currentMonth<fm;
+   const mac=m.monthlyPct<50?'alert-cell':(m.monthlyPct<75?'warning-cell':'');
+   const cfm=allComments.find(c=>c.kpiId===kpi.id&&c.month===currentMonth);
+   const row=tbody.insertRow();
+   row.innerHTML=`<td style="font-weight:600;">${esc(kpi.name)}</td><td><input type="number" class="editable-input yearly-plan-input" data-id="${kpi.id}" value="${fmt(kpi.yearlyPlan)}" ${!isAdmin?"disabled":""}></td><td style="font-weight:600;font-family:monospace">${fmt(m.yearlyActual)}</td><td><span class="status-chip ${sc}" style="padding:3px 8px;border-radius:16px;font-size:0.7rem;">${pct(m.yearlyPct)}</span></td><td style="font-family:monospace">${fmt(m.monthlyPlan)}</td><td><input type="number" class="editable-input monthly-actual-input" data-id="${kpi.id}" data-month="${currentMonth}" value="${fmt(m.monthlyActual)}" ${!isAdmin||ipm?"disabled":""}>${ipm?'<i class="fas fa-lock locked-icon"></i>':''}</td><td class="${mac}" style="font-weight:600;">${pct(m.monthlyPct)}</td><td style="font-family:monospace">${m.forecastYearly>0?fmt(m.forecastYearly)+" ("+pct(m.forecastPct)+")":"—"}</td><td><span class="status-chip ${sc}" style="padding:3px 8px;border-radius:16px;font-size:0.7rem;">${m.status.toUpperCase()}</span></td><td class="comment-cell ${cfm?'has-comment':''}" data-id="${kpi.id}" data-month="${currentMonth}"><i class="fas fa-comment"></i> ${cfm?'View':'Add'}</td>`;
+ });
+ document.querySelectorAll(".yearly-plan-input").forEach(inp=>inp.addEventListener("change",(e)=>updateYearlyPlan(e.target.dataset.id,e.target.value)));
+ document.querySelectorAll(".monthly-actual-input:not([disabled])").forEach(inp=>inp.addEventListener("change",(e)=>updateKpiMonthly(e.target.dataset.id,parseInt(e.target.dataset.month),e.target.value)));
+ document.querySelectorAll(".comment-cell").forEach(cell=>{cell.addEventListener("click",()=>{currentModalKpiId=cell.dataset.id;currentCommentMonth=parseInt(cell.dataset.month);openCommentModal();});});
+}
+
+function renderSummaryBar(){
+ const enriched=getEnrichedKpis();if(!enriched.length)return;
+ const a=enriched.reduce((s,k)=>s+k.metrics.yearlyPct,0)/enriched.length;
+ const g=enriched.reduce((s,k)=>s+k.metrics.gap,0)/enriched.length;
+ const f=enriched.reduce((s,k)=>s+k.metrics.forecastPct,0)/enriched.length;
+ const gr=enriched.filter(k=>k.metrics.status==="green").length,am=enriched.filter(k=>k.metrics.status==="amber").length,rd=enriched.filter(k=>k.metrics.status==="red").length;
+ document.getElementById("overallScore").textContent=pct(a);document.getElementById("avgGap").textContent=fmt(g);document.getElementById("forecastRatio").textContent=pct(f);
+ document.getElementById("healthIndicators").innerHTML=`<span class="health-badge health-green">🟢 ${gr}</span><span class="health-badge health-amber">🟡 ${am}</span><span class="health-badge health-red">🔴 ${rd}</span>`;
+}
 
 function renderDelayBuckets(){const enriched=getEnrichedKpis();const ot=enriched.filter(k=>Math.abs(k.metrics.gap)/Math.max(1,k.yearlyPlan)<0.10).length;const wn=enriched.filter(k=>{const r=Math.abs(k.metrics.gap)/Math.max(1,k.yearlyPlan);return r>=0.10&&r<0.30;}).length;const ct=enriched.filter(k=>Math.abs(k.metrics.gap)/Math.max(1,k.yearlyPlan)>=0.30).length;document.getElementById("delayBucketsContainer").innerHTML=`<div class="delay-bucket ok"><div class="delay-bucket-count" style="color:var(--green)">${ot}</div><div class="delay-bucket-label">On Track</div></div><div class="delay-bucket warn"><div class="delay-bucket-count" style="color:var(--amber)">${wn}</div><div class="delay-bucket-label">Warning</div></div><div class="delay-bucket crit"><div class="delay-bucket-count" style="color:var(--red)">${ct}</div><div class="delay-bucket-label">Critical</div></div>`;}
-function renderOwnerLeaderboard(){const enriched=getEnrichedKpis();const owners={};enriched.forEach(k=>{const o=k.owner||"Unassigned";if(!owners[o])owners[o]=[];owners[o].push(k.metrics.yearlyPct);});const ranked=Object.entries(owners).map(([owner,vals])=>({owner,avg:vals.reduce((a,b)=>a+b,0)/vals.length,count:vals.length})).sort((a,b)=>b.avg-a.avg);const maxAvg=ranked[0]?.avg||1;document.getElementById("ownerLeaderboard").innerHTML=ranked.map((r,i)=>`<div class="leaderboard-item"><div class="leaderboard-rank ${i===0?'gold':i===1?'silver':''}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':`#${i+1}`}</div><div class="leaderboard-name">${esc(r.owner)} <span style="font-size:0.62rem;color:var(--text3);">(${r.count})</span></div><div class="leaderboard-bar-wrap"><div class="leaderboard-bar"><div class="leaderboard-bar-fill" style="width:${Math.round((r.avg/maxAvg)*100)}%;"></div></div></div><div class="leaderboard-value">${pct(Math.round(r.avg))}</div></div>`).join('');}
 
-// FIX 2: Charts use computed theme color
-function renderCharts(){
-  const enriched=getEnrichedKpis();const labels=enriched.map(k=>k.name.length>18?k.name.slice(0,16)+"…":k.name);
-  Chart.defaults.font.family="'Inter', system-ui, sans-serif";
-  const themeColor=getComputedStyle(document.documentElement).getPropertyValue('--blue').trim()||'#0D5E3A';
+function renderOwnerLeaderboard(){
+ const enriched=getEnrichedKpis();const owners={};
+ enriched.forEach(k=>{const o=getKpiOwner(k.id).name;if(!owners[o])owners[o]=[];owners[o].push(k.metrics.yearlyPct);});
+ const ranked=Object.entries(owners).map(([owner,vals])=>({owner,avg:vals.reduce((a,b)=>a+b,0)/vals.length,count:vals.length})).sort((a,b)=>b.avg-a.avg);
+ const maxAvg=ranked[0]?.avg||1;
+ document.getElementById("ownerLeaderboard").innerHTML=ranked.map((r,i)=>`<div class="leaderboard-item"><div class="leaderboard-rank ${i===0?'gold':i===1?'silver':''}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':`#${i+1}`}</div><div class="leaderboard-name">${esc(r.owner)} <span style="font-size:0.62rem;color:var(--text3);">(${r.count})</span></div><div class="leaderboard-bar-wrap"><div class="leaderboard-bar"><div class="leaderboard-bar-fill" style="width:${Math.round((r.avg/maxAvg)*100)}%;"></div></div></div><div class="leaderboard-value">${pct(Math.round(r.avg))}</div></div>`).join('');
+}
 
-  const ctxBar=document.getElementById("barPlanActualChart")?.getContext("2d");if(ctxBar){if(barChart)barChart.destroy();barChart=new Chart(ctxBar,{type:"bar",data:{labels,datasets:[{label:"Plan",data:enriched.map(k=>k.yearlyPlan),backgroundColor:"#c5d9ec",borderRadius:6},{label:"Actual",data:enriched.map(k=>k.metrics.yearlyActual),backgroundColor:themeColor,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{position:"top"}}}});}
-  const ctxH=document.getElementById("horizontalAchievementChart")?.getContext("2d");if(ctxH){if(horizChart)horizChart.destroy();horizChart=new Chart(ctxH,{type:"bar",data:{labels,datasets:[{label:"%",data:enriched.map(k=>parseFloat(fmt(k.metrics.yearlyPct,1))),backgroundColor:enriched.map(k=>k.metrics.status==="green"?"#2b9e5c":k.metrics.status==="amber"?"#e68a2e":"#dc5a3c"),borderRadius:6}]},options:{indexAxis:"y",responsive:true,plugins:{legend:{display:false}},scales:{x:{max:110}}}});}
-  const catOrder=['sales','operations','quality','finance'];const cgd=catOrder.map(key=>{const ck=enriched.filter(k=>getKpiCategory(k.id).key===key);const tp=ck.reduce((s,k)=>s+k.yearlyPlan,0),ta=ck.reduce((s,k)=>s+k.metrics.yearlyActual,0);return{category:KPI_CATEGORIES[key]?.name||key,plan:tp,actual:ta};});const ctxCG=document.getElementById("catGapChart")?.getContext("2d");if(ctxCG){if(catGapChart)catGapChart.destroy();catGapChart=new Chart(ctxCG,{type:"bar",data:{labels:cgd.map(d=>d.category),datasets:[{label:"Plan",data:cgd.map(d=>d.plan),backgroundColor:"#c5d9ec",borderRadius:6},{label:"Actual",data:cgd.map(d=>d.actual),backgroundColor:themeColor,borderRadius:6}]},options:{responsive:true,plugins:{legend:{position:"top"}}}});}
-  const gC=enriched.filter(k=>k.metrics.status==='green').length,aC=enriched.filter(k=>k.metrics.status==='amber').length,rC=enriched.filter(k=>k.metrics.status==='red').length;const ctxPM=document.getElementById("perfMixChart")?.getContext("2d");if(ctxPM){if(perfMixChart)perfMixChart.destroy();perfMixChart=new Chart(ctxPM,{type:"doughnut",data:{labels:['Green','Amber','Red'],datasets:[{data:[gC||0.1,aC||0.1,rC||0.1],backgroundColor:['#2b9e5c','#e68a2e','#dc5a3c']}]},options:{responsive:true,cutout:'60%',plugins:{legend:{position:'bottom'}}}});}
-  const allMas=[];for(let i=0;i<12;i++){let sum=0,count=0;enriched.forEach(k=>{const v=parseFloat(k.monthlyActuals?.[i]||0);sum+=v;count++;});allMas.push(count>0?Math.round(sum/count):0);}const ctxTL=document.getElementById("trendLineChart")?.getContext("2d");if(ctxTL){if(trendLineChart)trendLineChart.destroy();trendLineChart=new Chart(ctxTL,{type:"line",data:{labels:FY_MONTHS,datasets:[{label:"Avg Actual",data:allMas,borderColor:themeColor,backgroundColor:themeColor+'1A',fill:true,tension:0.3,pointRadius:3}]},options:{responsive:true,plugins:{legend:{position:"top"}}}});}
+async function renderCharts(){await ensureChartJs();const enriched=getEnrichedKpis();const labels=enriched.map(k=>k.name.length>18?k.name.slice(0,16)+"…":k.name);
+ Chart.defaults.font.family="'Inter', system-ui, sans-serif";
+ const themeColor=getComputedStyle(document.documentElement).getPropertyValue('--blue').trim()||'#0D5E3A';
+ const ctxBar=document.getElementById("barPlanActualChart")?.getContext("2d");if(ctxBar){if(barChart)barChart.destroy();barChart=new Chart(ctxBar,{type:"bar",data:{labels,datasets:[{label:"Plan",data:enriched.map(k=>k.yearlyPlan),backgroundColor:"#c5d9ec",borderRadius:6},{label:"Actual",data:enriched.map(k=>k.metrics.yearlyActual),backgroundColor:themeColor,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{position:"top"}}}});}
+ const ctxH=document.getElementById("horizontalAchievementChart")?.getContext("2d");if(ctxH){if(horizChart)horizChart.destroy();horizChart=new Chart(ctxH,{type:"bar",data:{labels,datasets:[{label:"%",data:enriched.map(k=>parseFloat(fmt(k.metrics.yearlyPct,1))),backgroundColor:enriched.map(k=>k.metrics.status==="green"?"#2b9e5c":k.metrics.status==="amber"?"#e68a2e":"#dc5a3c"),borderRadius:6}]},options:{indexAxis:"y",responsive:true,plugins:{legend:{display:false}},scales:{x:{max:110}}}});}
+ const cgd=[];
+ const catOrder = kpiCategories ? Object.keys(kpiCategories) : ['sales','operations','quality','finance'];
+ catOrder.forEach(key=>{
+   const catDef = (kpiCategories || DEFAULT_KPI_CATEGORIES)[key];
+   if(!catDef) return;
+   const ck=enriched.filter(k=>getKpiCategory(k).key===key);
+   if(ck.length===0)return;
+   const tp=ck.reduce((s,k)=>s+k.yearlyPlan,0),ta=ck.reduce((s,k)=>s+k.metrics.yearlyActual,0);
+   cgd.push({category:catDef.name,plan:tp,actual:ta});
+ });
+ const ctxCG=document.getElementById("catGapChart")?.getContext("2d");if(ctxCG){if(catGapChart)catGapChart.destroy();catGapChart=new Chart(ctxCG,{type:"bar",data:{labels:cgd.map(d=>d.category),datasets:[{label:"Plan",data:cgd.map(d=>d.plan),backgroundColor:"#c5d9ec",borderRadius:6},{label:"Actual",data:cgd.map(d=>d.actual),backgroundColor:themeColor,borderRadius:6}]},options:{responsive:true,plugins:{legend:{position:"top"}}}});}
+
+ const gC=enriched.filter(k=>k.metrics.status==='green').length;
+ const aC=enriched.filter(k=>k.metrics.status==='amber').length;
+ const rC=enriched.filter(k=>k.metrics.status==='red').length;
+ const ctxPM=document.getElementById("perfMixChart")?.getContext("2d");
+ if(ctxPM){
+   if(perfMixChart)perfMixChart.destroy();
+   const perfLabels=[], perfData=[], perfColors=[];
+   if(gC>0){perfLabels.push('Green');perfData.push(gC);perfColors.push('#2b9e5c');}
+   if(aC>0){perfLabels.push('Amber');perfData.push(aC);perfColors.push('#e68a2e');}
+   if(rC>0){perfLabels.push('Red');perfData.push(rC);perfColors.push('#dc5a3c');}
+   if(perfData.length===0){perfLabels.push('No Data');perfData.push(1);perfColors.push('#e2e9f2');}
+   perfMixChart=new Chart(ctxPM,{type:"doughnut",data:{labels:perfLabels,datasets:[{data:perfData,backgroundColor:perfColors}]},options:{responsive:true,cutout:'60%',plugins:{legend:{position:'bottom'}}}});
+ }
+
+ const allMas=[];for(let i=0;i<12;i++){let sum=0,count=0;enriched.forEach(k=>{const v=parseFloat(k.monthlyActuals?.[i]||0);sum+=v;count++;});allMas.push(count>0?Math.round(sum/count):0);}const ctxTL=document.getElementById("trendLineChart")?.getContext("2d");if(ctxTL){if(trendLineChart)trendLineChart.destroy();trendLineChart=new Chart(ctxTL,{type:"line",data:{labels:FY_MONTHS,datasets:[{label:"Avg Actual",data:allMas,borderColor:themeColor,backgroundColor:themeColor+'1A',fill:true,tension:0.3,pointRadius:3}]},options:{responsive:true,plugins:{legend:{position:"top"}}}});}
 }
 
 function downloadChart(chartId,filename){const canvas=document.querySelector(`#${chartId}`);if(!canvas){showToast("Chart not found","error");return;}const link=document.createElement("a");link.download=`${filename}.png`;link.href=canvas.toDataURL("image/png");link.click();showToast("Downloaded","success");}
-async function exportToPDF(){const{jsPDF}=window.jspdf;showToast("Generating PDF...","info");const el=document.getElementById(currentView==='dashboardView'?'dashboardView':currentView==='analyticsView'?'analyticsView':'kpiUpdateView')||document.getElementById("dashboardView");try{const canvas=await html2canvas(el,{scale:2,useCORS:true,logging:false,windowWidth:el.scrollWidth});const imgData=canvas.toDataURL("image/png");const pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a4',compress:true});const iw=280,ih=(canvas.height*iw)/canvas.width;let hl=ih,pos=0,pn=1;pdf.addImage(imgData,'PNG',10,pos,iw,ih);hl-=(pdf.internal.pageSize.getHeight()-20);while(hl>0){pos=hl-ih;pdf.addPage();pdf.addImage(imgData,'PNG',10,pos,iw,ih);pdf.setFontSize(9);pdf.setTextColor(148,163,184);pdf.text(`Page ${pn+1}`,pdf.internal.pageSize.getWidth()/2,pdf.internal.pageSize.getHeight()-8,{align:'center'});hl-=(pdf.internal.pageSize.getHeight()-20);pn++;}pdf.save(`KPI_Report_${getFYLabel()}_${new Date().toISOString().slice(0,10)}.pdf`);showToast(`PDF exported (${pn} pages)`,"success");}catch(e){showToast("PDF failed","error");}}
-function exportToExcel(){const enriched=getEnrichedKpis();const header=["KPI","Owner","Yearly Plan","Yearly Actual","Yearly %","Monthly Plan",`${FY_MONTHS[currentMonth]} Actual`,"Monthly %","Forecast (FY)","Forecast %","Status"];const rows=enriched.map(k=>[k.name,k.owner||"Unassigned",k.yearlyPlan,fmt(k.metrics.yearlyActual),pct(k.metrics.yearlyPct),fmt(k.metrics.monthlyPlan),fmt(k.metrics.monthlyActual),pct(k.metrics.monthlyPct),fmt(k.metrics.forecastYearly),pct(k.metrics.forecastPct),k.metrics.status.toUpperCase()]);const ms=[["KPI",...FY_MONTHS]];kpiData.forEach(k=>{const m=k.monthlyActuals||buildEmptyMonthlyActuals();ms.push([k.name,...FY_MONTHS.map((_,i)=>fmt(m[i]))]);});const cr=[["Category","KPIs","Total Plan","Total Actual","Avg Achievement %","Total Gap"]];['sales','operations','quality','finance'].forEach(key=>{const ck=enriched.filter(k=>getKpiCategory(k.id).key===key);const tp=ck.reduce((s,k)=>s+k.yearlyPlan,0),ta=ck.reduce((s,k)=>s+k.metrics.yearlyActual,0);cr.push([KPI_CATEGORIES[key]?.name||key,ck.length,fmt(tp),fmt(ta),pct(Math.round(tp>0?(ta/tp)*100:0)),fmt(tp-ta)]);});const owners={};enriched.forEach(k=>{const o=k.owner||"Unassigned";if(!owners[o])owners[o]={kpis:[],ta:0};owners[o].kpis.push(k);owners[o].ta+=k.metrics.yearlyPct;});const or=[["Owner","KPI Count","Avg Achievement %","Green","Amber","Red"]];Object.entries(owners).forEach(([owner,data])=>{or.push([owner,data.kpis.length,pct(Math.round(data.ta/data.kpis.length)),data.kpis.filter(k=>k.metrics.status==='green').length,data.kpis.filter(k=>k.metrics.status==='amber').length,data.kpis.filter(k=>k.metrics.status==='red').length]);});const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([header,...rows]),"KPI Summary");XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(ms),"Monthly Actuals");XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(cr),"Category Analysis");XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(or),"Owner Scorecard");XLSX.writeFile(wb,`KPI_${getFYLabel().replace(/\s/g,"_")}_${new Date().toISOString().slice(0,10)}.xlsx`);showToast("Excel exported (4 sheets)","success");}
-function exportIndividualKpi(kpiId){const kpi=kpiData.find(k=>k.id===kpiId);if(!kpi)return;const m=kpi.monthlyActuals||buildEmptyMonthlyActuals();const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([["Month","Actual"],...FY_MONTHS.map((mn,i)=>[mn,fmt(m[i])])]),kpi.name.substring(0,25));XLSX.writeFile(wb,`${kpi.name.replace(/\s/g,"_")}_${new Date().toISOString().slice(0,10)}.xlsx`);showToast(`${kpi.name} exported`,"success");}
-function backupData(){try{const b={kpiData,allAuditLogs,exportedAt:new Date().toISOString(),version:'6.2'};const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob([JSON.stringify(b,null,2)],{type:'application/json'})),download:`kpi_backup_${new Date().toISOString().slice(0,19).replace(/:/g,'-')}.json`});a.click();showToast('Backup downloaded','success');}catch(e){showToast('Backup failed','error');}}
-function openKpiDetailModal(kpiId){
-  const kpi=kpiData.find(k=>k.id===kpiId);if(!kpi)return;
-  currentModalKpiId=kpiId;currentCommentMonth=currentMonth;
-  const finMonth=getFinancialMonth(),mas=kpi.monthlyActuals||buildEmptyMonthlyActuals(),mp=kpi.yearlyPlan/12,isTat=kpi.isTat===true;
-  document.getElementById("modalKpiName").textContent=kpi.name+" — Monthly Breakdown";
-  const monthSel=document.getElementById("monthSelectorContainer");
-  if(monthSel){monthSel.innerHTML=FY_MONTHS.map((m,idx)=>`<button class="month-btn ${idx<finMonth?'past':''} ${idx>finMonth?'future':''} ${idx===currentMonth?'active':''}" data-month="${idx}" ${idx>finMonth?"disabled":""}>${m}</button>`).join("");
-    document.querySelectorAll(".month-btn").forEach(btn=>btn.addEventListener("click",(e)=>{const idx=parseInt(e.target.dataset.month);if(idx>finMonth)return;if(isModalDirty&&!confirm("Unsaved changes. Change month?"))return;currentMonth=idx;document.querySelectorAll(".month-btn").forEach(b=>b.classList.remove("active"));e.target.classList.add("active");openKpiDetailModal(kpiId);renderDashboard();const ms=document.getElementById("monthSelect");if(ms)ms.value=idx;const ms2=document.getElementById("monthSelectKpi");if(ms2)ms2.value=idx;saveFilterState();}));}
-  const histContainer=document.getElementById("modalHistoryContainer");
-  if(histContainer){histContainer.innerHTML=`<table class="month-table"><thead><tr><th>Month</th><th>Plan</th><th>Actual</th><th>%</th><th></th></tr></thead><tbody>${FY_MONTHS.map((mn,idx)=>{const actual=mas[idx]??0;let ap;if(isTat){const ideal=kpi.idealDays||4;ap=actual===0?0:(actual<=ideal?100:Math.max(0,Math.min(100,100-((actual-ideal)/ideal)*100)));}else{ap=mp>0?Math.min((actual/mp)*100,100):0;}const locked=idx<finMonth,future=idx>finMonth;return`<tr ${idx===currentMonth?'style="background:#eaf7ef;"':""}><td>${mn}${idx===currentMonth?" ●":""}</td><td>${fmt(mp)}</td><td><input type="number" class="monthly-edit-input editable-input" data-month="${idx}" value="${fmt(actual)}" style="width:80px;" ${(!isAdmin||locked||future)?"disabled":""}></td><td style="color:${ap>=90?'#0d6e3e':ap>=60?'#b45f06':'#bc3f2c'};font-weight:600">${pct(ap)}</td><td>${locked?'🔒':future?'⏳':''}</td></tr>`;}).join("")}</tbody></table>`;}
-  document.querySelectorAll(".monthly-edit-input:not([disabled])").forEach(inp=>inp.addEventListener("change",(e)=>updateKpiMonthly(kpiId,parseInt(e.target.dataset.month),e.target.value)));
-  trackModalChanges();
-  const ctx=document.getElementById("trendChartCanvas")?.getContext("2d");
-  if(ctx){if(trendChartInstance)trendChartInstance.destroy();const themeColor=getComputedStyle(document.documentElement).getPropertyValue('--blue').trim()||'#0D5E3A';trendChartInstance=new Chart(ctx,{type:"line",data:{labels:FY_MONTHS,datasets:[{label:"Actual",data:FY_MONTHS.map((_,i)=>mas[i]??0),borderColor:themeColor,backgroundColor:themeColor+'1A',fill:true,tension:0.3,pointRadius:3},{label:"Plan",data:FY_MONTHS.map(()=>parseFloat(fmt(mp,1))),borderColor:"#e68a2e",borderDash:[6,4],pointRadius:0}]},options:{responsive:true,plugins:{legend:{position:"top"}}}});}
-  renderCommentsInModal();
-  let eb=document.getElementById("exportKpiBtn");if(!eb){eb=document.createElement("button");eb.id="exportKpiBtn";eb.style.cssText="margin-top:12px;padding:6px 12px;font-size:0.7rem;";eb.innerHTML='<i class="fas fa-file-excel"></i> Export KPI';eb.addEventListener("click",()=>exportIndividualKpi(kpiId));document.querySelector("#kpiModal .modal-content")?.appendChild(eb);}
-  document.getElementById("kpiModal")?.classList.add("active");
+
+async function ensureHtml2canvas() {
+ if(window.html2canvas)return;
+ await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s);});
 }
+
+async function ensureJsPDF() {
+ if(window.jspdf)return;
+ await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s);});
+}
+
+async function ensureChartJs() {
+ if(window.Chart) return;
+ await new Promise((res,rej)=>{
+   const s=document.createElement('script');
+   s.src='https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js';
+   s.onload=res; s.onerror=rej;
+   document.head.appendChild(s);
+ });
+}
+
+async function ensureSheetJS() {
+ if(window.XLSX)return;
+ await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s);});
+}
+
+async function exportToPDF(){
+ if(!kpiData.length){showToast("No data to export","error");return;}
+ showToast("Generating PDF...","info");
+ await ensureHtml2canvas();
+ await ensureJsPDF();
+ const{jsPDF}=window.jspdf;
+ const el=document.getElementById(currentView==='dashboardView'?'dashboardView':currentView==='analyticsView'?'analyticsView':'kpiUpdateView')||document.getElementById("dashboardView");
+ try{const canvas=await html2canvas(el,{scale:2,useCORS:true,logging:false,windowWidth:el.scrollWidth});const imgData=canvas.toDataURL("image/png");const pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a4',compress:true});const iw=280,ih=(canvas.height*iw)/canvas.width;let hl=ih,pos=0,pn=1;pdf.addImage(imgData,'PNG',10,pos,iw,ih);hl-=(pdf.internal.pageSize.getHeight()-20);while(hl>0){pos=hl-ih;pdf.addPage();pdf.addImage(imgData,'PNG',10,pos,iw,ih);pdf.setFontSize(9);pdf.setTextColor(148,163,184);pdf.text(`Page ${pn+1}`,pdf.internal.pageSize.getWidth()/2,pdf.internal.pageSize.getHeight()-8,{align:'center'});hl-=(pdf.internal.pageSize.getHeight()-20);pn++;}pdf.save(`KPI_Report_${getFYLabel()}_${new Date().toISOString().slice(0,10)}.pdf`);showToast(`PDF exported (${pn} pages)`,"success");}catch(e){showToast("PDF failed","error");}
+}
+
+async function exportToExcel(){
+ if(!kpiData.length){showToast("No data to export","error");return;}
+ await ensureSheetJS();
+ const enriched=getEnrichedKpis();
+ const header=["KPI","Owner","Yearly Plan","Yearly Actual","Yearly %","Monthly Plan",`${FY_MONTHS[currentMonth]} Actual`,"Monthly %","Forecast (FY)","Forecast %","Status"];
+ const rows=enriched.map(k=>[k.name,getKpiOwner(k.id).name,k.yearlyPlan,fmt(k.metrics.yearlyActual),pct(k.metrics.yearlyPct),fmt(k.metrics.monthlyPlan),fmt(k.metrics.monthlyActual),pct(k.metrics.monthlyPct),fmt(k.metrics.forecastYearly),pct(k.metrics.forecastPct),k.metrics.status.toUpperCase()]);
+ const ms=[["KPI",...FY_MONTHS]];kpiData.forEach(k=>{const m=k.monthlyActuals||buildEmptyMonthlyActuals();ms.push([k.name,...FY_MONTHS.map((_,i)=>fmt(m[i]))]);});
+ const cr=[["Category","KPIs","Total Plan","Total Actual","Avg Achievement %","Total Gap"]];
+ const catOrder = kpiCategories ? Object.keys(kpiCategories) : ['sales','operations','quality','finance'];
+ catOrder.forEach(key=>{const ck=enriched.filter(k=>getKpiCategory(k).key===key);if(!ck.length)return;const tp=ck.reduce((s,k)=>s+k.yearlyPlan,0),ta=ck.reduce((s,k)=>s+k.metrics.yearlyActual,0);cr.push([(kpiCategories||DEFAULT_KPI_CATEGORIES)[key]?.name||key,ck.length,fmt(tp),fmt(ta),pct(Math.round(tp>0?(ta/tp)*100:0)),fmt(tp-ta)]);});
+ const owners={};enriched.forEach(k=>{const o=getKpiOwner(k.id).name;if(!owners[o])owners[o]={kpis:[],ta:0};owners[o].kpis.push(k);owners[o].ta+=k.metrics.yearlyPct;});
+ const or=[["Owner","KPI Count","Avg Achievement %","Green","Amber","Red"]];Object.entries(owners).forEach(([owner,data])=>{or.push([owner,data.kpis.length,pct(Math.round(data.ta/data.kpis.length)),data.kpis.filter(k=>k.metrics.status==='green').length,data.kpis.filter(k=>k.metrics.status==='amber').length,data.kpis.filter(k=>k.metrics.status==='red').length]);});
+ const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([header,...rows]),"KPI Summary");XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(ms),"Monthly Actuals");XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(cr),"Category Analysis");XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(or),"Owner Scorecard");XLSX.writeFile(wb,`KPI_${getFYLabel().replace(/\s/g,"_")}_${new Date().toISOString().slice(0,10)}.xlsx`);showToast("Excel exported (4 sheets)","success");
+}
+
+function backupData(){
+ if(!kpiData.length){showToast("No data to backup","error");return;}
+ try{const b={kpiData,allAuditLogs,exportedAt:new Date().toISOString(),version:'6.4'};const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob([JSON.stringify(b,null,2)],{type:'application/json'})),download:`kpi_backup_${new Date().toISOString().slice(0,19).replace(/:/g,'-')}.json`});a.click();showToast('Backup downloaded','success');}catch(e){showToast('Backup failed','error');}
+}
+
+function openKpiDetailModal(kpiId){
+ const kpi=kpiData.find(k=>k.id===kpiId);if(!kpi)return;
+ currentModalKpiId=kpiId;currentCommentMonth=currentMonth;
+ const finMonth=getFinancialMonth(),mas=kpi.monthlyActuals||buildEmptyMonthlyActuals(),mp=kpi.yearlyPlan/12,isTat=kpi.isTat===true;
+ document.getElementById("modalKpiName").textContent=kpi.name+" — Monthly Breakdown";
+ const monthSel=document.getElementById("monthSelectorContainer");
+ if(monthSel){monthSel.innerHTML=FY_MONTHS.map((m,idx)=>`<button class="month-btn ${idx<finMonth?'past':''} ${idx>finMonth?'future':''} ${idx===currentMonth?'active':''}" data-month="${idx}" ${idx>finMonth?"disabled":""}>${m}</button>`).join("");
+   document.querySelectorAll(".month-btn").forEach(btn=>btn.addEventListener("click",(e)=>{const idx=parseInt(e.target.dataset.month);if(idx>finMonth)return;currentMonth=idx;document.querySelectorAll(".month-btn").forEach(b=>b.classList.remove("active"));e.target.classList.add("active");openKpiDetailModal(kpiId);renderDashboard();const ms=document.getElementById("monthSelect");if(ms)ms.value=idx;const ms2=document.getElementById("monthSelectKpi");if(ms2)ms2.value=idx;saveFilterState();}));}
+ const histContainer=document.getElementById("modalHistoryContainer");
+ if(histContainer){
+   histContainer.innerHTML=`<table class="month-table"><thead><tr><th>Month</th><th>Plan</th><th>Actual</th><th>%</th><th></th></tr></thead><tbody>${FY_MONTHS.map((mn,idx)=>{
+     const actual=mas[idx]??0;let ap;
+     if(isTat){const ideal=kpi.idealDays||4;ap=actual===0?0:(actual<=ideal?100:Math.max(0,Math.min(100,100-((actual-ideal)/ideal)*100)));}
+     else{ap=mp>0?Math.min((actual/mp)*100,100):0;}
+     const locked=finMonth>0&&idx<finMonth,future=idx>finMonth;
+     return`<tr ${idx===currentMonth?'style="background:#eaf7ef;"':""}><td>${mn}${idx===currentMonth?" ●":""}</td><td>${fmt(mp)}</td><td><input type="number" class="monthly-edit-input editable-input" data-month="${idx}" value="${fmt(actual)}" style="width:80px;" ${(!isAdmin||locked||future)?"disabled":""}></td><td style="color:${ap>=90?'#0d6e3e':ap>=60?'#b45f06':'#bc3f2c'};font-weight:600">${pct(ap)}</td><td>${locked?'🔒':future?'⏳':''}</td></tr>`;
+   }).join("")}</tbody></table>`;
+ }
+ document.querySelectorAll(".monthly-edit-input:not([disabled])").forEach(inp=>inp.addEventListener("change",(e)=>updateKpiMonthly(kpiId,parseInt(e.target.dataset.month),e.target.value)));
+ trackModalChanges();
+ const ctx=document.getElementById("trendChartCanvas")?.getContext("2d");
+ if(ctx){if(trendChartInstance)trendChartInstance.destroy();const themeColor=getComputedStyle(document.documentElement).getPropertyValue('--blue').trim()||'#0D5E3A';trendChartInstance=new Chart(ctx,{type:"line",data:{labels:FY_MONTHS,datasets:[{label:"Actual",data:FY_MONTHS.map((_,i)=>mas[i]??0),borderColor:themeColor,backgroundColor:themeColor+'1A',fill:true,tension:0.3,pointRadius:3},{label:"Plan",data:FY_MONTHS.map(()=>parseFloat(fmt(mp,1))),borderColor:"#e68a2e",borderDash:[6,4],pointRadius:0}]},options:{responsive:true,plugins:{legend:{position:"top"}}}});}
+ renderCommentsInModal();
+ let eb=document.getElementById("exportKpiBtn");
+ if(!eb){eb=document.createElement("button");eb.id="exportKpiBtn";eb.style.cssText="margin-top:12px;padding:6px 12px;font-size:0.7rem;";eb.innerHTML='<i class="fas fa-file-excel"></i> Export KPI';eb.addEventListener("click",()=>exportIndividualKpi(kpiId));document.querySelector("#kpiModal .modal-content")?.appendChild(eb);}
+ else{eb.onclick=()=>exportIndividualKpi(kpiId);}
+ document.getElementById("kpiModal")?.classList.add("active");
+}
+
+async function exportIndividualKpi(kpiId){
+ await ensureSheetJS();
+ const kpi=kpiData.find(k=>k.id===kpiId);if(!kpi)return;
+ const m=kpi.monthlyActuals||buildEmptyMonthlyActuals();
+ const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([["Month","Actual"],...FY_MONTHS.map((mn,i)=>[mn,fmt(m[i])])]),kpi.name.substring(0,25));XLSX.writeFile(wb,`${kpi.name.replace(/\s/g,"_")}_${new Date().toISOString().slice(0,10)}.xlsx`);showToast(`${kpi.name} exported`,"success");
+}
+
 function openCommentModal(){document.getElementById("commentText").value="";document.getElementById("commentModal")?.classList.add("active");}
 
 function populateMonthSelect(){
-  const sel=document.getElementById("monthSelect");if(!sel)return;
-  const sel2=document.getElementById("monthSelectKpi");const finMonth=getFinancialMonth();
-  const opts=FY_MONTHS.map((m,idx)=>`<option value="${idx}" ${idx===currentMonth?"selected":""} ${idx>finMonth?"disabled":""}>${m}</option>`).join("");
-  sel.innerHTML=opts;if(sel2)sel2.innerHTML=opts;
-  sel.addEventListener("change",(e)=>{const val=parseInt(e.target.value);if(val>getFinancialMonth()){e.target.value=currentMonth;return;}currentMonth=val;if(sel2)sel2.value=val;renderDashboard();if(currentView==='kpiUpdateView')renderKpiUpdateView();saveFilterState();});
-  if(sel2){sel2.addEventListener("change",(e)=>{const val=parseInt(e.target.value);if(val>getFinancialMonth()){e.target.value=currentMonth;return;}currentMonth=val;sel.value=val;renderDashboard();renderKpiUpdateView();saveFilterState();});}
+ const sel=document.getElementById("monthSelect");if(!sel)return;
+ const sel2=document.getElementById("monthSelectKpi");const finMonth=getFinancialMonth();
+ const opts=FY_MONTHS.map((m,idx)=>`<option value="${idx}" ${idx===currentMonth?"selected":""} ${idx>finMonth?"disabled":""}>${m}</option>`).join("");
+ sel.innerHTML=opts;if(sel2)sel2.innerHTML=opts;
+ sel.addEventListener("change",(e)=>{const val=parseInt(e.target.value);if(val>getFinancialMonth()){e.target.value=currentMonth;return;}currentMonth=val;if(sel2)sel2.value=val;renderDashboard();if(currentView==='kpiUpdateView')renderKpiUpdateView();saveFilterState();});
+ if(sel2){sel2.addEventListener("change",(e)=>{const val=parseInt(e.target.value);if(val>getFinancialMonth()){e.target.value=currentMonth;return;}currentMonth=val;sel.value=val;renderDashboard();renderKpiUpdateView();saveFilterState();});}
 }
 
 function populateKpiFilter(){
-  const sel=document.getElementById("kpiSelectFilter");if(!sel)return;
-  const sel2=document.getElementById("kpiSelectFilterKpi");const curr=sel.value;
-  const opts='<option value="all">All KPIs</option>'+kpiData.map(k=>`<option value="${k.id}" ${k.id===curr?"selected":""}>${esc(k.name)}</option>`).join("");
-  sel.innerHTML=opts;if(sel2)sel2.innerHTML=opts;
-  sel.addEventListener("change",(e)=>{currentKpiFilter=e.target.value;if(sel2)sel2.value=currentKpiFilter;renderTable();saveFilterState();});
-  if(sel2){sel2.addEventListener("change",(e)=>{currentKpiFilter=e.target.value;sel.value=currentKpiFilter;renderTable();saveFilterState();});}
-  const as=document.getElementById("auditKpiFilter");if(as){const ac=as.value;as.innerHTML='<option value="all">All KPIs</option>'+kpiData.map(k=>`<option value="${k.id}" ${k.id===ac?"selected":""}>${esc(k.name)}</option>`).join("");}
+ const sel=document.getElementById("kpiSelectFilter");if(!sel)return;
+ const sel2=document.getElementById("kpiSelectFilterKpi");const curr=sel.value;
+ const opts='<option value="all">All KPIs</option>'+kpiData.map(k=>`<option value="${k.id}" ${k.id===curr?"selected":""}>${esc(k.name)}</option>`).join("");
+ sel.innerHTML=opts;if(sel2)sel2.innerHTML=opts;
+ const as=document.getElementById("auditKpiFilter");if(as){const ac=as.value;as.innerHTML='<option value="all">All KPIs</option>'+kpiData.map(k=>`<option value="${k.id}" ${k.id===ac?"selected":""}>${esc(k.name)}</option>`).join("");}
 }
 
+function attachFilterListeners(){
+ const sel=document.getElementById("kpiSelectFilter");
+ const sel2=document.getElementById("kpiSelectFilterKpi");
+ if(sel && !sel._listenerAttached){
+   sel._listenerAttached=true;
+   sel.addEventListener("change",(e)=>{currentKpiFilter=e.target.value;if(sel2)sel2.value=currentKpiFilter;renderTable();saveFilterState();});
+ }
+ if(sel2 && !sel2._listenerAttached){
+   sel2._listenerAttached=true;
+   sel2.addEventListener("change",(e)=>{currentKpiFilter=e.target.value;if(sel)sel.value=currentKpiFilter;renderTable();saveFilterState();});
+ }
+}
+
+// ─── FIX C ────────────────────────────────────────────────────────────────────
+// KPI listener: after kpiData is updated, call repopulateCategoryIds() so that
+// category grouping reflects any category field changes admin made on kpi docs.
+// Owner changes are automatically reflected because getKpiOwner() reads kpiData live.
 function initKpiListener(){
-  if(realtimeUnsub)realtimeUnsub();
-  realtimeUnsub=onSnapshot(collection(db,"kpis"),async(snapshot)=>{
-    const fetched=[];snapshot.forEach(d=>fetched.push({id:d.id,...d.data()}));
-    for(const def of KPI_DEFINITIONS){const ex=fetched.find(f=>f.id===def.id);if(!ex){const nd={id:def.id,name:def.name,yearlyPlan:def.yearlyPlan,unit:def.unit,monthlyActuals:buildEmptyMonthlyActuals(),owner:def.owner,ownerEmail:def.ownerEmail,lastUpdated:serverTimestamp()};if(def.isTat)nd.isTat=true;if(def.idealDays)nd.idealDays=def.idealDays;try{await setDoc(doc(db,"kpis",def.id),nd);}catch(e){}fetched.push({...nd});}else{if(!ex.owner&&def.owner){try{await updateDoc(doc(db,"kpis",def.id),{owner:def.owner,ownerEmail:def.ownerEmail});}catch(e){}}const m=ex.monthlyActuals||{};let dirty=false;for(let i=0;i<12;i++){if(m[i]===undefined||m[i]===null){m[i]=0;dirty=true;}}if(dirty){try{await updateDoc(doc(db,"kpis",def.id),{monthlyActuals:m});}catch(e){}ex.monthlyActuals=m;}}}
-    kpiData=fetched.sort((a,b)=>KPI_DEFINITIONS.findIndex(d=>d.id===a.id)-KPI_DEFINITIONS.findIndex(d=>d.id===b.id));
-    if(currentView==='dashboardView')renderDashboard();if(currentView==='kpiUpdateView')renderKpiUpdateView();if(currentView==='analyticsView')renderAnalytics();populateKpiFilter();
+ if(realtimeUnsub)realtimeUnsub();
+ realtimeUnsub=onSnapshot(collection(db,"kpis"),async(snapshot)=>{
+   const fetched=[];snapshot.forEach(d=>fetched.push({id:d.id,...d.data()}));
+   for(const def of KPI_DEFINITIONS){
+     const ex=fetched.find(f=>f.id===def.id);
+     if(!ex){
+       const nd={id:def.id,name:def.name,yearlyPlan:def.yearlyPlan,unit:def.unit,monthlyActuals:buildEmptyMonthlyActuals(),lastUpdated:serverTimestamp(),owner:def.owner||'',ownerEmail:def.ownerEmail||'',category:def.category||'sales'};
+       if(def.isTat)nd.isTat=true;
+       if(def.idealDays)nd.idealDays=def.idealDays;
+       try{await setDoc(doc(db,"kpis",def.id),nd);}catch(e){}
+       fetched.push({...nd});
+     } else {
+       if(ex.monthlyActuals){
+         const m={...ex.monthlyActuals};let dirty=false;
+         for(let i=0;i<12;i++){if(m[i]===undefined||m[i]===null){m[i]=0;dirty=true;}}
+         if(dirty){try{await updateDoc(doc(db,"kpis",def.id),{monthlyActuals:m});}catch(e){}ex.monthlyActuals=m;}
+       } else {
+         ex.monthlyActuals=buildEmptyMonthlyActuals();
+       }
+     }
+   }
+   kpiData=fetched.sort((a,b)=>KPI_DEFINITIONS.findIndex(d=>d.id===a.id)-KPI_DEFINITIONS.findIndex(d=>d.id===b.id));
+   // ← KEY FIX: repopulate category ids now that kpiData is fresh.
+   // This resolves the race condition where categories snapshot fired
+   // before kpiData was available, leaving all ids arrays empty.
+   // Also handles admin changing a KPI's category field in Firestore.
+   repopulateCategoryIds();
+   safeRender();
+   populateKpiFilter();
+ });
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
+const THEME_COLORS = [
+ {name:'King Green',color:'#0D5E3A',light:'#D4EDDA',dark:'#0a4e30',sidebar:'#0a4e30'},
+ {name:'Royal Blue',color:'#1E40AF',light:'#DBEAFE',dark:'#1E3A5F',sidebar:'#0F1E47'},
+ {name:'Deep Purple',color:'#6D28D9',light:'#EDE9FE',dark:'#4C1D95',sidebar:'#2E1065'},
+ {name:'Crimson Red',color:'#BE123C',light:'#FEE2E2',dark:'#881337',sidebar:'#450A0A'},
+ {name:'Teal',color:'#0D9488',light:'#CCFBF1',dark:'#0F766E',sidebar:'#134E4A'},
+ {name:'Amber Gold',color:'#B45309',light:'#FEF3C7',dark:'#78350F',sidebar:'#451A03'},
+ {name:'Slate Grey',color:'#475569',light:'#E2E8F0',dark:'#1E293B',sidebar:'#0F172A'},
+ {name:'Midnight',color:'#1E293B',light:'#CBD5E1',dark:'#0F172A',sidebar:'#0F172A'}
+];
+
+function applyThemeColor(colorObj){
+ const root=document.documentElement;
+ root.style.setProperty('--blue',colorObj.color);root.style.setProperty('--blue-light',colorObj.light);
+ root.style.setProperty('--navy',colorObj.color);root.style.setProperty('--navy-dark',colorObj.dark);
+ root.style.setProperty('--sidebar-bg',colorObj.sidebar);
+ document.getElementById('themeDot').style.background=colorObj.color;
+ localStorage.setItem('kpi_theme_color',JSON.stringify(colorObj));renderCharts();
+}
+function loadThemeColor(){const saved=localStorage.getItem('kpi_theme_color');if(saved){try{applyThemeColor(JSON.parse(saved));}catch(e){applyThemeColor(THEME_COLORS[0]);}}else{applyThemeColor(THEME_COLORS[0]);}}
+function buildThemePicker(){
+ const grid=document.getElementById('themeColorGrid'),saved=JSON.parse(localStorage.getItem('kpi_theme_color')||'{}');
+ grid.innerHTML=THEME_COLORS.map(c=>`<div class="theme-color-opt ${saved.color===c.color?'active':''}" style="background:${c.color};" data-color='${JSON.stringify(c).replace(/'/g,"&#39;")}' title="${c.name}"></div>`).join('');
+ grid.querySelectorAll('.theme-color-opt').forEach(el=>{el.addEventListener('click',()=>{applyThemeColor(JSON.parse(el.getAttribute('data-color')));buildThemePicker();});});
+}
+
+async function handleLogin(){const email=document.getElementById("loginEmail").value.trim();const pwd=document.getElementById("loginPassword").value;const errEl=document.getElementById("loginError");if(errEl)errEl.style.display="none";if(!email||!pwd){if(errEl){errEl.textContent="Please enter your credentials.";errEl.style.display="block";}return;}try{await signInWithEmailAndPassword(auth,email,pwd);}catch(e){if(errEl){errEl.textContent=parseFirebaseError(e,"Login failed.");errEl.style.display="block";}}}
+async function handleLogout(){try{await signOut(auth);showToast("Logged out");}catch(e){showToast("Logout failed","error");}}
+
+let confirmResolver = null;
+function showConfirm(message, title = 'Please Confirm') {
+  return new Promise(resolve => {
+    confirmResolver = resolve;
+    const modal = document.getElementById('commentModal');
+    const textarea = document.getElementById('commentText');
+    const saveBtn = document.getElementById('saveCommentBtn');
+    const cancelBtn = document.getElementById('cancelCommentBtn');
+    const closeBtn = document.getElementById('closeCommentModal');
+    const titleEl = modal?.querySelector('.modal-header h3');
+    if(titleEl) titleEl.textContent = title;
+    if(textarea){textarea.style.display='none';}
+    const msgEl = document.createElement('p');
+    msgEl.id = 'confirmMsg';
+    msgEl.style.cssText = 'padding:12px 0;font-size:0.84rem;color:var(--text);';
+    msgEl.textContent = message;
+    if(textarea) textarea.parentNode.insertBefore(msgEl, textarea);
+    if(saveBtn){saveBtn.textContent='Confirm';saveBtn.onclick=()=>resolveConfirm(true);}
+    if(cancelBtn) cancelBtn.onclick = () => resolveConfirm(false);
+    if(closeBtn) closeBtn.onclick = () => resolveConfirm(false);
+    modal?.classList.add('active');
   });
 }
 
-// ========== AUTH ==========
-async function handleLogin(){const email=document.getElementById("loginEmail").value.trim().toLowerCase();const pwd=document.getElementById("loginPassword").value;const errEl=document.getElementById("loginError");const loginBtn=document.getElementById("doLoginBtn");if(errEl)errEl.style.display="none";if(!email||!pwd){if(errEl){errEl.textContent="Please enter your credentials.";errEl.style.display="block";}return;}try{if(loginBtn){loginBtn.disabled=true;loginBtn.textContent="Signing in...";}await signInWithEmailAndPassword(auth,email,pwd);}catch(e){console.error("Login failed",e);if(errEl){errEl.textContent=parseFirebaseError(e,"Login failed.");errEl.style.display="block";}}finally{if(loginBtn){loginBtn.disabled=false;loginBtn.textContent="Sign In →";}}}
-async function handleLogout(){try{await signOut(auth);showToast("Logged out");}catch(e){showToast("Logout failed","error");}}
+function resolveConfirm(result) {
+  const modal = document.getElementById('commentModal');
+  const textarea = document.getElementById('commentText');
+  const saveBtn = document.getElementById('saveCommentBtn');
+  const msgEl = document.getElementById('confirmMsg');
+  if(textarea) textarea.style.display = '';
+  if(msgEl) msgEl.remove();
+  if(saveBtn){saveBtn.textContent='Save';saveBtn.onclick=()=>{if(currentModalKpiId&&currentCommentMonth!==undefined)addComment(currentModalKpiId,currentCommentMonth,document.getElementById("commentText").value);}};
+  modal?.classList.remove('active');
+  if(confirmResolver){confirmResolver(result);confirmResolver=null;}
+}
 
 onAuthStateChanged(auth,async user=>{
-  if(user){currentUserId=user.uid;currentUserEmail=user.email;let roleData="viewer";try{const userDoc=await getDoc(doc(db,"users",user.uid));roleData=userDoc.exists()?(userDoc.data()?.role||"viewer"):"viewer";}catch(e){}currentUserRole=roleData;isAdmin=roleData==="admin";
-    document.getElementById("sidebarUserName").textContent=getDisplayName(user.email);document.getElementById("sidebarAvatar").textContent=user.email.substring(0,2).toUpperCase();
-    document.getElementById("sidebarUserRole").textContent=isAdmin?"Administrator":"Viewer";document.getElementById("roleBadgeTop").textContent=isAdmin?"ADMIN":"VIEWER";document.getElementById("roleBadgeTop").className=`role-chip ${isAdmin?'admin':'viewer'}`;
-    document.getElementById("loginScreen").style.display="none";document.getElementById("mainApp").style.display="block";
-    const notice=document.getElementById("readonlyNotice");if(notice){if(!isAdmin)notice.classList.add("visible");else notice.classList.remove("visible");}
-    document.getElementById("fyLabel").textContent=getFYLabel();document.getElementById("fyLabelKpi").textContent=getFYLabel();
-    loadThemeColor();buildThemePicker();loadFilterState();populateMonthSelect();initKpiListener();initAuditListener();initCommentsListener();initChatListener();initSuggestListener();
-    const ss=document.getElementById("sortTableSelect");if(ss)ss.addEventListener("change",(e)=>{currentSort=e.target.value;renderTable();saveFilterState();});
-    const ss2=document.getElementById("sortTableSelectKpi");if(ss2)ss2.addEventListener("change",(e)=>{currentSort=e.target.value;if(ss)ss.value=currentSort;renderTable();saveFilterState();});
-    const si=document.getElementById("kpiSearchInput");if(si)si.addEventListener("input",(e)=>{currentSearchTerm=e.target.value;const si2=document.getElementById("kpiSearchInputKpi");if(si2)si2.value=currentSearchTerm;renderDashboard();saveFilterState();});
-    const si2=document.getElementById("kpiSearchInputKpi");if(si2)si2.addEventListener("input",(e)=>{currentSearchTerm=e.target.value;if(si)si.value=currentSearchTerm;renderDashboard();renderKpiUpdateView();saveFilterState();});
-    const gb=document.getElementById("groupByCategoryBtn");if(gb)gb.innerHTML=groupByCategory?'<i class="fas fa-list"></i> Flat View':'<i class="fas fa-layer-group"></i> Group by Category';
-  }else{if(realtimeUnsub)realtimeUnsub();if(auditUnsub)auditUnsub();if(commentsUnsub)commentsUnsub();if(chatUnsub)chatUnsub();if(suggestUnsub)suggestUnsub();currentUserId=null;currentUserEmail=null;currentUserRole="viewer";isAdmin=false;kpiData=[];document.getElementById("loginScreen").style.display="flex";document.getElementById("mainApp").style.display="none";}
+ if(user){
+   currentUserId=user.uid;currentUserEmail=user.email;
+   loadPinnedKpis();
+   let roleData="viewer";
+   try{const userDoc=await getDoc(doc(db,"users",user.uid));roleData=userDoc.exists()?(userDoc.data()?.role||"viewer"):"viewer";}catch(e){}
+   currentUserRole=roleData;isAdmin=roleData==="admin";
+   document.getElementById("sidebarUserName").textContent=getDisplayName(user.email);
+   document.getElementById("sidebarAvatar").textContent=user.email.substring(0,2).toUpperCase();
+   document.getElementById("sidebarUserRole").textContent=isAdmin?"Administrator":"Viewer";
+   document.getElementById("roleBadgeTop").textContent=isAdmin?"ADMIN":"VIEWER";
+   document.getElementById("roleBadgeTop").className=`role-chip ${isAdmin?'admin':'viewer'}`;
+   document.getElementById("loginScreen").style.display="none";document.getElementById("mainApp").style.display="block";
+   const notice=document.getElementById("readonlyNotice");if(notice){if(!isAdmin)notice.classList.add("visible");else notice.classList.remove("visible");}
+   document.getElementById("fyLabel").textContent=getFYLabel();document.getElementById("fyLabelKpi").textContent=getFYLabel();
+   loadThemeColor();buildThemePicker();loadFilterState();populateMonthSelect();
+   attachFilterListeners();
+   initDynamicDataListeners();
+   initKpiListener();initAuditListener();initCommentsListener();initChatListener();initSuggestListener();
+   const ss=document.getElementById("sortTableSelect");if(ss && !ss._listenerAttached){ss._listenerAttached=true;ss.addEventListener("change",(e)=>{currentSort=e.target.value;renderTable();saveFilterState();});}
+   const ss2=document.getElementById("sortTableSelectKpi");if(ss2 && !ss2._listenerAttached){ss2._listenerAttached=true;ss2.addEventListener("change",(e)=>{currentSort=e.target.value;if(ss)ss.value=currentSort;renderTable();saveFilterState();});}
+   const si=document.getElementById("kpiSearchInput");if(si && !si._listenerAttached){si._listenerAttached=true;si.addEventListener("input",(e)=>{currentSearchTerm=e.target.value;const si2=document.getElementById("kpiSearchInputKpi");if(si2)si2.value=currentSearchTerm;renderDashboard();saveFilterState();});}
+   const si2=document.getElementById("kpiSearchInputKpi");if(si2 && !si2._listenerAttached){si2._listenerAttached=true;si2.addEventListener("input",(e)=>{currentSearchTerm=e.target.value;if(si)si.value=currentSearchTerm;renderDashboard();renderKpiUpdateView();saveFilterState();});}
+   const gb=document.getElementById("groupByCategoryBtn");if(gb)gb.innerHTML=groupByCategory?'<i class="fas fa-list"></i> Flat View':'<i class="fas fa-layer-group"></i> Group by Category';
+   document.getElementById("chatInput")?.addEventListener("input",updateChatCharCounter);
+   document.getElementById("suggestInput")?.addEventListener("input",updateSuggestCharCounter);
+ }else{
+   if(realtimeUnsub)realtimeUnsub();if(auditUnsub)auditUnsub();if(commentsUnsub)commentsUnsub();if(chatUnsub)chatUnsub();if(suggestUnsub)suggestUnsub();
+   currentUserId=null;currentUserEmail=null;currentUserRole="viewer";isAdmin=false;kpiData=[];
+   document.getElementById("loginScreen").style.display="flex";document.getElementById("mainApp").style.display="none";
+ }
 });
 
-// ========== EVENT LISTENERS ==========
 document.getElementById("doLoginBtn")?.addEventListener("click",handleLogin);
-document.getElementById("loginEmail")?.addEventListener("keydown",e=>{if(e.key==="Enter")handleLogin();});
 document.getElementById("loginPassword")?.addEventListener("keydown",e=>{if(e.key==="Enter")handleLogin();});
 document.getElementById("logoutMainBtn")?.addEventListener("click",handleLogout);
 document.getElementById("exportExcelSidebarBtn")?.addEventListener("click",exportToExcel);
@@ -636,30 +1348,28 @@ document.getElementById("exportPdfSidebarBtn")?.addEventListener("click",exportT
 document.getElementById("backupDataBtn")?.addEventListener("click",backupData);
 document.querySelectorAll(".nav-item[data-view]").forEach(item=>{item.addEventListener("click",()=>switchView(item.getAttribute("data-view")));});
 
-// Theme picker
+document.getElementById("hamburgerBtn")?.addEventListener("click",toggleMobileSidebar);
+document.getElementById("sidebarOverlay")?.addEventListener("click",closeMobileSidebar);
+
 document.getElementById("themePickerBtn")?.addEventListener("click",(e)=>{e.stopPropagation();document.getElementById("themeDropdown").classList.toggle("show");});
 document.addEventListener("click",()=>{document.getElementById("themeDropdown").classList.remove("show");});
 
-// Chat panel
 document.getElementById("openChatBtn")?.addEventListener("click",()=>{if(activePanel==='chat')closeChatPanel();else openChatPanel();});
 document.getElementById("closeChatBtn")?.addEventListener("click",closeChatPanel);
 document.getElementById("sendChatBtn")?.addEventListener("click",sendChatMessage);
 document.getElementById("chatInput")?.addEventListener("keydown",e=>{if(e.key==="Enter")sendChatMessage();});
-document.getElementById("chatMessages")?.addEventListener("click",(e)=>{const btn=e.target.closest('.chat-pin-btn');if(btn){const id=btn.getAttribute('data-id');const pinned=btn.getAttribute('data-pinned')==='true';togglePinMessage(id,pinned);}});
+document.getElementById("chatMessages")?.addEventListener("click",(e)=>{const btn=e.target.closest('.chat-pin-btn');if(btn){const id=btn.getAttribute('data-id');const cp=btn.getAttribute('data-pinned');togglePinMessage(id,cp);}});
 
-// Suggestions panel
 document.getElementById("openSuggestBtn")?.addEventListener("click",()=>{if(activePanel==='suggest')closeSuggestPanel();else openSuggestPanel();});
 document.getElementById("closeSuggestBtn")?.addEventListener("click",closeSuggestPanel);
 document.getElementById("sendSuggestBtn")?.addEventListener("click",sendSuggestion);
 document.getElementById("suggestInput")?.addEventListener("keydown",e=>{if(e.key==="Enter")sendSuggestion();});
 
-// Chart downloads
 document.getElementById("downloadBarChartBtn")?.addEventListener("click",()=>downloadChart("barPlanActualChart","Plan_vs_Actual"));
 document.getElementById("downloadAchievementChartBtn")?.addEventListener("click",()=>downloadChart("horizontalAchievementChart","Achievement"));
 document.getElementById("downloadCatGapChartBtn")?.addEventListener("click",()=>downloadChart("catGapChart","Category_Gap"));
 document.getElementById("downloadPerfMixChartBtn")?.addEventListener("click",()=>downloadChart("perfMixChart","Performance_Mix"));
 
-// Modals
 document.getElementById("closeModalBtn")?.addEventListener("click",()=>closeModalWithCheck());
 document.getElementById("closeCommentModal")?.addEventListener("click",()=>{document.getElementById("commentModal")?.classList.remove("active");});
 document.getElementById("cancelCommentBtn")?.addEventListener("click",()=>{document.getElementById("commentModal")?.classList.remove("active");});
@@ -667,22 +1377,18 @@ document.getElementById("saveCommentBtn")?.addEventListener("click",()=>{if(curr
 document.getElementById("addCommentBtn")?.addEventListener("click",()=>{openCommentModal();});
 document.getElementById("kpiModal")?.addEventListener("click",e=>{if(e.target===e.currentTarget)closeModalWithCheck();});
 document.getElementById("commentModal")?.addEventListener("click",e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove("active");});
-document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeAllPanels();closeModalWithCheck();document.getElementById("commentModal")?.classList.remove("active");}});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeAllPanels();closeModalWithCheck();document.getElementById("commentModal")?.classList.remove("active");closeMobileSidebar();}});
 
-// Audit
 document.getElementById("auditKpiFilter")?.addEventListener("change",()=>renderAuditTable());
 document.getElementById("auditUserFilter")?.addEventListener("change",()=>renderAuditTable());
 document.getElementById("auditDateFilter")?.addEventListener("change",()=>renderAuditTable());
 
-// Notifications
 document.getElementById("notifBellBtn")?.addEventListener("click",(e)=>{e.stopPropagation();document.getElementById("notifDropdown").classList.toggle("show");});
 document.addEventListener("click",(e)=>{const w=document.getElementById("notifBellWrap");if(w&&!w.contains(e.target))document.getElementById("notifDropdown").classList.remove("show");});
 document.getElementById("markAllReadBtn")?.addEventListener("click",markAllNotificationsRead);
 document.getElementById("clearAllNotifsBtn")?.addEventListener("click",clearAllNotifications);
 document.getElementById("dismissAnomalyBtn")?.addEventListener("click",()=>{document.getElementById("anomalyBanner").classList.remove("show");});
-if(location.protocol==="file:"){const errEl=document.getElementById("loginError");if(errEl){errEl.textContent="Open this dashboard using a local web server (http://localhost) to avoid Firebase auth domain issues.";errEl.style.display="block";}}
 
-// Group & Brief
 document.getElementById("groupByCategoryBtn")?.addEventListener("click",()=>{groupByCategory=!groupByCategory;document.getElementById("groupByCategoryBtn").innerHTML=groupByCategory?'<i class="fas fa-list"></i> Flat View':'<i class="fas fa-layer-group"></i> Group by Category';renderKpiCards();saveFilterState();});
 document.getElementById("collapseBriefBtn")?.addEventListener("click",()=>{const body=document.getElementById("execBriefBody");const icon=document.querySelector("#collapseBriefBtn i");if(body.style.display==="none"){body.style.display="grid";icon.className="fas fa-chevron-up";}else{body.style.display="none";icon.className="fas fa-chevron-down";}});
 document.getElementById("refreshBriefBtn")?.addEventListener("click",()=>{generateExecutiveBrief();showToast("Brief refreshed","success");});
