@@ -464,7 +464,7 @@ function esc(s){if(s==null)return"";return String(s).replace(/[&<>"']/g,m=>({"&"
 function fmt(n,d=0){const num=parseFloat(n);if(isNaN(num))return"0";return num.toFixed(d).replace(/\.0+$/,"");}
 function pct(n){return fmt(n)+"%";}
 function showToast(msg,type="info"){const c=document.getElementById("toastContainer"),t=document.createElement("div");t.className="toast";t.style.borderLeft=`4px solid ${type==='success'?'#2b9e5c':type==='error'?'#dc5a3c':'#1f6392'}`;t.innerHTML=`<i class="fas fa-${type==='success'?'check-circle':type==='error'?'exclamation-triangle':'info-circle'}"></i> ${msg}`;c.appendChild(t);setTimeout(()=>t.remove(),3400);}
-function parseFirebaseError(e,f){const m={"auth/invalid-credential":"Invalid email or password.","permission-denied":"Access denied."};return m[e?.code]||f;}
+function parseFirebaseError(e,f){const m={"auth/invalid-credential":"Invalid email or password.","auth/user-not-found":"Invalid email or password.","auth/wrong-password":"Invalid email or password.","auth/invalid-email":"Please enter a valid email address.","auth/too-many-requests":"Too many failed attempts. Try again in a few minutes.","auth/network-request-failed":"Network error. Check your internet connection and retry.","auth/unauthorized-domain":"This domain is not authorized in Firebase Authentication settings.","auth/operation-not-allowed":"Email/password sign-in is not enabled in Firebase Authentication.","auth/invalid-api-key":"Firebase API key is invalid for this project.","permission-denied":"Access denied."};return m[e?.code]||`${f}${e?.code?` (${e.code})`:""}`;}
 
 function switchView(viewId){
   document.querySelectorAll('.view-container').forEach(v=>v.classList.remove('active'));const view=document.getElementById(viewId);if(view)view.classList.add('active');
@@ -607,7 +607,7 @@ function initKpiListener(){
 }
 
 // ========== AUTH ==========
-async function handleLogin(){const email=document.getElementById("loginEmail").value.trim();const pwd=document.getElementById("loginPassword").value;const errEl=document.getElementById("loginError");if(errEl)errEl.style.display="none";if(!email||!pwd){if(errEl){errEl.textContent="Please enter your credentials.";errEl.style.display="block";}return;}try{await signInWithEmailAndPassword(auth,email,pwd);}catch(e){if(errEl){errEl.textContent=parseFirebaseError(e,"Login failed.");errEl.style.display="block";}}}
+async function handleLogin(){const email=document.getElementById("loginEmail").value.trim().toLowerCase();const pwd=document.getElementById("loginPassword").value;const errEl=document.getElementById("loginError");const loginBtn=document.getElementById("doLoginBtn");if(errEl)errEl.style.display="none";if(!email||!pwd){if(errEl){errEl.textContent="Please enter your credentials.";errEl.style.display="block";}return;}try{if(loginBtn){loginBtn.disabled=true;loginBtn.textContent="Signing in...";}await signInWithEmailAndPassword(auth,email,pwd);}catch(e){console.error("Login failed",e);if(errEl){errEl.textContent=parseFirebaseError(e,"Login failed.");errEl.style.display="block";}}finally{if(loginBtn){loginBtn.disabled=false;loginBtn.textContent="Sign In →";}}}
 async function handleLogout(){try{await signOut(auth);showToast("Logged out");}catch(e){showToast("Logout failed","error");}}
 
 onAuthStateChanged(auth,async user=>{
@@ -628,6 +628,7 @@ onAuthStateChanged(auth,async user=>{
 
 // ========== EVENT LISTENERS ==========
 document.getElementById("doLoginBtn")?.addEventListener("click",handleLogin);
+document.getElementById("loginEmail")?.addEventListener("keydown",e=>{if(e.key==="Enter")handleLogin();});
 document.getElementById("loginPassword")?.addEventListener("keydown",e=>{if(e.key==="Enter")handleLogin();});
 document.getElementById("logoutMainBtn")?.addEventListener("click",handleLogout);
 document.getElementById("exportExcelSidebarBtn")?.addEventListener("click",exportToExcel);
@@ -679,6 +680,7 @@ document.addEventListener("click",(e)=>{const w=document.getElementById("notifBe
 document.getElementById("markAllReadBtn")?.addEventListener("click",markAllNotificationsRead);
 document.getElementById("clearAllNotifsBtn")?.addEventListener("click",clearAllNotifications);
 document.getElementById("dismissAnomalyBtn")?.addEventListener("click",()=>{document.getElementById("anomalyBanner").classList.remove("show");});
+if(location.protocol==="file:"){const errEl=document.getElementById("loginError");if(errEl){errEl.textContent="Open this dashboard using a local web server (http://localhost) to avoid Firebase auth domain issues.";errEl.style.display="block";}}
 
 // Group & Brief
 document.getElementById("groupByCategoryBtn")?.addEventListener("click",()=>{groupByCategory=!groupByCategory;document.getElementById("groupByCategoryBtn").innerHTML=groupByCategory?'<i class="fas fa-list"></i> Flat View':'<i class="fas fa-layer-group"></i> Group by Category';renderKpiCards();saveFilterState();});
